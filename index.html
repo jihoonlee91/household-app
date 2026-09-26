@@ -29,7 +29,7 @@ let timer=null, curApp=null;
 window.__hh={sb,inputs:null,saveInputs(d){ clearTimeout(timer); timer=setTimeout(async()=>{ const {error}=await sb.from("app_state").upsert({app:curApp,key:"inputs",data:d,updated_at:new Date().toISOString()}); if(error) console.warn(error); },700); }};
 $("login").onclick=()=>{ msg("GitHub로 이동합니다…"); sb.auth.signInWithOAuth({provider:"github",options:{redirectTo:location.origin+location.pathname}}); };
 $("out").onclick=async()=>{ await sb.auth.signOut(); location.replace(location.pathname); };
-async function open(app){
+async function openApp(app){
   curApp=app; $("app").style.display="none"; msg("불러오는 중…");
   const [b,st]=await Promise.all([sb.from("app_bundles").select("html,title").eq("app",app).maybeSingle(), sb.from("app_state").select("data").eq("app",app).eq("key","inputs").maybeSingle()]);
   if(b.error||!b.data){ msg("앱을 불러오지 못했습니다."); return; }
@@ -46,8 +46,8 @@ async function boot(){
   $("who").textContent=(me?me.name:"우리집");
   const apps=await sb.from("app_bundles").select("app,title").order("app");
   $("pick").innerHTML=(apps.data||[]).map(a=>`<option value="${a.app}">${a.title}</option>`).join("");
-  const want=new URLSearchParams(location.search).get("app")||"sim"; $("pick").value=want; $("pick").onchange=e=>open(e.target.value);
-  open(want);
+  const want=new URLSearchParams(location.search).get("app")||"sim"; $("pick").value=want; $("pick").onchange=e=>openApp(e.target.value);
+  openApp(want);
 }
 sb.auth.onAuthStateChange((ev)=>{ if(ev==="SIGNED_IN") boot(); });
 boot();
