@@ -44,27 +44,42 @@ $("theme").value=theme; applyTheme(); $("theme").onchange=e=>{ theme=e.target.va
 $("app").addEventListener("load",applyTheme);
 $("login").onclick=()=>{ msg("GitHub로 이동합니다…"); sb.auth.signInWithOAuth({provider:"github",options:{redirectTo:location.origin+location.pathname}}); };
 $("out").onclick=async()=>{ await sb.auth.signOut(); location.replace(location.pathname); };
-const INFO={sim:{ic:"📈",d:"연봉·성과급·투자·집 매수·은퇴를 연도별로 굴려 보기"},ledger:{ic:"🧾",d:"지출·수입 입력, 월별 합계와 예산 대비"},items:{ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"}};
+const INFO={assets:{ic:"🏦",d:"통장·증권·대출 잔액 업데이트, 순자산 추이"},sim:{ic:"📈",d:"연봉·성과급·투자·집 매수·은퇴를 연도별로 굴려 보기"},ledger:{ic:"🧾",d:"지출·수입 입력, 월별 합계와 예산 대비"},items:{ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"}};
 const fm=v=>v==null?"–":(Math.abs(v)>=1e8?(v/1e8).toFixed(1)+"억":Math.round(v/1e4).toLocaleString("ko-KR")+"만");
 async function openHome(){
   curApp=null; $("app").style.display="none"; $("app").srcdoc=""; $("gate").style.display="none"; $("bar").style.display="flex"; $("home").style.display="block"; $("pick").value="home";
   document.title="우리집"; history.replaceState(null,"",location.pathname);
   const now=new Date(), ym=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
   const nx=new Date(now.getFullYear(),now.getMonth()+1,1), nym=nx.getFullYear()+"-"+String(nx.getMonth()+1).padStart(2,"0");
-  const [tx,it,st]=await Promise.all([sb.from("transactions").select("amount").gte("occurred_on",ym+"-01").lt("occurred_on",nym+"-01").lt("amount",0),
-    sb.from("items").select("value_now,status"), sb.from("app_state").select("data").eq("app","sim").eq("key","inputs").maybeSingle()]);
+  const [tx,it,st,bl]=await Promise.all([sb.from("transactions").select("amount").gte("occurred_on",ym+"-01").lt("occurred_on",nym+"-01").lt("amount",0),
+    sb.from("items").select("value_now,status"), sb.from("app_state").select("data").eq("app","sim").eq("key","inputs").maybeSingle(), sb.from("balances").select("account_id,as_of,amount").order("as_of")]);
+  const lastB={}; (bl.data||[]).forEach(x=>lastB[x.account_id]=x); const netW=Object.values(lastB).reduce((s,x)=>s+x.amount,0), netAsof=Object.values(lastB).map(x=>x.as_of).sort().pop();
   const spent=(tx.data||[]).reduce((a,x)=>a-x.amount,0), budget=((st.data&&st.data.data&&st.data.data.monthly)||300)*1e4;
   const itemsV=(it.data||[]).filter(x=>!["판매함","폐기"].includes(x.status)).reduce((a,x)=>a+(x.value_now||0),0), itemsN=(it.data||[]).filter(x=>!["판매함","폐기"].includes(x.status)).length;
-  const extra={sim:`<span>시작 2026-09-24 스냅샷</span>`,ledger:`<div class="num">${fm(spent)}</div><span>이번 달 지출 · 예산 ${fm(budget)}</span>`,items:`<div class="num">${fm(itemsV)}</div><span>물건 ${itemsN}개 · 시세 입력분 합계</span>`};
+  const extra={assets:`<div class="num">${fm(netW)}</div><span>순자산 · ${netAsof||"잔액 입력 전"}</span>`,sim:`<span>자산 앱 최신 잔액에서 시작</span>`,ledger:`<div class="num">${fm(spent)}</div><span>이번 달 지출 · 예산 ${fm(budget)}</span>`,items:`<div class="num">${fm(itemsV)}</div><span>물건 ${itemsN}개 · 시세 입력분 합계</span>`};
   $("tiles").innerHTML=APPS.map(a=>`<button type="button" class="tile" data-app="${a.app}"><div class="ic">${(INFO[a.app]||{}).ic||"📄"}</div><b>${a.title}</b><span>${(INFO[a.app]||{}).d||""}</span>${extra[a.app]||""}</button>`).join("");
 }
 let APPS=[];
+/* 시뮬레이터 시작값: 자산 앱 계좌별 최신 잔액 + 살림살이 현재 시세 합계 */
+async function simSnapshot(){
+  const [a,b,it]=await Promise.all([sb.from("accounts").select("id,name,kind,owner_id,rate,meta").eq("active",true), sb.from("balances").select("account_id,as_of,amount").order("as_of"), sb.from("items").select("value_now,status")]);
+  if(!a.data||!b.data) return null;
+  const last={}; b.data.forEach(x=>{ last[x.account_id]=x; });
+  const v=x=>(last[x.id]||{}).amount||0, sum=f=>a.data.filter(f).reduce((s,x)=>s+v(x),0);
+  const asof=Object.values(last).map(x=>x.as_of).sort().pop();
+  const vals={cash:sum(x=>x.kind==="cash"), cheongMe:sum(x=>x.kind==="savings"&&/청약/.test(x.name)&&x.owner_id===1), cheongSp:sum(x=>x.kind==="savings"&&/청약/.test(x.name)&&x.owner_id===2),
+    dojak:sum(x=>/청년도약/.test(x.name)), inv:sum(x=>x.kind==="invest"), opi:sum(x=>x.kind==="stock"), isa:sum(x=>x.kind==="isa"), pen:sum(x=>x.kind==="pension"),
+    jeonse:sum(x=>x.kind==="deposit"), car:sum(x=>x.kind==="other"&&(x.meta||{}).sim==="car"), pts:sum(x=>x.kind==="other"&&(x.meta||{}).sim!=="car")};
+  const gear=(it.data||[]).filter(x=>!["판매함","폐기"].includes(x.status)).reduce((s,x)=>s+(x.value_now||0),0); if(gear) vals.gear=gear;
+  const debts=a.data.filter(x=>x.kind==="loan"&&v(x)<0).map(x=>{ const d={n:x.name,b:-v(x),r:x.rate||0}; if(/HF|전세대출|전월세/.test(x.name)) d.hf=true; if(/학자금/.test(x.name)){ d.amort=2.69e6; d.keep=true; } return d; });
+  return {asof,vals,debts};
+}
 async function openApp(app){
   if(app==="home"){ openHome(); return; }
   curApp=app; $("home").style.display="none"; $("app").style.display="none"; msg("불러오는 중…");
   const [b,st]=await Promise.all([sb.from("app_bundles").select("html,title").eq("app",app).maybeSingle(), sb.from("app_state").select("data").eq("app",app).eq("key","inputs").maybeSingle()]);
   if(b.error||!b.data){ msg("앱을 불러오지 못했습니다."); return; }
-  window.__hh.inputs=st.data?st.data.data:null; document.title=b.data.title+" · 우리집";
+  window.__hh.inputs=st.data?st.data.data:null; window.__hh.snapshot=app==="sim"? await simSnapshot() : null; document.title=b.data.title+" · 우리집";
   $("gate").style.display="none"; $("bar").style.display="flex"; $("app").style.display="block"; $("app").srcdoc=b.data.html;
   history.replaceState(null,"","?app="+encodeURIComponent(app));
 }
@@ -77,7 +92,7 @@ async function boot(){
   const me=(m.data||[]).find(x=>x.github_login===(session.user.user_metadata||{}).user_name);
   if(!m.data||!m.data.length){ msg("이 GitHub 계정은 접근 권한이 없습니다."); await sb.auth.signOut(); return; }
   $("who").textContent=(me?me.name:"우리집");
-  const ORDER=["sim","ledger","items"]; const apps=await sb.from("app_bundles").select("app,title");
+  const ORDER=["assets","ledger","items","sim"]; const apps=await sb.from("app_bundles").select("app,title");
   (apps.data||[]).sort((a,b)=>((ORDER.indexOf(a.app)+99)%99)-((ORDER.indexOf(b.app)+99)%99));
   APPS=apps.data||[];
   $("pick").innerHTML=`<option value="home">🏠 홈</option>`+APPS.map(a=>`<option value="${a.app}">${a.title}</option>`).join("");
