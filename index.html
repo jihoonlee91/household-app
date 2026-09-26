@@ -37,8 +37,10 @@ async function openApp(app){
   $("gate").style.display="none"; $("bar").style.display="flex"; $("app").style.display="block"; $("app").srcdoc=b.data.html;
   history.replaceState(null,"","?app="+encodeURIComponent(app));
 }
+let booted=false;
 async function boot(){
   const {data:{session}}=await sb.auth.getSession(); if(!session){ msg(""); return; }
+  if(booted) return; booted=true;
   msg("확인 중…");
   const m=await sb.from("members").select("id,name,github_login");
   const me=(m.data||[]).find(x=>x.github_login===(session.user.user_metadata||{}).user_name);
