@@ -69,7 +69,7 @@ async function simSnapshot(){
   const v=x=>(last[x.id]||{}).amount||0, sum=f=>a.data.filter(f).reduce((s,x)=>s+v(x),0);
   const asof=Object.values(last).map(x=>x.as_of).sort().pop();
   const vals={cash:sum(x=>x.kind==="cash"), cheongMe:sum(x=>x.kind==="savings"&&/청약/.test(x.name)&&x.owner_id===1), cheongSp:sum(x=>x.kind==="savings"&&/청약/.test(x.name)&&x.owner_id===2),
-    dojak:sum(x=>/청년도약/.test(x.name)), inv:sum(x=>x.kind==="invest"), opi:sum(x=>x.kind==="stock"), isa:sum(x=>x.kind==="isa"), pen:sum(x=>x.kind==="pension"),
+    dojak:sum(x=>/청년도약/.test(x.name)), inv:sum(x=>x.kind==="invest"), opi:sum(x=>x.kind==="stock"), isa:sum(x=>x.kind==="isa"), pen:sum(x=>x.kind==="pension"), penCo:sum(x=>x.kind==="pension"&&/회사|사내/.test(x.name)), penIrp:sum(x=>x.kind==="pension"&&/IRP/.test(x.name)), penEtc:sum(x=>x.kind==="pension"&&!/회사|사내|IRP/.test(x.name)),
     jeonse:sum(x=>x.kind==="deposit"), car:sum(x=>x.kind==="other"&&(x.meta||{}).sim==="car"), pts:sum(x=>x.kind==="other"&&(x.meta||{}).sim!=="car")};
   const gear=(it.data||[]).filter(x=>!["판매함","폐기"].includes(x.status)).reduce((s,x)=>s+(x.value_now||0),0); if(gear) vals.gear=gear;
   const debts=a.data.filter(x=>x.kind==="loan"&&v(x)<0).map(x=>{ const d={n:x.name,b:-v(x),r:x.rate||0}; if(/HF|전세대출|전월세/.test(x.name)) d.hf=true; if(/학자금/.test(x.name)){ d.amort=2.69e6; d.keep=true; } return d; });
