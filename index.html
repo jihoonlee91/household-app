@@ -44,7 +44,7 @@ $("theme").value=theme; applyTheme(); $("theme").onchange=e=>{ theme=e.target.va
 $("app").addEventListener("load",applyTheme);
 $("login").onclick=()=>{ msg("GitHub로 이동합니다…"); sb.auth.signInWithOAuth({provider:"github",options:{redirectTo:location.origin+location.pathname}}); };
 $("out").onclick=async()=>{ await sb.auth.signOut(); location.replace(location.pathname); };
-const INFO={assets:{ic:"🏦",d:"통장·증권·대출 잔액 업데이트, 순자산 추이"},sim:{ic:"📈",d:"연봉·성과급·투자·집 매수·은퇴를 연도별로 굴려 보기 (자산 시뮬레이터)"},ledger:{ic:"🧾",d:"지출·수입 입력, 월별 합계와 예산 대비"},items:{ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"}};
+const INFO={assets:{ic:"🏦",d:"통장·증권·대출 잔액 업데이트, 순자산 추이"},sim:{ic:"📈",d:"연봉·성과급·투자·집 매수·은퇴를 연도별로 굴려 보기 (자산 시뮬레이터)"},ledger:{ic:"🧾",d:"지출·수입 입력, 월별 합계와 예산 대비"},items:{ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"},gifts:{ic:"🎁",d:"경조사·명절 주고받은 기록, 사람별 정리, 가족 일정"},trips:{ic:"✈️",d:"같이 다녀온 여행, 경비, 가고 싶은 곳"},wedding:{ic:"💍",d:"2023.8.15 결혼식 — 축의금·비용·식순·문서"}};
 const fm=v=>v==null?"–":(Math.abs(v)>=1e8?(v/1e8).toFixed(1)+"억":Math.round(v/1e4).toLocaleString("ko-KR")+"만");
 async function openHome(){
   curApp=null; $("app").style.display="none"; $("app").srcdoc=""; $("gate").style.display="none"; $("bar").style.display="flex"; $("home").style.display="block"; $("pick").value="home";
@@ -63,7 +63,8 @@ let APPS=[];
 /* 시뮬레이터 시작값: 자산 앱 계좌별 최신 잔액 + 살림살이 현재 시세 합계 */
 async function simSnapshot(){
   try{ await sb.functions.invoke("refresh-quotes",{body:{}}); }catch(e){}
-  const [a,b,it,qs]=await Promise.all([sb.from("accounts").select("id,name,kind,owner_id,rate,meta").eq("active",true), sb.from("balances").select("account_id,as_of,amount,updated_at").order("as_of"), sb.from("items").select("value_now,status"), sb.from("quotes").select("symbol,price").eq("symbol","005930").maybeSingle()]);
+  const [a,b,it,qs,mb]=await Promise.all([sb.from("accounts").select("id,name,kind,owner_id,rate,meta").eq("active",true), sb.from("balances").select("account_id,as_of,amount,updated_at").order("as_of"), sb.from("items").select("value_now,status"), sb.from("quotes").select("symbol,price").eq("symbol","005930").maybeSingle(), sb.from("members").select("id,birth_date")]);
+  const birth=Object.fromEntries((mb.data||[]).map(m=>[m.id,m.birth_date]));
   if(!a.data||!b.data) return null;
   const last={}; b.data.forEach(x=>{ last[x.account_id]=x; });
   const v=x=>(last[x.id]||{}).amount||0, sum=f=>a.data.filter(f).reduce((s,x)=>s+v(x),0);
@@ -79,7 +80,7 @@ async function simSnapshot(){
   const up=b.data.map(x=>x.updated_at).filter(Boolean).sort().pop(); const updatedAt=up?new Date(up).toLocaleString("sv-SE",{timeZone:"Asia/Seoul"}):null;
   const gear=(it.data||[]).filter(x=>!["판매함","폐기"].includes(x.status)).reduce((s,x)=>s+(x.value_now||0),0); if(gear) vals.gear=gear;
   const debts=a.data.filter(x=>x.kind==="loan"&&v(x)<0).map(x=>{ const d={n:x.name,b:-v(x),r:+x.rate||0,o:x.owner_id}; if(/HF|전세대출|전월세/.test(x.name)) d.hf=true; if(/학자금/.test(x.name)){ d.amort=2.69e6; d.keep=true; } return d; });
-  return {asof,updatedAt,list,params,vals,debts,ssPrice:qs&&qs.data?Number(qs.data.price):null};
+  return {asof,updatedAt,birth,list,params,vals,debts,ssPrice:qs&&qs.data?Number(qs.data.price):null};
 }
 async function openApp(app){
   if(app==="home"){ openHome(); return; }
@@ -99,7 +100,7 @@ async function boot(){
   const me=(m.data||[]).find(x=>x.github_login===(session.user.user_metadata||{}).user_name);
   if(!m.data||!m.data.length){ msg("이 GitHub 계정은 접근 권한이 없습니다."); await sb.auth.signOut(); return; }
   $("who").textContent=(me?me.name:"우리집");
-  const ORDER=["assets","ledger","items","sim"]; const apps=await sb.from("app_bundles").select("app,title");
+  const ORDER=["assets","ledger","items","sim","gifts","trips","wedding"]; const apps=await sb.from("app_bundles").select("app,title");
   (apps.data||[]).sort((a,b)=>((ORDER.indexOf(a.app)+99)%99)-((ORDER.indexOf(b.app)+99)%99));
   APPS=apps.data||[];
   $("pick").innerHTML=`<option value="home">🏠 홈</option>`+APPS.map(a=>`<option value="${a.app}">${a.title}</option>`).join("");
