@@ -46,9 +46,10 @@ $("login").onclick=()=>{ msg("GitHub로 이동합니다…"); sb.auth.signInWith
 $("out").onclick=async()=>{ await sb.auth.signOut(); location.replace(location.pathname); };
 const INFO={assets:{ic:"🏦",d:"통장·증권·대출 잔액 업데이트, 순자산 추이"},sim:{ic:"📈",d:"연봉·성과급·투자·집 매수·은퇴를 연도별로 굴려 보기 (자산 시뮬레이터)"},ledger:{ic:"🧾",d:"지출·수입 입력, 월별 합계와 예산 대비"},items:{ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"},gifts:{ic:"🎁",d:"경조사·명절 주고받은 기록, 사람별 정리, 가족 일정"},trips:{ic:"✈️",d:"같이 다녀온 여행, 경비, 가고 싶은 곳"},wedding:{ic:"💍",d:"2023.8.15 결혼식 — 축의금·비용·식순·문서"}};
 const fm=v=>v==null?"–":(Math.abs(v)>=1e8?(v/1e8).toFixed(1)+"억":Math.round(v/1e4).toLocaleString("ko-KR")+"만");
+window.addEventListener("popstate",e=>{ const a=e.state&&e.state.app; if(a){ $("pick").value=a; openApp(a,true); } else openHome(); });
 async function openHome(){
   curApp=null; $("app").style.display="none"; $("app").srcdoc=""; $("gate").style.display="none"; $("bar").style.display="flex"; $("home").style.display="block"; $("pick").value="home";
-  document.title="우리집"; history.replaceState(null,"",location.pathname);
+  document.title="우리집"; history.replaceState({home:1},"",location.pathname);
   const now=new Date(), ym=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
   const nx=new Date(now.getFullYear(),now.getMonth()+1,1), nym=nx.getFullYear()+"-"+String(nx.getMonth()+1).padStart(2,"0");
   const [tx,it,st,bl]=await Promise.all([sb.from("transactions").select("amount").gte("occurred_on",ym+"-01").lt("occurred_on",nym+"-01").lt("amount",0),
@@ -85,7 +86,7 @@ async function simSnapshot(){
 /* 셸이 새 버전으로 배포됐으면 앱을 열 때 새로고침 (열어 둔 탭이 예전 셸로 새 앱을 여는 문제 방지) */
 let shellTag=null; const tagOf=async()=>{ try{ const r=await fetch(location.pathname,{method:"HEAD",cache:"no-store"}); return r.headers.get("etag")||r.headers.get("last-modified"); }catch(e){ return null; } };
 tagOf().then(t=>shellTag=t);
-async function openApp(app){
+async function openApp(app,fromPop){
   if(app!=="home"&&shellTag){ const t=await tagOf(); if(t&&t!==shellTag){ location.href=location.pathname+"?app="+encodeURIComponent(app); return; } }
   if(app==="home"){ openHome(); return; }
   curApp=app; $("home").style.display="none"; $("app").style.display="none"; msg("불러오는 중…");
@@ -93,7 +94,8 @@ async function openApp(app){
   if(b.error||!b.data){ msg("앱을 불러오지 못했습니다."); return; }
   window.__hh.inputs=st.data?st.data.data:null; window.__hh.snapshot=app==="sim"? await simSnapshot() : null; document.title=b.data.title+" · 우리집";
   $("gate").style.display="none"; $("bar").style.display="flex"; $("app").style.display="block"; $("app").srcdoc=b.data.html;
-  history.replaceState(null,"","?app="+encodeURIComponent(app));
+  /* 뒤로가기 → 홈: 앱은 홈 위에 한 칸만 쌓음 */
+  if(fromPop||(history.state&&history.state.app)) history.replaceState({app},"","?app="+encodeURIComponent(app)); else { history.replaceState({home:1},"",location.pathname); history.pushState({app},"","?app="+encodeURIComponent(app)); }
 }
 let booted=false;
 async function boot(){
