@@ -82,7 +82,11 @@ async function simSnapshot(){
   const debts=a.data.filter(x=>x.kind==="loan"&&v(x)<0).map(x=>{ const d={n:x.name,b:-v(x),r:+x.rate||0,o:x.owner_id}; if(/HF|전세대출|전월세/.test(x.name)) d.hf=true; if(/학자금/.test(x.name)){ d.amort=2.69e6; d.keep=true; } return d; });
   return {asof,updatedAt,birth,list,params,vals,debts,ssPrice:qs&&qs.data?Number(qs.data.price):null};
 }
+/* 셸이 새 버전으로 배포됐으면 앱을 열 때 새로고침 (열어 둔 탭이 예전 셸로 새 앱을 여는 문제 방지) */
+let shellTag=null; const tagOf=async()=>{ try{ const r=await fetch(location.pathname,{method:"HEAD",cache:"no-store"}); return r.headers.get("etag")||r.headers.get("last-modified"); }catch(e){ return null; } };
+tagOf().then(t=>shellTag=t);
 async function openApp(app){
+  if(app!=="home"&&shellTag){ const t=await tagOf(); if(t&&t!==shellTag){ location.href=location.pathname+"?app="+encodeURIComponent(app); return; } }
   if(app==="home"){ openHome(); return; }
   curApp=app; $("home").style.display="none"; $("app").style.display="none"; msg("불러오는 중…");
   const [b,st]=await Promise.all([sb.from("app_bundles").select("html,title").eq("app",app).maybeSingle(), sb.from("app_state").select("data").eq("app",app).eq("key","inputs").maybeSingle()]);
