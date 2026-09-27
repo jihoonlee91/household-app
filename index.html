@@ -62,7 +62,8 @@ async function openHome(){
 let APPS=[];
 /* 시뮬레이터 시작값: 자산 앱 계좌별 최신 잔액 + 살림살이 현재 시세 합계 */
 async function simSnapshot(){
-  const [a,b,it]=await Promise.all([sb.from("accounts").select("id,name,kind,owner_id,rate,meta").eq("active",true), sb.from("balances").select("account_id,as_of,amount").order("as_of"), sb.from("items").select("value_now,status")]);
+  try{ await sb.functions.invoke("refresh-quotes",{body:{}}); }catch(e){}
+  const [a,b,it,qs]=await Promise.all([sb.from("accounts").select("id,name,kind,owner_id,rate,meta").eq("active",true), sb.from("balances").select("account_id,as_of,amount").order("as_of"), sb.from("items").select("value_now,status"), sb.from("quotes").select("symbol,price").eq("symbol","005930").maybeSingle()]);
   if(!a.data||!b.data) return null;
   const last={}; b.data.forEach(x=>{ last[x.account_id]=x; });
   const v=x=>(last[x.id]||{}).amount||0, sum=f=>a.data.filter(f).reduce((s,x)=>s+v(x),0);
@@ -72,7 +73,7 @@ async function simSnapshot(){
     jeonse:sum(x=>x.kind==="deposit"), car:sum(x=>x.kind==="other"&&(x.meta||{}).sim==="car"), pts:sum(x=>x.kind==="other"&&(x.meta||{}).sim!=="car")};
   const gear=(it.data||[]).filter(x=>!["판매함","폐기"].includes(x.status)).reduce((s,x)=>s+(x.value_now||0),0); if(gear) vals.gear=gear;
   const debts=a.data.filter(x=>x.kind==="loan"&&v(x)<0).map(x=>{ const d={n:x.name,b:-v(x),r:x.rate||0}; if(/HF|전세대출|전월세/.test(x.name)) d.hf=true; if(/학자금/.test(x.name)){ d.amort=2.69e6; d.keep=true; } return d; });
-  return {asof,vals,debts};
+  return {asof,vals,debts,ssPrice:qs&&qs.data?Number(qs.data.price):null};
 }
 async function openApp(app){
   if(app==="home"){ openHome(); return; }
