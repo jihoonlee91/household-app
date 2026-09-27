@@ -39,7 +39,7 @@ let theme=""; try{ theme=localStorage.getItem("hh-theme")||""; }catch(e){}
 function applyTheme(){ const set=el=>{ if(!el) return; if(theme) el.setAttribute("data-theme",theme); else el.removeAttribute("data-theme"); };
   set(document.documentElement); try{ set($("app").contentDocument&&$("app").contentDocument.documentElement); }catch(e){} }
 /* 앱(iframe) 쪽에서 쓰는 다리: 입력값을 부부 공용 DB(app_state)에 저장 */
-window.__hh={sb,inputs:null,open:app=>{ $("pick").value=app; openApp(app); },saveInputs(d){ clearTimeout(timer); timer=setTimeout(async()=>{ const {error}=await sb.from("app_state").upsert({app:curApp,key:"inputs",data:d,updated_at:new Date().toISOString()}); if(error) console.warn(error); },700); }};
+window.__hh={sb,inputs:null,open:app=>{ $("pick").value=app; openApp(app); },saveInputs(d){ const app=curApp; clearTimeout(timer); timer=setTimeout(async()=>{ const {error}=await sb.from("app_state").upsert({app,key:"inputs",data:d,updated_at:new Date().toISOString()}); if(error) console.warn(error); },700); }};
 $("theme").value=theme; applyTheme(); $("theme").onchange=e=>{ theme=e.target.value; try{localStorage.setItem("hh-theme",theme);}catch(_){} applyTheme(); };
 $("app").addEventListener("load",applyTheme);
 $("login").onclick=()=>{ msg("GitHub로 이동합니다…"); sb.auth.signInWithOAuth({provider:"github",options:{redirectTo:location.origin+location.pathname}}); };
