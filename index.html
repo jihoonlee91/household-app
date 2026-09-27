@@ -80,7 +80,7 @@ async function simSnapshot(){
   const list=a.data.map(x=>({name:x.name,kind:x.kind,owner:x.owner_id,amt:v(x),rate:x.rate?+x.rate:null})).filter(x=>x.amt!==0).sort((p,q)=>Math.abs(q.amt)-Math.abs(p.amt));
   const up=b.data.map(x=>x.updated_at).filter(Boolean).sort().pop(); const updatedAt=up?new Date(up).toLocaleString("sv-SE",{timeZone:"Asia/Seoul"}):null;
   const gear=(it.data||[]).filter(x=>!["판매함","폐기"].includes(x.status)).reduce((s,x)=>s+(x.value_now||0),0); if(gear) vals.gear=gear;
-  const debts=a.data.filter(x=>x.kind==="loan"&&v(x)<0).map(x=>{ const d={n:x.name,b:-v(x),r:+x.rate||0,o:x.owner_id}; if(/HF|전세대출|전월세/.test(x.name)) d.hf=true; if(/학자금/.test(x.name)){ d.amort=2.69e6; d.keep=true; } return d; });
+  const debts=a.data.filter(x=>x.kind==="loan"&&v(x)<0).map(x=>{ const d={n:x.name,b:-v(x),r:+x.rate||0,o:x.owner_id}; if(/HF|전세대출|전월세/.test(x.name)) d.hf=true; if(/학자금/.test(x.name)){ d.amort=+((x.meta||{}).amort_year)||0; d.keep=true; } return d; });
   return {asof,updatedAt,birth,list,params,vals,debts,ssPrice:qs&&qs.data?Number(qs.data.price):null};
 }
 /* 셸이 새 버전으로 배포됐으면 앱을 열 때 새로고침 (열어 둔 탭이 예전 셸로 새 앱을 여는 문제 방지) */
