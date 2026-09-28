@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "우리집",
+  "short_name": "우리집",
+  "description": "지훈·상아 가계 플랫폼",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F3F5F6",
+  "theme_color": "#0C7480",
+  "orientation": "any",
+  "icons": [
+    {"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
