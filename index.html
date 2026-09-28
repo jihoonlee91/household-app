@@ -48,7 +48,7 @@ $("theme").value=theme; applyTheme(); $("theme").onchange=e=>{ theme=e.target.va
 $("app").addEventListener("load",applyTheme);
 $("login").onclick=()=>{ msg("GitHub로 이동합니다…"); sb.auth.signInWithOAuth({provider:"github",options:{redirectTo:location.origin+location.pathname}}); };
 $("out").onclick=async()=>{ await sb.auth.signOut(); location.replace(location.pathname); };
-const INFO={assets:{ic:"🏦",d:"통장·증권·대출 잔액 업데이트, 순자산 추이"},realestate:{ic:"🏠",d:"전세·월세·자가·투자부동산 계약과 자산 관리"},apply:{ic:"📝",d:"서울·경기남부 아파트 분양 청약 일정, 관심 단지"},investments:{ic:"📊",d:"주식·ETF·펀드·TDF 투자자산을 따로 보기"},sim:{ic:"📈",d:"연봉·성과급·투자·집 매수·은퇴를 연도별로 굴려 보기 (자산 시뮬레이터)"},ledger:{ic:"🧾",d:"지출·수입 입력, 월별 합계와 예산 대비"},items:{ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"},gifts:{ic:"🎁",d:"결혼식·장례 등 경조사 주고받은 기록, 사람별 정리"},holidays:{ic:"🧧",d:"설·추석, 부모님 용돈·선물, 가족 생일·환갑 일정"},life:{ic:"🧭",d:"이지훈·이상아 학교·직장·이사, 나란히 보는 인생 연표"},trips:{ic:"✈️",d:"같이 다녀온 여행, 경비, 가고 싶은 곳"},wedding:{ic:"💍",d:"2023.8.15 결혼식 — 축의금·비용·식순·문서"}};
+const INFO={assets:{ic:"🏦",d:"통장·증권·대출 잔액 업데이트, 순자산 추이"},realestate:{ic:"🏠",d:"전세·월세·자가·투자부동산 계약과 자산 관리"},apply:{ic:"📝",d:"서울·경기남부 아파트 분양 청약 일정, 관심 단지"},investments:{ic:"📊",d:"주식·ETF·펀드·TDF 투자자산을 따로 보기"},sim:{ic:"📈",d:"연봉·성과급·투자·집 매수·은퇴를 연도별로 굴려 보기 (자산 시뮬레이터)"},ledger:{ic:"🧾",d:"지출·수입 입력, 월별 합계와 예산 대비"},items:{ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"},gifts:{ic:"🎁",d:"결혼식·장례 등 경조사 주고받은 기록, 사람별 정리"},holidays:{ic:"🧧",d:"설·추석, 부모님 용돈·선물, 가족 생일·환갑 일정"},life:{ic:"🧭",d:"이지훈·이상아 학교·직장·이사, 나란히 보는 인생 연표"},family:{ic:"🌳",d:"양가 가계도, 가족 관계·생년"},trips:{ic:"✈️",d:"같이 다녀온 여행, 경비, 가고 싶은 곳"},wedding:{ic:"💍",d:"2023.8.15 결혼식 — 축의금·비용·식순·문서"}};
 const fm=v=>v==null?"–":(Math.abs(v)>=1e8?(v/1e8).toFixed(1)+"억":Math.round(v/1e4).toLocaleString("ko-KR")+"만");
 window.addEventListener("popstate",e=>{ const a=e.state&&e.state.app; if(a){ $("pick").value=a; openApp(a,true); } else openHome(); });
 async function openHome(){
@@ -113,7 +113,7 @@ async function boot(){
   const me=(m.data||[]).find(x=>x.github_login===(session.user.user_metadata||{}).user_name);
   if(!m.data||!m.data.length){ msg("이 GitHub 계정은 접근 권한이 없습니다."); await sb.auth.signOut(); return; }
   $("who").textContent=(me?me.name:"우리집");
-  const ORDER=["assets","realestate","apply","investments","ledger","items","sim","gifts","holidays","trips","wedding","life"]; const apps=await sb.from("app_bundles").select("app,title");
+  const ORDER=["assets","realestate","apply","investments","ledger","items","sim","gifts","holidays","trips","wedding","life","family"]; const apps=await sb.from("app_bundles").select("app,title");
   (apps.data||[]).sort((a,b)=>((ORDER.indexOf(a.app)+99)%99)-((ORDER.indexOf(b.app)+99)%99));
   APPS=apps.data||[];
   $("pick").innerHTML=`<option value="home">🏠 홈</option>`+APPS.map(a=>`<option value="${a.app}">${a.title}</option>`).join("");
