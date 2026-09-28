@@ -2,7 +2,10 @@
   let promptEvent=null;
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const buttons=()=>[document.getElementById('installTop')].filter(Boolean);
-  function refresh(){buttons().forEach(b=>{b.hidden=standalone();b.textContent=standalone()?'설치됨':'⬇ 앱 설치';});}
+  function refresh(){
+    const installed=standalone();
+    buttons().forEach(b=>{b.hidden=installed;b.style.display=installed?'none':'inline-flex';});
+  }
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;refresh();});
   window.addEventListener('appinstalled',()=>{promptEvent=null;refresh();});
   async function install(){
@@ -19,13 +22,11 @@
     const oldGate=document.getElementById('installGate'),oldBar=document.getElementById('installBar');
     if(oldGate) oldGate.style.display='none';
     if(oldBar) oldBar.style.display='none';
+    if(standalone()) return;
     const top=document.createElement('button');
     top.id='installTop'; top.type='button'; top.textContent='⬇ 앱 설치'; top.setAttribute('aria-label','우리집 앱 설치');
-    top.style.cssText='position:fixed;top:0;left:0;right:0;width:100%;height:44px;border:0;border-radius:0;background:#0C7480;color:#fff;font-weight:800;font-size:14px;z-index:1000;box-shadow:0 1px 6px rgba(0,0,0,.18);padding-top:env(safe-area-inset-top,0px)';
+    top.style.cssText='position:fixed;top:calc(6px + env(safe-area-inset-top,0px));right:8px;height:30px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(12,116,128,.35);border-radius:9px;background:rgba(255,255,255,.94);color:#0C7480;font-weight:700;font-size:12px;z-index:1000;padding:0 10px;box-shadow:0 1px 4px rgba(0,0,0,.08)';
     document.body.prepend(top);
-    const s=document.createElement('style');
-    s.textContent='#bar{top:44px!important}#home{padding-top:calc(98px + env(safe-area-inset-top,0px))!important}#app{top:calc(83px + env(safe-area-inset-top,0px))!important;height:calc(100% - 83px - env(safe-area-inset-top,0px))!important}#gate{padding-top:60px!important}';
-    document.head.appendChild(s);
     top.addEventListener('click',install);
     refresh();
   });
