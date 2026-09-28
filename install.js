@@ -1,8 +1,10 @@
 (()=>{
   let promptEvent=null;
-  const APP_NAME='상지홈', META_VER='20260928-4';
+  const APP_NAME='상지홈', META_VER='20260928-5';
   const SB_URL='https://jdidzokxoaxqcnraowyu.supabase.co';
   const SB_KEY='sb_publishable_sgaob3nqRHgAaKBs_4yclw_-Wq7stKH';
+  const AUTH_BACKUP='sangjihome-auth-v1';
+  const AUTH_STORAGE='sangjihome-oauth-v1';
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const buttons=()=>[document.getElementById('installTop')].filter(Boolean);
   function refresh(){const installed=standalone();buttons().forEach(b=>{b.hidden=installed;b.style.display=installed?'none':'inline-flex';});}
@@ -27,21 +29,62 @@
     else alert('브라우저 메뉴에서 “앱 설치” 또는 “홈 화면에 추가”를 선택하세요.');
   }
   function authErrorText(){const q=new URLSearchParams(location.search),h=new URLSearchParams(location.hash.replace(/^#/,''));return q.get('error_description')||q.get('error')||h.get('error_description')||h.get('error')||'';}
+  function saveBackup(s){
+    try{
+      if(!s?.access_token||!s?.refresh_token) return;
+      localStorage.setItem(AUTH_BACKUP,JSON.stringify({access_token:s.access_token,refresh_token:s.refresh_token,expires_at:s.expires_at||null}));
+    }catch(_){}
+  }
+  function loadBackup(){
+    try{const x=JSON.parse(localStorage.getItem(AUTH_BACKUP)||'null');return x?.access_token&&x?.refresh_token?x:null}catch(_){return null}
+  }
+  function clearBackup(){try{localStorage.removeItem(AUTH_BACKUP)}catch(_){} }
   async function setupAuth(){
     const login=document.getElementById('login'),msg=document.getElementById('msg');
     if(!login||!window.supabase) return;
+    const main=window.__hh&&window.__hh.sb;
     const err=authErrorText();if(err&&msg)msg.textContent='로그인 오류: '+decodeURIComponent(err.replace(/\+/g,' '));
-    const authClient=window.supabase.createClient(SB_URL,SB_KEY,{auth:{flowType:'implicit',persistSession:true,detectSessionInUrl:true}});
+    const authClient=window.supabase.createClient(SB_URL,SB_KEY,{auth:{flowType:'implicit',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:AUTH_STORAGE}});
+    authClient.auth.onAuthStateChange((event,session)=>{if(session)saveBackup(session);else if(event==='SIGNED_OUT')clearBackup();});
+    if(main){
+      main.auth.onAuthStateChange((event,session)=>{
+        if(session)saveBackup(session);
+        else if(event==='SIGNED_OUT')clearBackup();
+      });
+    }
     try{
-      const {data:{session}}=await authClient.auth.getSession();
-      if(session){
-        const main=window.__hh&&window.__hh.sb;
-        if(main){await main.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token});}
-        if(location.hash||/[?&](code|error|error_description)=/.test(location.search)){history.replaceState({},'',location.pathname);location.reload();return;}
+      const [{data:{session:oauthSession}},{data:{session:mainSession}}]=await Promise.all([
+        authClient.auth.getSession(),
+        main?main.auth.getSession():Promise.resolve({data:{session:null}})
+      ]);
+      if(oauthSession)saveBackup(oauthSession);
+      if(mainSession)saveBackup(mainSession);
+      const backup=loadBackup();
+      const candidate=mainSession||oauthSession||backup;
+      let restored=false;
+      if(candidate&&main&&!mainSession){
+        const {error}=await main.auth.setSession({access_token:candidate.access_token,refresh_token:candidate.refresh_token});
+        if(error) throw error;
+        saveBackup(candidate);
+        restored=true;
       }
-    }catch(e){console.warn('OAuth recovery',e);}
+      const callback=!!location.hash||/[?&](code|error|error_description)=/.test(location.search);
+      if(candidate&&(callback||restored)){
+        history.replaceState({},'',location.pathname);
+        if(sessionStorage.getItem('hh-auth-reloaded')!=='1'){
+          sessionStorage.setItem('hh-auth-reloaded','1');
+          location.reload();
+          return;
+        }
+      }
+      if(mainSession)sessionStorage.removeItem('hh-auth-reloaded');
+    }catch(e){
+      console.warn('OAuth/session recovery',e);
+      if(msg&&!err)msg.textContent='로그인 세션 복구 실패: '+(e?.message||e);
+    }
     login.onclick=async()=>{
       if(msg)msg.textContent='GitHub로 이동합니다…';
+      sessionStorage.removeItem('hh-auth-reloaded');
       const {error}=await authClient.auth.signInWithOAuth({provider:'github',options:{redirectTo:location.origin+location.pathname}});
       if(error&&msg)msg.textContent='로그인 오류: '+error.message;
     };
