@@ -81,6 +81,9 @@ async function simSnapshot(){
   const dj=a.data.find(x=>/청년도약/.test(x.name)), irp=a.data.find(x=>x.kind==="pension"&&/IRP/.test(x.name)), params={};
   if(dj&&(dj.meta||{}).monthly) params.dojakMonthly=+dj.meta.monthly/1e4; if(dj&&dj.rate) params.dojakRate=+dj.rate;
   if(irp&&(irp.meta||{}).tdf_share!=null) params.irpSafePct=Math.round(+irp.meta.tdf_share*100);
+  /* 집 매수 가격: 부동산 앱에서 '시뮬레이터 목표'로 표시한 단지의 최신 시세 (만원) */
+  try{ const tw=await sb.from("realestate_watchlist").select("id").eq("sim_target",true).limit(1); const wid=tw.data&&tw.data[0]&&tw.data[0].id;
+    if(wid){ const pr=await sb.from("realestate_prices").select("recent_trade_price,asking_price,deal_date,checked_on").eq("watch_id",wid).order("deal_date",{ascending:false,nullsFirst:false}).order("checked_on",{ascending:false}).limit(1); const x=pr.data&&pr.data[0]; const v=x&&(x.recent_trade_price||x.asking_price); if(v) params.housePrice=Math.round(v/1e4); } }catch(e){}
   const list=a.data.map(x=>({name:x.name,kind:x.kind,owner:x.owner_id,amt:v(x),rate:x.rate?+x.rate:null})).filter(x=>x.amt!==0).sort((p,q)=>Math.abs(q.amt)-Math.abs(p.amt));
   const up=b.data.map(x=>x.updated_at).filter(Boolean).sort().pop(); const updatedAt=up?new Date(up).toLocaleString("sv-SE",{timeZone:"Asia/Seoul"}):null;
   const gear=(it.data||[]).filter(x=>!["판매함","폐기"].includes(x.status)).reduce((s,x)=>s+(x.value_now||0),0); if(gear) vals.gear=gear;
