@@ -1,11 +1,20 @@
 (()=>{
   let promptEvent=null;
-  const APP_NAME='상지홈';
+  const APP_NAME='상지홈', META_VER='20260928-2';
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const buttons=()=>[document.getElementById('installTop')].filter(Boolean);
   function refresh(){
     const installed=standalone();
     buttons().forEach(b=>{b.hidden=installed;b.style.display=installed?'none':'inline-flex';});
+  }
+  function refreshMetadata(){
+    document.title=APP_NAME;
+    let appleTitle=document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if(!appleTitle){appleTitle=document.createElement('meta');appleTitle.name='apple-mobile-web-app-title';document.head.appendChild(appleTitle);} appleTitle.content=APP_NAME;
+    document.querySelectorAll('link[rel="manifest"]').forEach(x=>x.remove());
+    const m=document.createElement('link');m.rel='manifest';m.href='./manifest.webmanifest?v='+META_VER;document.head.appendChild(m);
+    const h1=document.querySelector('#gate h1'); if(h1) h1.textContent=APP_NAME;
+    const hello=document.getElementById('hello'); if(hello&&hello.textContent.trim()==='우리집') hello.textContent=APP_NAME;
   }
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;refresh();});
   window.addEventListener('appinstalled',()=>{promptEvent=null;refresh();});
@@ -20,10 +29,7 @@
   }
   window.hhInstallApp=install;
   window.addEventListener('DOMContentLoaded',()=>{
-    document.title=APP_NAME;
-    const appleTitle=document.querySelector('meta[name="apple-mobile-web-app-title"]'); if(appleTitle) appleTitle.content=APP_NAME;
-    const h1=document.querySelector('#gate h1'); if(h1) h1.textContent=APP_NAME;
-    const hello=document.getElementById('hello'); if(hello&&hello.textContent.trim()==='우리집') hello.textContent=APP_NAME;
+    refreshMetadata();
     const oldGate=document.getElementById('installGate'),oldBar=document.getElementById('installBar');
     if(oldGate) oldGate.style.display='none';
     if(oldBar) oldBar.style.display='none';
@@ -35,5 +41,7 @@
     top.addEventListener('click',install);
     refresh();
   });
-  if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.warn));
+  if('serviceWorker' in navigator) window.addEventListener('load',async()=>{
+    try{const r=await navigator.serviceWorker.register('./sw.js?v='+META_VER,{updateViaCache:'none'});await r.update();}catch(e){console.warn(e);}
+  });
 })();
