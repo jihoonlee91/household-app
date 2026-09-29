@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>상지홈</title><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0C7480"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="상지홈"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg">
+<script>/* 저장된 로그인이 있으면 첫 화면부터 로그인 창 없이 (새로고침 깜빡임 방지). 실제 확인은 아래 boot()가 하고, 로그인이 없으면 되돌림 */
+try{ const v=JSON.parse(localStorage.getItem("sb-jdidzokxoaxqcnraowyu-auth-token")||"null"), h=location.hash;
+  if((v&&v.refresh_token)||/access_token=/.test(h)){ document.documentElement.classList.add("authed"); if(new URLSearchParams(location.search).get("app")) document.documentElement.classList.add("authed-app"); } }catch(e){}</script>
 <style>
 :root{--bg:#F3F5F6;--card:#fff;--ink:#15202A;--muted:#5B6873;--line:#D5DCE0;--accent:#0C7480;color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1419;--card:#161E25;--ink:#E4EAEE;--muted:#9AA7B1;--line:#2A3641;--accent:#4DB8C2;color-scheme:dark}}
@@ -26,6 +29,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 @media (max-width:560px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.tile{padding:12px;gap:4px;border-radius:12px}.tile b{font-size:15px}.tile .d{display:none}.tile .num{font-size:16px}.tile span{font-size:11.5px}.tile .ic{width:30px;height:30px;font-size:16px}}
 #app{display:none;position:fixed;left:0;right:0;bottom:0;top:calc(39px + env(safe-area-inset-top,0px));width:100%;height:calc(100% - 39px - env(safe-area-inset-top,0px));border:0}
 
+.authed #gate{display:none}.authed #bar{display:flex}.authed #home{display:block}.authed-app #home{display:none}
 @media (min-width:1280px){#home{max-width:1240px}.tiles{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}}
 </style></head><body>
 <div id="gate"><div class="card"><h1>상지홈</h1><p>지훈·상아 전용입니다.<br>GitHub 계정으로 로그인하세요.</p>
@@ -34,7 +38,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 <div id="bar"><b id="who"></b><select id="pick" aria-label="앱 고르기"></select><select id="theme" aria-label="화면 테마"><option value="">시스템</option><option value="light">라이트</option><option value="dark">다크</option></select><button id="installBar" type="button">앱 설치</button><button id="out" type="button">로그아웃</button></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="tiles"></div></main>
 <iframe id="app" title="앱"></iframe>
-<script src="./install.js?v=20260929-4"></script>
+<script src="./install.js?v=20260929-5"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <script>
 /* 로그인 안정화
@@ -145,18 +149,19 @@ async function openApp(app,fromPop){
 let booted=false, bootPromise=null;
 function boot(){
   if(bootPromise) return bootPromise;
-  bootPromise=bootSession().catch(error=>{ msg("로그인 확인 중 오류가 발생했습니다. 다시 시도해 주세요. "+error.message); }).finally(()=>{ bootPromise=null; });
+  bootPromise=bootSession().catch(error=>{ if(!booted) unauth(); msg("로그인 확인 중 오류가 발생했습니다. 다시 시도해 주세요. "+error.message); }).finally(()=>{ bootPromise=null; });
   return bootPromise;
 }
+function unauth(){ document.documentElement.classList.remove("authed","authed-app"); $("bar").style.display="none"; $("home").style.display="none"; $("app").style.display="none"; $("gate").style.display=""; }
 async function bootSession(){
   await handoff;
-  const {data:{session}}=await sb.auth.getSession(); if(!session){ if(!authError&&!/실패/.test($("msg").textContent)) msg(""); return; }
+  const {data:{session}}=await sb.auth.getSession(); if(!session){ unauth(); if(!authError&&!/실패/.test($("msg").textContent)) msg(""); return; }
   if(booted) return;
   msg("확인 중…");
   const m=await sb.from("members").select("id,name,github_login");
   if(m.error) throw m.error;
   const me=(m.data||[]).find(x=>x.github_login===(session.user.user_metadata||{}).user_name);
-  if(!me){ msg("이 GitHub 계정은 접근 권한이 없습니다."); await sb.auth.signOut(); return; }
+  if(!me){ unauth(); msg("이 GitHub 계정은 접근 권한이 없습니다."); await sb.auth.signOut(); return; }
   msg(""); $("who").textContent=me.name;
   const ORDER=["assets","realestate","apply","investments","ledger","items","sim","gifts","holidays","trips","wedding","life","family"]; const apps=await sb.from("app_bundles").select("app,title");
   (apps.data||[]).sort((a,b)=>((ORDER.indexOf(a.app)+99)%99)-((ORDER.indexOf(b.app)+99)%99));
