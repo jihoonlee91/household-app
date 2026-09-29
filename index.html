@@ -34,10 +34,15 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 <div id="bar"><b id="who"></b><select id="pick" aria-label="앱 고르기"></select><select id="theme" aria-label="화면 테마"><option value="">시스템</option><option value="light">라이트</option><option value="dark">다크</option></select><button id="installBar" type="button">앱 설치</button><button id="out" type="button">로그아웃</button></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="tiles"></div></main>
 <iframe id="app" title="앱"></iframe>
-<script src="./install.js?v=20260929-3"></script>
+<script src="./install.js?v=20260929-4"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <script>
-const sb=supabase.createClient("https://jdidzokxoaxqcnraowyu.supabase.co","sb_publishable_sgaob3nqRHgAaKBs_4yclw_-Wq7stKH",{auth:{flowType:"implicit",persistSession:true,detectSessionInUrl:true}});
+/* 로그인 안정화
+   - lock: supabase 기본 잠금(navigator.locks)은 같은 사이트의 모든 탭·설치 앱 창이 같이 씀. 예전 창 하나가 잠금을 쥐고 멈추면
+     새 창이 로그인 정보를 영영 못 읽음(서버 로그: GitHub 인증 성공 후 /user 호출 없음). 잠금 없이 바로 실행
+   - detectSessionInUrl:false: 돌아온 주소(#access_token=…)는 아래에서 직접 읽어 setSession */
+const AUTH_KEY="sb-jdidzokxoaxqcnraowyu-auth-token";
+const sb=supabase.createClient("https://jdidzokxoaxqcnraowyu.supabase.co","sb_publishable_sgaob3nqRHgAaKBs_4yclw_-Wq7stKH",{auth:{flowType:"implicit",persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:AUTH_KEY,lock:async(_n,_t,fn)=>await fn()}});
 const $=id=>document.getElementById(id), msg=t=>$("msg").textContent=t;
 let timer=null, curApp=null;
 // Read OAuth errors before successful boot removes the callback URL.
@@ -45,6 +50,15 @@ const authParams=new URLSearchParams(location.hash.slice(1));
 const authQuery=new URLSearchParams(location.search);
 const authError=authParams.get("error_description")||authParams.get("error")||authQuery.get("error_description")||authQuery.get("error");
 if(authError) msg("로그인 오류: "+authError);
+/* GitHub에서 돌아온 경우: 주소의 토큰으로 세션 저장 후 주소에서 지움 */
+const handoff=(async()=>{
+  const at=authParams.get("access_token"), rt=authParams.get("refresh_token");
+  if(!at&&!authError) return;
+  history.replaceState(null,"",location.pathname+location.search);
+  if(!at||!rt) return;
+  msg("로그인 마무리 중…");
+  for(let i=0;i<3;i++){ const {error}=await sb.auth.setSession({access_token:at,refresh_token:rt}); if(!error) return; if(i===2) msg("로그인 마무리에 실패했습니다. 다시 눌러 주세요. ("+error.message+")"); await new Promise(r=>setTimeout(r,800)); }
+})();
 /* 테마: 시스템 / 라이트 / 다크 — 셸과 열린 앱 둘 다에 적용 */
 let theme=""; try{ theme=localStorage.getItem("hh-theme")||""; }catch(e){}
 function applyTheme(){ const set=el=>{ if(!el) return; if(theme) el.setAttribute("data-theme",theme); else el.removeAttribute("data-theme"); };
@@ -135,14 +149,15 @@ function boot(){
   return bootPromise;
 }
 async function bootSession(){
-  const {data:{session}}=await sb.auth.getSession(); if(!session){ if(!authError) msg(""); return; }
+  await handoff;
+  const {data:{session}}=await sb.auth.getSession(); if(!session){ if(!authError&&!/실패/.test($("msg").textContent)) msg(""); return; }
   if(booted) return;
   msg("확인 중…");
   const m=await sb.from("members").select("id,name,github_login");
   if(m.error) throw m.error;
   const me=(m.data||[]).find(x=>x.github_login===(session.user.user_metadata||{}).user_name);
   if(!me){ msg("이 GitHub 계정은 접근 권한이 없습니다."); await sb.auth.signOut(); return; }
-  $("who").textContent=me.name;
+  msg(""); $("who").textContent=me.name;
   const ORDER=["assets","realestate","apply","investments","ledger","items","sim","gifts","holidays","trips","wedding","life","family"]; const apps=await sb.from("app_bundles").select("app,title");
   (apps.data||[]).sort((a,b)=>((ORDER.indexOf(a.app)+99)%99)-((ORDER.indexOf(b.app)+99)%99));
   if(apps.error) throw apps.error;
@@ -162,7 +177,10 @@ async function resumeAuth(){
 // getSession or database APIs synchronously from inside it.
 sb.auth.onAuthStateChange((ev)=>{
   if(ev==="SIGNED_IN"||ev==="TOKEN_REFRESHED"||ev==="INITIAL_SESSION") setTimeout(()=>boot(),0);
+  if(ev==="SIGNED_OUT"&&booted) setTimeout(()=>location.replace(location.pathname),0);
 });
+/* 다른 탭·브라우저 창(예: 설치 앱 밖에서 열린 로그인 창)에서 로그인/로그아웃하면 이 창도 따라감 */
+window.addEventListener("storage",e=>{ if(e.key!==AUTH_KEY) return; if(e.newValue&&!booted) boot(); if(!e.newValue&&booted) location.replace(location.pathname); });
 document.addEventListener("visibilitychange",resumeAuth);
 window.addEventListener("focus",resumeAuth);
 window.addEventListener("pageshow",resumeAuth);
