@@ -121,7 +121,6 @@ async function openApp(app,fromPop){
   /* 뒤로가기 → 홈: 앱은 홈 위에 한 칸만 쌓음 */
   if(fromPop||(history.state&&history.state.app)) history.replaceState({app},"","?app="+encodeURIComponent(app)); else { history.replaceState({home:1},"",location.pathname); history.pushState({app},"","?app="+encodeURIComponent(app)); }
 }
-let APPS=[];
 let booted=false;
 async function boot(){
   const {data:{session}}=await sb.auth.getSession(); if(!session){ msg(""); return; }
