@@ -1,11 +1,28 @@
 (()=>{
   let promptEvent=null;
-  const APP_NAME='상지홈', META_VER='20260929-1';
+  const APP_NAME='상지홈', META_VER='20260929-2';
   const SB_URL='https://jdidzokxoaxqcnraowyu.supabase.co';
   const SB_KEY='sb_publishable_sgaob3nqRHgAaKBs_4yclw_-Wq7stKH';
-  const AUTH_CHANNEL='sangjihome-auth';
+  const AUTH_TYPE='sangjihome-auth';
+  const AUTH_CHANNEL_PREFIX='sangjihome-auth-';
+  const AUTH_PENDING_KEY='hh-oauth-handoff';
+  const AUTH_TTL_MS=10*60*1000;
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const buttons=()=>[document.getElementById('installTop')].filter(Boolean);
+  const validNonce=s=>typeof s==='string'&&/^[A-Za-z0-9_-]{24,128}$/.test(s);
+  const makeNonce=()=>{
+    const b=new Uint8Array(24);crypto.getRandomValues(b);
+    return btoa(String.fromCharCode(...b)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  };
+  const getPending=()=>{
+    try{
+      const x=JSON.parse(sessionStorage.getItem(AUTH_PENDING_KEY)||'null');
+      if(!x||!validNonce(x.nonce)||!Number.isFinite(x.at)||Date.now()-x.at>AUTH_TTL_MS){sessionStorage.removeItem(AUTH_PENDING_KEY);return null;}
+      return x;
+    }catch(_){try{sessionStorage.removeItem(AUTH_PENDING_KEY)}catch(__){}return null;}
+  };
+  const setPending=nonce=>{try{sessionStorage.setItem(AUTH_PENDING_KEY,JSON.stringify({nonce,at:Date.now()}))}catch(_){}};
+  const clearPending=nonce=>{try{const x=getPending();if(!nonce||!x||x.nonce===nonce)sessionStorage.removeItem(AUTH_PENDING_KEY)}catch(_){}};
   function refresh(){const installed=standalone();buttons().forEach(b=>{b.hidden=installed;b.style.display=installed?'none':'inline-flex';});}
   function refreshMetadata(){
     document.title=APP_NAME;
@@ -38,65 +55,69 @@
     const err=authErrorText();if(err&&msg)msg.textContent='로그인 오류: '+decodeURIComponent(err.replace(/\+/g,' '));
     const main=window.__hh&&window.__hh.sb;
     const authClient=main||window.supabase.createClient(SB_URL,SB_KEY,{auth:{flowType:'implicit',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-
-    const acceptSession=async payload=>{
-      if(!payload||payload.type!==AUTH_CHANNEL||!payload.access_token||!payload.refresh_token) return false;
+    let channel=null, authPopup=null, listeningNonce=null;
+    const closeChannel=()=>{try{if(channel)channel.close()}catch(_){}channel=null;listeningNonce=null;};
+    const acceptSession=async(payload,expectedNonce)=>{
+      if(!validNonce(expectedNonce)||!payload||payload.type!==AUTH_TYPE||payload.nonce!==expectedNonce||!payload.access_token||!payload.refresh_token) return false;
       try{
         const {error}=await authClient.auth.setSession({access_token:payload.access_token,refresh_token:payload.refresh_token});
         if(error) throw error;
+        clearPending(expectedNonce);closeChannel();
+        try{if(authPopup&&!authPopup.closed)authPopup.close()}catch(_){}
         if(msg) msg.textContent='로그인 완료';
         return true;
       }catch(e){
-        console.warn('OAuth handoff',e);
+        console.warn('OAuth handoff failed',e);
         if(msg) msg.textContent='로그인 세션 연결 실패: '+(e?.message||e);
         return false;
       }
     };
-
+    const listenFor=nonce=>{
+      if(!validNonce(nonce)||listeningNonce===nonce)return;
+      closeChannel();listeningNonce=nonce;
+      try{channel=new BroadcastChannel(AUTH_CHANNEL_PREFIX+nonce);channel.onmessage=e=>acceptSession(e.data,nonce);}catch(_){}
+    };
+    const pending=getPending();if(pending)listenFor(pending.nonce);
     window.addEventListener('message',e=>{
-      if(e.origin!==location.origin) return;
-      acceptSession(e.data);
+      if(e.origin!==location.origin)return;
+      const p=getPending();if(!p)return;
+      if(authPopup&&e.source!==authPopup)return;
+      acceptSession(e.data,p.nonce);
     });
-    let channel=null;
-    try{
-      channel=new BroadcastChannel(AUTH_CHANNEL);
-      channel.onmessage=e=>acceptSession(e.data);
-    }catch(_){ }
-
     try{
       const {data:{session}}=await authClient.auth.getSession();
       if(session&&authReturn()){
-        const payload={type:AUTH_CHANNEL,access_token:session.access_token,refresh_token:session.refresh_token};
-        let handedOff=false;
-        try{
-          if(window.opener&&!window.opener.closed){window.opener.postMessage(payload,location.origin);handedOff=true;}
-        }catch(_){ }
-        try{if(channel){channel.postMessage(payload);handedOff=true;}}catch(_){ }
-        if(handedOff&&!standalone()){
-          if(msg)msg.textContent='로그인 완료. 상지홈으로 돌아갑니다…';
-          history.replaceState({},'',location.pathname);
-          setTimeout(()=>{try{window.close();}catch(_){}},120);
+        const q=new URLSearchParams(location.search),nonce=q.get('handoff')||'';
+        history.replaceState({},'',location.pathname);
+        if(!validNonce(nonce)){
+          if(!standalone()&&msg)msg.textContent='로그인 복귀 정보가 유효하지 않습니다. 앱에서 다시 로그인해 주세요.';
           return;
         }
-        if(location.hash||/[?&](oauth|code|error|error_description)=/.test(location.search)){
-          history.replaceState({},'',location.pathname);
+        const payload={type:AUTH_TYPE,nonce,access_token:session.access_token,refresh_token:session.refresh_token};
+        let handedOff=false;
+        try{if(window.opener&&!window.opener.closed){window.opener.postMessage(payload,location.origin);handedOff=true;}}catch(_){}
+        try{const c=new BroadcastChannel(AUTH_CHANNEL_PREFIX+nonce);c.postMessage(payload);c.close();handedOff=true;}catch(_){}
+        if(handedOff&&!standalone()){
+          if(msg)msg.textContent='로그인 완료. 상지홈으로 돌아갑니다…';
+          setTimeout(()=>{try{window.close()}catch(_){}},120);
+          return;
         }
       }
     }catch(e){console.warn('OAuth recovery',e);if(msg&&!err)msg.textContent='로그인 세션 확인 실패: '+(e?.message||e);}
-
     login.onclick=async()=>{
       if(msg)msg.textContent='GitHub 로그인 창을 여는 중…';
-      let popup=null;
-      try{popup=window.open('about:blank','sangjihome-oauth');}catch(_){ }
-      const redirectTo=location.origin+location.pathname+'?oauth=1';
+      const nonce=makeNonce();setPending(nonce);listenFor(nonce);
+      try{authPopup=window.open('about:blank','sangjihome-oauth');}catch(_){authPopup=null;}
+      const redirectTo=location.origin+location.pathname+'?oauth=1&handoff='+encodeURIComponent(nonce);
       const {data,error}=await authClient.auth.signInWithOAuth({provider:'github',options:{redirectTo,skipBrowserRedirect:true}});
       if(error||!data||!data.url){
-        try{if(popup)popup.close();}catch(_){ }
+        clearPending(nonce);closeChannel();
+        try{if(authPopup)authPopup.close()}catch(_){}
         if(msg)msg.textContent='로그인 오류: '+(error?.message||'OAuth URL을 만들지 못했습니다.');
         return;
       }
-      if(popup){
-        try{popup.location.replace(data.url);popup.focus();if(msg)msg.textContent='GitHub 인증 후 자동으로 앱에 로그인됩니다.';return;}catch(_){ }
+      if(authPopup){
+        try{authPopup.location.replace(data.url);authPopup.focus();if(msg)msg.textContent='GitHub 인증 후 자동으로 앱에 로그인됩니다.';return;}catch(_){}
       }
       location.href=data.url;
     };
