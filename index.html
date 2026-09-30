@@ -5,9 +5,9 @@
 try{ const v=JSON.parse(localStorage.getItem("sb-jdidzokxoaxqcnraowyu-auth-token")||"null"), h=location.hash;
   if((v&&v.refresh_token)||/access_token=/.test(h)){ document.documentElement.classList.add("authed"); if(new URLSearchParams(location.search).get("app")) document.documentElement.classList.add("authed-app"); } }catch(e){}</script>
 <style>
-:root{--bg:#F3F5F6;--card:#fff;--ink:#15202A;--muted:#5B6873;--line:#D5DCE0;--accent:#0C7480;color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1419;--card:#161E25;--ink:#E4EAEE;--muted:#9AA7B1;--line:#2A3641;--accent:#4DB8C2;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0E1419;--card:#161E25;--ink:#E4EAEE;--muted:#9AA7B1;--line:#2A3641;--accent:#4DB8C2;color-scheme:dark}
+:root{--bg:#F3F5F6;--card:#fff;--ink:#15202A;--muted:#5B6873;--line:#D5DCE0;--accent:#0C7480;--up:#C2472F;--down:#1F5FAF;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1419;--card:#161E25;--ink:#E4EAEE;--muted:#9AA7B1;--line:#2A3641;--accent:#4DB8C2;--up:#EE7A62;--down:#6FA8F0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1419;--card:#161E25;--ink:#E4EAEE;--muted:#9AA7B1;--line:#2A3641;--accent:#4DB8C2;--up:#EE7A62;--down:#6FA8F0;color-scheme:dark}
 html,body{height:100%;margin:0}body{background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
 #gate{min-height:100%;display:grid;place-items:center;padding:16px;box-sizing:border-box}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 24px;max-width:340px;width:100%;text-align:center}
@@ -17,7 +17,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 .install{width:100%;margin-top:9px;border-color:var(--accent);color:var(--accent);font-weight:700}.install[hidden]{display:none!important}
 #msg{margin-top:14px;font-size:13px;color:var(--muted);min-height:1em}
 #bar{display:none;position:fixed;top:0;left:0;right:0;height:38px;padding-top:env(safe-area-inset-top,0px);background:var(--card);border-bottom:1px solid var(--line);align-items:center;gap:8px;padding-inline:12px;font-size:13px;z-index:2}
-#bar b{flex:1}#bar select,#bar button{padding:4px 8px;font-size:12.5px}#bar #installBar{border-color:var(--accent);color:var(--accent);font-weight:700}
+#bar b{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:3em}#bar button,#bar select{white-space:nowrap}#bar select,#bar button{padding:4px 8px;font-size:12.5px}#bar #installBar{border-color:var(--accent);color:var(--accent);font-weight:700}
 #home{display:none;max-width:720px;margin:0 auto;padding:calc(54px + env(safe-area-inset-top,0px)) 16px 32px;box-sizing:border-box}
 #home h2{font-size:20px;margin:6px 0 2px}#home .sub{color:var(--muted);font-size:13px;margin:0 0 16px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
@@ -27,6 +27,10 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 .tile .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--bg);font-size:18px}
 .grp{margin:22px 0 10px;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:10px}.grp:first-of-type{margin-top:6px}.grp::after{content:"";flex:1;height:1px;background:var(--line)}
 @media (max-width:560px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.tile{padding:12px;gap:4px;border-radius:12px}.tile b{font-size:15px}.tile .d{display:none}.tile .num{font-size:16px}.tile span{font-size:11.5px}.tile .ic{width:30px;height:30px;font-size:16px}}
+.tile .bar{display:block;height:5px;border-radius:5px;background:var(--bg);overflow:hidden;margin-top:2px}.tile .bar b{display:block;height:100%;border-radius:5px}
+.up{display:grid;gap:6px}.upi{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);font:inherit;cursor:pointer}
+.upi b{font:700 13px ui-monospace,Menlo,monospace;color:var(--accent);min-width:3.2em}.upi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}.upi em{font-style:normal;color:var(--muted);font-size:12.5px}
+.tile span{overflow-wrap:anywhere}
 #app{display:none;position:fixed;left:0;right:0;bottom:0;top:calc(39px + env(safe-area-inset-top,0px));width:100%;height:calc(100% - 39px - env(safe-area-inset-top,0px));border:0}
 
 .authed #gate{display:none}.authed #bar{display:flex}.authed #home{display:block}.authed-app #home{display:none}
@@ -36,7 +40,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 <button class="gh" id="login"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub로 로그인</button>
 <button class="install" id="installGate" type="button">앱 설치</button><div id="msg"></div></div></div>
 <div id="bar"><b id="who"></b><select id="pick" aria-label="앱 고르기"></select><select id="theme" aria-label="화면 테마"><option value="">시스템</option><option value="light">라이트</option><option value="dark">다크</option></select><button id="installBar" type="button">앱 설치</button><button id="out" type="button">로그아웃</button></div>
-<main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="tiles"></div></main>
+<main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="upnext"></div><div id="tiles"></div></main>
 <iframe id="app" title="앱"></iframe>
 <script src="./install.js?v=20260929-5"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
@@ -86,6 +90,7 @@ $("login").onclick=async()=>{
 window.addEventListener("pageshow",()=>{ $("login").disabled=false; });
 $("out").onclick=async()=>{ await sb.auth.signOut(); location.replace(location.pathname); };
 const INFO={assets:{ic:"🏦",d:"통장·증권·대출 잔액 업데이트, 순자산 추이"},realestate:{ic:"🏠",d:"전세·월세·자가·투자부동산 계약과 자산 관리"},apply:{ic:"📝",d:"서울·경기남부 아파트 분양 청약 일정, 관심 단지"},investments:{ic:"📊",d:"주식·ETF·펀드·TDF 투자자산을 따로 보기"},sim:{ic:"📈",d:"연봉·성과급·투자·집 매수·은퇴를 연도별로 굴려 보기 (자산 시뮬레이터)"},ledger:{ic:"🧾",d:"지출·수입 입력, 월별 합계와 예산 대비"},items:{ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"},gifts:{ic:"🎁",d:"결혼식·장례 등 경조사 주고받은 기록, 사람별 정리"},holidays:{ic:"🧧",d:"설·추석, 부모님 용돈·선물, 가족 생일·환갑 일정"},life:{ic:"🧭",d:"이지훈·이상아 학교·직장·이사, 나란히 보는 인생 연표"},family:{ic:"🌳",d:"양가 가계도, 가족 관계·생년"},trips:{ic:"✈️",d:"같이 다녀온 여행, 경비, 가고 싶은 곳"},wedding:{ic:"💍",d:"2023.8.15 결혼식 — 축의금·비용·식순·문서"}};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fm=v=>v==null?"–":(Math.abs(v)>=1e8?(v/1e8).toFixed(1)+"억":Math.round(v/1e4).toLocaleString("ko-KR")+"만");
 window.addEventListener("popstate",e=>{ const a=e.state&&e.state.app; if(a){ $("pick").value=a; openApp(a,true); } else openHome(); });
 async function openHome(){
@@ -93,12 +98,74 @@ async function openHome(){
   document.title="상지홈"; history.replaceState({home:1},"",location.pathname);
   const now=new Date(), ym=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
   const nx=new Date(now.getFullYear(),now.getMonth()+1,1), nym=nx.getFullYear()+"-"+String(nx.getMonth()+1).padStart(2,"0");
-  const [tx,it,st,bl]=await Promise.all([sb.from("transactions").select("amount").gte("occurred_on",ym+"-01").lt("occurred_on",nym+"-01").lt("amount",0),
-    sb.from("items").select("value_now,status,account_id"), sb.from("app_state").select("data").eq("app","sim").eq("key","inputs").maybeSingle(), sb.from("balances").select("account_id,as_of,amount").order("as_of")]);
+  const today=new Date(Date.now()+9*3600e3).toISOString().slice(0,10), mFrom=ym+"-01", mTo=nym+"-01";
+  const dday=d=>Math.round((Date.parse(d)-Date.parse(today))/864e5), md=d=>d?`${+d.slice(5,7)}/${+d.slice(8,10)}`:"";
+  const q=(p)=>p.then(r=>r).catch(()=>({data:null}));
+  /* 홈 미리보기: 각 앱의 핵심 숫자 한두 개. 앱과 같은 원본(DB)에서 읽기만 함 */
+  const [tx,gf,tc,it,st,bl,ac,hd,qt,ct,rw,sub,gup,tr,pp]=await Promise.all([
+    q(sb.from("transactions").select("amount").gte("occurred_on",mFrom).lt("occurred_on",mTo).lt("amount",0)),
+    q(sb.from("gifts").select("cash,goods_value,direction").gte("occurred_on",mFrom).lt("occurred_on",mTo).eq("direction","보냄")),
+    q(sb.from("trip_costs").select("amount").gte("spent_on",mFrom).lt("spent_on",mTo)),
+    q(sb.from("items").select("value_now,status,account_id")), q(sb.from("app_state").select("data").eq("app","sim").eq("key","inputs").maybeSingle()),
+    q(sb.from("balances").select("account_id,as_of,amount").order("as_of")), q(sb.from("accounts").select("id,kind").in("kind",["invest","isa","pension","stock"]).eq("active",true)),
+    q(sb.from("holdings").select("account_id,as_of,symbol,name,value,pnl").order("as_of",{ascending:false})), q(sb.from("quotes").select("symbol,change_pct")),
+    q(sb.from("contracts").select("kind,title,end_date,amount").in("kind",["jeonse","monthly_rent"])),
+    q(sb.from("realestate_watchlist").select("id,name,sim_target,purpose").eq("active",true)),
+    q(sb.from("subscriptions").select("name,receipt_start,receipt_end,rank1_date,interest").gte("receipt_end",today).order("receipt_start")),
+    q(sb.from("gifts").select("occurred_on,label,occasion,direction,person_id").gte("occurred_on",today).order("occurred_on").limit(20)),
+    q(sb.from("trips").select("title,start_date,end_date,total_krw,status").order("start_date",{ascending:false})),
+    q(sb.from("people").select("id,name,relation"))
+  ]);
   const lastB={}; (bl.data||[]).forEach(x=>lastB[x.account_id]=x); const netW=Object.values(lastB).reduce((s,x)=>s+x.amount,0), netAsof=Object.values(lastB).map(x=>x.as_of).sort().pop();
-  const spent=(tx.data||[]).reduce((a,x)=>a-x.amount,0), budget=((st.data&&st.data.data&&st.data.data.monthly)||300)*1e4;
-  const itemsV=(it.data||[]).filter(x=>!["판매함","폐기"].includes(x.status)).reduce((a,x)=>a+(x.value_now||0),0), itemsN=(it.data||[]).filter(x=>!["판매함","폐기"].includes(x.status)).length;
-  const extra={assets:`<div class="num">${fm(netW)}</div><span>순자산 · ${netAsof||"잔액 입력 전"}</span>`,sim:`<span>자산 앱 최신 잔액에서 시작</span>`,ledger:`<div class="num">${fm(spent)}</div><span>이번 달 지출 · 예산 ${fm(budget)}</span>`,items:`<div class="num">${fm(itemsV)}</div><span>물건 ${itemsN}개 · 시세 입력분 합계</span>`};
+  /* 이번 달 지출 = 가계부와 같은 합산 (직접 기록 + 경조사·명절 보낸 돈 + 여행 경비) */
+  const spent=(tx.data||[]).reduce((a,x)=>a-x.amount,0)+(gf.data||[]).reduce((a,x)=>a+(x.cash||0)+(x.goods_value||0),0)+(tc.data||[]).reduce((a,x)=>a+(x.amount||0),0);
+  const budget=((st.data&&st.data.data&&st.data.data.monthly)||300)*1e4;
+  const live=(it.data||[]).filter(x=>!["판매함","폐기"].includes(x.status)), itemsV=live.reduce((a,x)=>a+(x.value_now||0),0), sale=live.filter(x=>x.status==="판매 예정").length;
+  /* 투자: 계좌별 최신 보유분 합계, 오늘 등락은 종목 등락률로 추정 */
+  const invIds=new Set((ac.data||[]).map(x=>x.id)), lastAsof={}; (hd.data||[]).forEach(h=>{ if(invIds.has(h.account_id)&&!lastAsof[h.account_id]) lastAsof[h.account_id]=h.as_of; });
+  const hs=(hd.data||[]).filter(h=>lastAsof[h.account_id]===h.as_of), cp=Object.fromEntries((qt.data||[]).map(x=>[x.symbol,+x.change_pct||0]));
+  const invV=hs.reduce((a,h)=>a+(h.value||0),0), invPnl=hs.reduce((a,h)=>a+(h.pnl||0),0), invDay=hs.reduce((a,h)=>{const c=cp[h.symbol];return c?a+(h.value||0)*c/(100+c):a},0);
+  const sgn=v=>v>0?"+":v<0?"−":"", abs=v=>fm(Math.abs(v)), col=v=>v>0?"var(--up)":v<0?"var(--down)":"var(--muted)";
+  /* 부동산: 전세 만기, 목표 단지 최신 시세 */
+  const jeon=(ct.data||[]).filter(c=>c.end_date).sort((a,b)=>a.end_date.localeCompare(b.end_date))[0];
+  const tgt=(rw.data||[]).find(x=>x.sim_target)||null; let tgtP=null;
+  if(tgt){ const pr=await q(sb.from("realestate_prices").select("recent_trade_price,asking_price,deal_date,checked_on").eq("watch_id",tgt.id).order("deal_date",{ascending:false,nullsFirst:false}).limit(1)); const x=pr.data&&pr.data[0]; tgtP=x&&(x.recent_trade_price||x.asking_price); }
+  const nCand=(rw.data||[]).filter(x=>x.purpose!=="current_home").length;
+  /* 청약: 접수 중·예정 */
+  const subs=sub.data||[], open=subs.filter(x=>x.receipt_start&&x.receipt_start<=today), soon=subs.filter(x=>x.receipt_start&&x.receipt_start>today), star=subs.filter(x=>x.interest);
+  const nextSub=(star.length?star:subs)[0];
+  /* 경조사·명절 */
+  const isHol=x=>/^(명절|용돈|선물|생신|어버이날|가족 행사)$/.test(x.occasion||""), ups=gup.data||[];
+  const gNext=ups.find(x=>!isHol(x)), hNext=ups.find(isHol);
+  /* 여행: 다가오는 여행 또는 올해 경비 */
+  const trips=tr.data||[], upTrip=trips.filter(t=>t.start_date&&t.start_date>=today).sort((a,b)=>a.start_date.localeCompare(b.start_date))[0];
+  const yr=today.slice(0,4), yTrips=trips.filter(t=>(t.start_date||"").startsWith(yr)), yCost=yTrips.reduce((a,t)=>a+(t.total_krw||0),0);
+  const pn=Object.fromEntries((pp.data||[]).map(x=>[x.id,x.name])), gName=x=>[pn[x.person_id],x.occasion&&x.occasion!=="기타"?x.occasion:(x.label||"")].filter(Boolean).join(" ")||"경조사";
+  const fam=(pp.data||[]).filter(x=>/^(지훈|상아)/.test(x.relation||"")).length;
+  const wedDays=dday("2023-08-15")*-1;
+  const extra={
+    assets:`<div class="num">${fm(netW)}</div><span>순자산 · ${netAsof?md(netAsof)+" 기준":"잔액 입력 전"}</span>`,
+    investments:hs.length?`<div class="num">${fm(invV)}</div><span><em style="color:${col(invDay)};font-style:normal">오늘 ${sgn(invDay)}${abs(invDay)}</em> · 평가손익 ${sgn(invPnl)}${abs(invPnl)}</span>`:"",
+    realestate:`<div class="num">${tgt&&tgtP?fm(tgtP):"–"}</div><span>${tgt?esc(String(tgt.name).replace(/\s*\d+㎡.*/,""))+" 실거래":"목표 단지 없음"}${jeon?` · 전세 만기 D-${Math.max(0,dday(jeon.end_date))}`:""}${nCand?` · 후보 ${nCand}곳`:""}</span>`,
+    apply:`<div class="num">${open.length}곳 접수 중</div><span>${soon.length?`예정 ${soon.length}곳`:"예정 없음"}${nextSub?` · ${star.length?"★ ":""}${esc(nextSub.name)} ${md(nextSub.receipt_start)}~${md(nextSub.receipt_end)}`:""}</span>`,
+    sim:`<span>자산 앱 최신 잔액에서 시작</span>`,
+    ledger:`<div class="num">${fm(spent)}</div><span>이번 달 지출 · 예산 ${fm(budget)}${spent>0?` (${Math.round(spent/budget*100)}%)`:""}</span><i class="bar"><b style="width:${Math.min(100,spent/budget*100).toFixed(0)}%;background:${spent>budget?"var(--down)":"var(--accent)"}"></b></i>`,
+    items:`<div class="num">${fm(itemsV)}</div><span>물건 ${live.length}개${sale?` · 판매 예정 ${sale}개`:""}</span>`,
+    gifts:gNext?`<div class="num">D-${dday(gNext.occurred_on)}</div><span>${esc(gName(gNext))} · ${md(gNext.occurred_on)}</span>`:`<span>다가오는 경조사 없음</span>`,
+    holidays:hNext?`<div class="num">D-${dday(hNext.occurred_on)}</div><span>${esc(gName(hNext))} · ${md(hNext.occurred_on)}</span>`:`<span>다가오는 일정 없음</span>`,
+    trips:upTrip?`<div class="num">D-${dday(upTrip.start_date)}</div><span>${esc(upTrip.title)} · ${md(upTrip.start_date)}</span>`:`<div class="num">${yTrips.length}번</div><span>${yr}년 여행${yCost?` · ${fm(yCost)}`:""}</span>`,
+    wedding:`<div class="num">${wedDays.toLocaleString("ko-KR")}일</div><span>함께한 날 · 2023.8.15</span>`,
+    family:fam?`<div class="num">${fam}명</div><span>양가 가족</span>`:""
+  };
+  /* 맨 위 '다가오는 일': 날짜가 가까운 것만 모아서 */
+  const todo=[];
+  open.filter(x=>x.interest).forEach(x=>todo.push([x.receipt_end,`📝 ${x.name} 청약 접수 마감`,"apply"]));
+  soon.filter(x=>x.interest&&dday(x.receipt_start)<=14).forEach(x=>todo.push([x.receipt_start,`📝 ${x.name} 청약 접수 시작`,"apply"]));
+  ups.filter(x=>dday(x.occurred_on)<=30).slice(0,3).forEach(x=>todo.push([x.occurred_on,`${isHol(x)?"🧧":"🎁"} ${gName(x)}`,isHol(x)?"holidays":"gifts"]));
+  if(upTrip&&dday(upTrip.start_date)<=45) todo.push([upTrip.start_date,`✈️ ${upTrip.title} 출발`,"trips"]);
+  if(jeon&&dday(jeon.end_date)<=180) todo.push([jeon.end_date,`🏠 전세 만기`,"realestate"]);
+  todo.sort((a,b)=>a[0].localeCompare(b[0]));
+  $("upnext").innerHTML=todo.length?`<div class="grp">다가오는 일</div><div class="up">${todo.slice(0,5).map(([d,t,a])=>`<button type="button" class="upi" data-app="${a}"><b>${dday(d)<=0?"오늘":"D-"+dday(d)}</b><span>${esc(t)}</span><em>${md(d)}</em></button>`).join("")}</div>`:"";
   const tile=a=>`<button type="button" class="tile" data-app="${a.app}"><div class="ic">${(INFO[a.app]||{}).ic||"📄"}</div><b>${a.title}</b><span class="d">${(INFO[a.app]||{}).d||""}</span>${extra[a.app]||""}</button>`;
   const used=new Set(GROUPS.flatMap(g=>g[1])), rest=APPS.filter(a=>!used.has(a.app));
   $("tiles").innerHTML=GROUPS.map(([t,ks])=>[t,ks.map(k=>APPS.find(a=>a.app===k)).filter(Boolean)]).concat(rest.length?[["기타",rest]]:[]).filter(g=>g[1].length)
@@ -169,7 +236,7 @@ async function bootSession(){
   APPS=apps.data||[];
   $("pick").innerHTML=`<option value="home">🏠 홈</option>`+APPS.map(a=>`<option value="${a.app}">${a.title}</option>`).join("");
   $("hello").textContent=`${me.name}님, 안녕하세요`; $("hsub").textContent="지훈·상아 가계 앱";
-  $("tiles").onclick=e=>{ const t=e.target.closest(".tile"); if(t){ $("pick").value=t.dataset.app; openApp(t.dataset.app); } };
+  $("home").onclick=e=>{ const t=e.target.closest(".tile,.upi"); if(t){ $("pick").value=t.dataset.app; openApp(t.dataset.app); } };
   const want=new URLSearchParams(location.search).get("app")||"home"; $("pick").value=want; $("pick").onchange=e=>openApp(e.target.value);
   await openApp(want);
   booted=true;
