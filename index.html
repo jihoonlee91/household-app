@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>상지홈</title><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0C7480"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="상지홈"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg">
+<title>상지홈</title><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0C7480"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="상지홈"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg"><link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="preconnect" href="https://jdidzokxoaxqcnraowyu.supabase.co">
 <script>/* 저장된 로그인이 있으면 첫 화면부터 로그인 창 없이 (새로고침 깜빡임 방지). 실제 확인은 아래 boot()가 하고, 로그인이 없으면 되돌림 */
 try{ const v=JSON.parse(localStorage.getItem("sb-jdidzokxoaxqcnraowyu-auth-token")||"null"), h=location.hash;
   if((v&&v.refresh_token)||/access_token=/.test(h)){ document.documentElement.classList.add("authed"); if(new URLSearchParams(location.search).get("app")) document.documentElement.classList.add("authed-app"); } }catch(e){}</script>
@@ -34,16 +35,19 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 #app{display:none;position:fixed;left:0;right:0;bottom:0;top:calc(39px + env(safe-area-inset-top,0px));width:100%;height:calc(100% - 39px - env(safe-area-inset-top,0px));border:0}
 
 .authed #gate{display:none}.authed #bar{display:flex}.authed #home{display:block}.authed-app #home{display:none}
+#status{display:none;position:fixed;top:calc(45px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 14px;font-size:13px;color:var(--muted);box-shadow:0 2px 10px rgba(0,0,0,.14);z-index:3;max-width:90%;text-align:center}
+.authed #status:not(:empty){display:block}
 @media (min-width:1280px){#home{max-width:1240px}.tiles{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}}
 </style></head><body>
 <div id="gate"><div class="card"><h1>상지홈</h1><p>지훈·상아 전용입니다.<br>GitHub 계정으로 로그인하세요.</p>
 <button class="gh" id="login"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub로 로그인</button>
 <button class="install" id="installGate" type="button">앱 설치</button><div id="msg"></div></div></div>
 <div id="bar"><b id="who"></b><select id="pick" aria-label="앱 고르기"></select><select id="theme" aria-label="화면 테마"><option value="">시스템</option><option value="light">라이트</option><option value="dark">다크</option></select><button id="installBar" type="button">앱 설치</button><button id="out" type="button">로그아웃</button></div>
+<div id="status" role="status" aria-live="polite"></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="upnext"></div><div id="tiles"></div></main>
 <iframe id="app" title="앱"></iframe>
-<script src="./install.js?v=20260929-5"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script src="./install.js?v=20261001-1"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>
 /* 로그인 안정화
    - lock: supabase 기본 잠금(navigator.locks)은 같은 사이트의 모든 탭·설치 앱 창이 같이 씀. 예전 창 하나가 잠금을 쥐고 멈추면
@@ -51,7 +55,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
    - detectSessionInUrl:false: 돌아온 주소(#access_token=…)는 아래에서 직접 읽어 setSession */
 const AUTH_KEY="sb-jdidzokxoaxqcnraowyu-auth-token";
 const sb=supabase.createClient("https://jdidzokxoaxqcnraowyu.supabase.co","sb_publishable_sgaob3nqRHgAaKBs_4yclw_-Wq7stKH",{auth:{flowType:"implicit",persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:AUTH_KEY,lock:async(_n,_t,fn)=>await fn()}});
-const $=id=>document.getElementById(id), msg=t=>$("msg").textContent=t;
+const $=id=>document.getElementById(id), msg=t=>{ $("msg").textContent=t; $("status").textContent=t; };
 let timer=null, curApp=null;
 // Read OAuth errors before successful boot removes the callback URL.
 const authParams=new URLSearchParams(location.hash.slice(1));
@@ -94,7 +98,7 @@ const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 const fm=v=>v==null?"–":(Math.abs(v)>=1e8?(v/1e8).toFixed(1)+"억":Math.round(v/1e4).toLocaleString("ko-KR")+"만");
 window.addEventListener("popstate",e=>{ const a=e.state&&e.state.app; if(a){ $("pick").value=a; openApp(a,true); } else openHome(); });
 async function openHome(){
-  curApp=null; $("app").style.display="none"; $("app").srcdoc=""; $("gate").style.display="none"; $("bar").style.display="flex"; $("home").style.display="block"; $("pick").value="home";
+  curApp=null; msg(""); $("app").style.display="none"; $("app").srcdoc=""; $("gate").style.display="none"; $("bar").style.display="flex"; $("home").style.display="block"; $("pick").value="home";
   document.title="상지홈"; history.replaceState({home:1},"",location.pathname);
   const now=new Date(), ym=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
   const nx=new Date(now.getFullYear(),now.getMonth()+1,1), nym=nx.getFullYear()+"-"+String(nx.getMonth()+1).padStart(2,"0");
@@ -166,7 +170,7 @@ async function openHome(){
   if(jeon&&dday(jeon.end_date)<=180) todo.push([jeon.end_date,`🏠 전세 만기`,"realestate"]);
   todo.sort((a,b)=>a[0].localeCompare(b[0]));
   $("upnext").innerHTML=todo.length?`<div class="grp">다가오는 일</div><div class="up">${todo.slice(0,5).map(([d,t,a])=>`<button type="button" class="upi" data-app="${a}"><b>${dday(d)<=0?"오늘":"D-"+dday(d)}</b><span>${esc(t)}</span><em>${md(d)}</em></button>`).join("")}</div>`:"";
-  const tile=a=>`<button type="button" class="tile" data-app="${a.app}"><div class="ic">${(INFO[a.app]||{}).ic||"📄"}</div><b>${a.title}</b><span class="d">${(INFO[a.app]||{}).d||""}</span>${extra[a.app]||""}</button>`;
+  const tile=a=>`<button type="button" class="tile" data-app="${a.app}"><div class="ic" aria-hidden="true">${(INFO[a.app]||{}).ic||"📄"}</div><b>${a.title}</b><span class="d">${(INFO[a.app]||{}).d||""}</span>${extra[a.app]||""}</button>`;
   const used=new Set(GROUPS.flatMap(g=>g[1])), rest=APPS.filter(a=>!used.has(a.app));
   $("tiles").innerHTML=GROUPS.map(([t,ks])=>[t,ks.map(k=>APPS.find(a=>a.app===k)).filter(Boolean)]).concat(rest.length?[["기타",rest]]:[]).filter(g=>g[1].length)
     .map(([t,l])=>`<div class="grp">${t}</div><div class="tiles">${l.map(tile).join("")}</div>`).join("");
@@ -209,7 +213,7 @@ async function openApp(app,fromPop){
   const [b,st]=await Promise.all([sb.from("app_bundles").select("html,title").eq("app",app).maybeSingle(), sb.from("app_state").select("data").eq("app",app).eq("key","inputs").maybeSingle()]);
   if(b.error||!b.data){ msg("앱을 불러오지 못했습니다."); return; }
   window.__hh.inputs=st.data?st.data.data:null; window.__hh.snapshot=app==="sim"? await simSnapshot() : null; document.title=b.data.title+" · 상지홈";
-  $("gate").style.display="none"; $("bar").style.display="flex"; $("app").style.display="block"; $("app").srcdoc=b.data.html;
+  $("gate").style.display="none"; $("bar").style.display="flex"; $("app").style.display="block"; $("app").srcdoc=b.data.html; msg("");
   /* 뒤로가기 → 홈: 앱은 홈 위에 한 칸만 쌓음 */
   if(fromPop||(history.state&&history.state.app)) history.replaceState({app},"","?app="+encodeURIComponent(app)); else { history.replaceState({home:1},"",location.pathname); history.pushState({app},"","?app="+encodeURIComponent(app)); }
 }
