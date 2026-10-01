@@ -24,7 +24,10 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
  #tabsbar{display:flex;flex:1;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0}#tabsbar::-webkit-scrollbar{display:none}
  #tabsbar button,#themeSeg button{border:0;background:none;color:var(--muted);padding:5px 9px;border-radius:8px;font:inherit;font-size:12.5px;white-space:nowrap;cursor:pointer}
  #tabsbar button:hover,#themeSeg button:hover{background:var(--bg);color:var(--ink)}
- #tabsbar button[aria-current="page"],#themeSeg button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:700}
+ #tabsbar button[aria-current="page"]{background:var(--gc,var(--accent));color:#fff;font-weight:700}#themeSeg button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:700}
+ #tabsbar .ti{font-style:normal}
+ #tabsbar .tg{flex:0 0 auto;align-self:center;margin:0 2px 0 10px;padding:1px 7px;border-radius:6px;font-size:11px;font-weight:800;color:var(--gc);background:color-mix(in srgb,var(--gc) 13%,transparent);border-left:3px solid var(--gc)}
+ #tabsbar button[data-app]:not([data-app="home"]){border-bottom:2px solid color-mix(in srgb,var(--gc) 35%,transparent);border-radius:8px 8px 4px 4px}
  #themeSeg{display:flex;gap:2px;border:1px solid var(--line);border-radius:10px;padding:2px}#themeSeg button{padding:3px 8px}}
 #bar b{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:3em}#bar button,#bar select{white-space:nowrap}#bar select,#bar button{padding:4px 8px;font-size:12.5px}#bar #installBar{border-color:var(--accent);color:var(--accent);font-weight:700}
 #home{display:none;max-width:720px;margin:0 auto;padding:calc(54px + env(safe-area-inset-top,0px)) 16px 32px;box-sizing:border-box}
@@ -47,6 +50,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 .authed #status:not(:empty){display:block}
 @media (min-width:1280px){#home{max-width:none;padding-inline:28px}.tiles{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}.up{grid-template-columns:repeat(auto-fill,minmax(440px,1fr))}}
 .tile{align-content:start} /* 같은 줄 타일 높이가 달라도 내용은 위에서부터 (제목 줄이 들쭉날쭉하지 않게) */
+@media (min-width:1100px) and (max-width:1500px){#tabsbar .ti{display:none}#tabsbar button{padding:5px 6px!important}#tabsbar .tg{margin-left:6px!important}#bar #who{display:none}}
 </style></head><body>
 <div id="gate"><div class="card"><h1>상지홈</h1><p>지훈·상아 전용입니다.<br>GitHub 계정으로 로그인하세요.</p>
 <button class="gh" id="login"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub로 로그인</button>
@@ -188,11 +192,14 @@ async function openHome(){ setTimeout(syncTabs);
   const tile=a=>`<button type="button" class="tile" data-app="${a.app}"><div class="ic" aria-hidden="true">${(INFO[a.app]||{}).ic||"📄"}</div><b>${a.title}</b><span class="d">${(INFO[a.app]||{}).d||""}</span>${extra[a.app]||""}</button>`;
   const used=new Set(GROUPS.flatMap(g=>g[1])), rest=APPS.filter(a=>!used.has(a.app));
   $("tiles").innerHTML=GROUPS.map(([t,ks])=>[t,ks.map(k=>APPS.find(a=>a.app===k)).filter(Boolean)]).concat(rest.length?[["기타",rest]]:[]).filter(g=>g[1].length)
-    .map(([t,l])=>`<div class="grp">${t}</div><div class="tiles">${l.map(tile).join("")}</div>`).join("");
+    .map(([t,l])=>`<div class="grp" style="color:${GCOL[t]||"var(--muted)"}">${t}</div><div class="tiles">${l.map(tile).join("")}</div>`).join("");
 }
 let APPS=[];
 /* 홈 묶음: 돈 / 생활 / 가족 (여기 없는 새 앱은 "기타"로) */
-const GROUPS=[["돈",["assets","investments","realestate","apply","ledger","sim"]],["생활",["items","trips","wedding","life"]],["가족",["gifts","holidays","family"]]];
+/* 앱 순서 = 자주 쓰고 중요한 순 (한 곳에서 정함: 홈 타일·PC 상단 버튼·드롭다운 모두 이 순서) */
+const GROUPS=[["돈",["ledger","assets","investments","apply","realestate","sim"]],["가족",["gifts","holidays","family"]],["생활",["items","trips","life","wedding"]]];
+const GCOL={"돈":"#0C7480","가족":"#C06A30","생활":"#6E5AA6"};
+const SHORT={sim:"시뮬레이터",life:"타임라인",wedding:"결혼식",apply:"청약",holidays:"명절·용돈",investments:"투자"}; /* PC 상단 한 줄에 다 들어가게 */
 /* 시뮬레이터 시작값: 자산 앱 계좌별 최신 잔액 + 살림살이 현재 시세 합계 */
 async function simSnapshot(){
   try{ await sb.functions.invoke("refresh-quotes",{body:{}}); }catch(e){}
@@ -249,12 +256,15 @@ async function bootSession(){
   const me=(m.data||[]).find(x=>x.github_login===(session.user.user_metadata||{}).user_name);
   if(!me){ unauth(); msg("이 GitHub 계정은 접근 권한이 없습니다."); await sb.auth.signOut(); return; }
   msg(""); $("who").textContent=me.name;
-  const ORDER=["assets","realestate","apply","investments","ledger","items","sim","gifts","holidays","trips","wedding","life","family"]; const apps=await sb.from("app_bundles").select("app,title");
+  const ORDER=GROUPS.flatMap(g=>g[1]); const apps=await sb.from("app_bundles").select("app,title");
   (apps.data||[]).sort((a,b)=>((ORDER.indexOf(a.app)+99)%99)-((ORDER.indexOf(b.app)+99)%99));
   if(apps.error) throw apps.error;
   APPS=apps.data||[];
   $("pick").innerHTML=`<option value="home">🏠 홈</option>`+APPS.map(a=>`<option value="${a.app}">${a.title}</option>`).join("");
-  $("tabsbar").innerHTML=`<button type="button" data-app="home">🏠 홈</button>`+APPS.map(a=>`<button type="button" data-app="${a.app}">${a.title}</button>`).join("");
+  /* PC 상단: 묶음(돈·가족·생활)마다 색 이름표 + 구분선, 버튼에 아이콘 */
+  { const gOf=k=>(GROUPS.find(g=>g[1].includes(k))||["기타"])[0]; let h=`<button type="button" data-app="home">🏠 홈</button>`, cur=null;
+    APPS.forEach(a=>{ const g=gOf(a.app); if(g!==cur){ h+=`<span class="tg" style="--gc:${GCOL[g]||"#888"}">${g}</span>`; cur=g; } h+=`<button type="button" data-app="${a.app}" style="--gc:${GCOL[g]||"#888"}" title="${a.title}"><i class="ti">${(INFO[a.app]||{}).ic||""}</i> ${SHORT[a.app]||a.title}</button>`; });
+    $("tabsbar").innerHTML=h; }
   $("hello").textContent=`${me.name}님, 안녕하세요`; $("hsub").textContent="지훈·상아 가계 앱";
   $("home").onclick=e=>{ const t=e.target.closest(".tile,.upi"); if(t){ $("pick").value=t.dataset.app; openApp(t.dataset.app); } };
   const want=new URLSearchParams(location.search).get("app")||"home"; $("pick").value=want; $("pick").onchange=e=>openApp(e.target.value);
