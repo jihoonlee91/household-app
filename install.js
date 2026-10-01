@@ -1,7 +1,9 @@
 (()=>{
   let promptEvent=null;
-  const APP_NAME='상지홈', META_VER='20261001-1';
+  const APP_NAME='상지홈', META_VER='20261002-1';
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+  const loadMobileUi=()=>{if(document.getElementById('hh-mobile-ui'))return;const s=document.createElement('script');s.id='hh-mobile-ui';s.src='./mobile-ui.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
+  loadMobileUi();
   /* 설치 버튼: 로그인 화면(installGate)·위 막대(installBar) 안에만 둠. 화면 위에 떠 있는 버튼은 로그아웃 버튼을 가려서 없앰 */
   const buttons=()=>['installGate','installBar'].map(id=>document.getElementById(id)).filter(Boolean);
   function refresh(){const installed=standalone();buttons().forEach(b=>{b.hidden=installed;b.style.display=installed?'none':'';});}
