@@ -159,7 +159,7 @@ $("login").onclick=async()=>{
 };
 window.addEventListener("pageshow",()=>{ $("login").disabled=false; });
 $("out").onclick=async()=>{ await sb.auth.signOut(); location.replace(location.pathname); };
-const INFO={connect:{ic:"🔌",d:"결제 문자 자동 입력·카드/은행 알림 설정·뱅크샐러드 내보내기"},assets:{ic:"🏦",d:"통장·증권·대출 잔액 업데이트, 순자산 추이"},realestate:{ic:"🏠",d:"전세·월세·자가·투자부동산 계약과 자산 관리"},apply:{ic:"📝",d:"서울·경기남부 아파트 분양 청약 일정, 관심 단지"},investments:{ic:"📊",d:"주식·ETF·펀드·TDF 투자자산을 따로 보기"},sim:{ic:"📈",d:"연봉·성과급·투자·집 매수·은퇴를 연도별로 굴려 보기 (자산 시뮬레이터)"},ledger:{ic:"🧾",d:"지출·수입 입력, 월별 합계와 예산 대비"},items:{ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"},gifts:{ic:"🎁",d:"결혼식·장례 등 경조사 주고받은 기록, 사람별 정리"},holidays:{ic:"🧧",d:"설·추석, 부모님 용돈·선물, 가족 생일·환갑 일정"},life:{ic:"🧭",d:"이지훈·이상아 학교·직장·이사, 나란히 보는 인생 연표"},family:{ic:"🌳",d:"양가 가계도, 가족 관계·생년"},trips:{ic:"✈️",d:"같이 다녀온 여행, 경비, 가고 싶은 곳"},wedding:{ic:"💍",d:"2023.8.15 결혼식 — 축의금·비용·식순·문서"}};
+const INFO={races:{ic:"🏃",d:"관심 마라톤·트레일 대회 — 신청 기간·대회일·완주 기록"},connect:{ic:"🔌",d:"결제 문자 자동 입력·카드/은행 알림 설정·뱅크샐러드 내보내기"},assets:{ic:"🏦",d:"통장·증권·대출 잔액 업데이트, 순자산 추이"},realestate:{ic:"🏠",d:"전세·월세·자가·투자부동산 계약과 자산 관리"},apply:{ic:"📝",d:"서울·경기남부 아파트 분양 청약 일정, 관심 단지"},investments:{ic:"📊",d:"주식·ETF·펀드·TDF 투자자산을 따로 보기"},sim:{ic:"📈",d:"연봉·성과급·투자·집 매수·은퇴를 연도별로 굴려 보기 (자산 시뮬레이터)"},ledger:{ic:"🧾",d:"지출·수입 입력, 월별 합계와 예산 대비"},items:{ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"},gifts:{ic:"🎁",d:"결혼식·장례 등 경조사 주고받은 기록, 사람별 정리"},holidays:{ic:"🧧",d:"설·추석, 부모님 용돈·선물, 가족 생일·환갑 일정"},life:{ic:"🧭",d:"이지훈·이상아 학교·직장·이사, 나란히 보는 인생 연표"},family:{ic:"🌳",d:"양가 가계도, 가족 관계·생년"},trips:{ic:"✈️",d:"같이 다녀온 여행, 경비, 가고 싶은 곳"},wedding:{ic:"💍",d:"2023.8.15 결혼식 — 축의금·비용·식순·문서"}};
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fm=v=>v==null?"–":(Math.abs(v)>=1e8?(v/1e8).toFixed(1)+"억":Math.round(v/1e4).toLocaleString("ko-KR")+"만");
 window.addEventListener("popstate",e=>{ const a=e.state&&e.state.app; if(a){ $("pick").value=a; openApp(a,true); } else openHome(); });
@@ -172,7 +172,7 @@ async function openHome(){ setTimeout(syncTabs);
   const dday=d=>Math.round((Date.parse(d)-Date.parse(today))/864e5), md=d=>d?`${+d.slice(5,7)}/${+d.slice(8,10)}`:"";
   const q=(p)=>p.then(r=>r).catch(()=>({data:null}));
   /* 홈 미리보기: 각 앱의 핵심 숫자 한두 개. 앱과 같은 원본(DB)에서 읽기만 함 */
-  const [tx,gf,tc,it,st,bl,ac,hd,qt,ct,rw,sub,gup,tr,pp]=await Promise.all([
+  const [tx,gf,tc,it,st,bl,ac,hd,qt,ct,rw,sub,gup,tr,pp,rc]=await Promise.all([
     q(sb.from("transactions").select("amount").gte("occurred_on",mFrom).lt("occurred_on",mTo).lt("amount",0)),
     q(sb.from("gifts").select("cash,goods_value,direction").gte("occurred_on",mFrom).lt("occurred_on",mTo).eq("direction","보냄")),
     q(sb.from("trip_costs").select("amount").gte("spent_on",mFrom).lt("spent_on",mTo)),
@@ -184,7 +184,8 @@ async function openHome(){ setTimeout(syncTabs);
     q(sb.from("subscriptions").select("name,receipt_start,receipt_end,rank1_date,interest").gte("receipt_end",today).order("receipt_start")),
     q(sb.from("gifts").select("occurred_on,label,occasion,direction,person_id").gte("occurred_on",today).order("occurred_on").limit(20)),
     q(sb.from("trips").select("title,start_date,end_date,total_krw,status").order("start_date",{ascending:false})),
-    q(sb.from("people").select("id,name,relation"))
+    q(sb.from("people").select("id,name,relation")),
+    q(sb.from("races").select("name,race_date,reg_open,reg_close,status"))
   ]);
   const lastB={}; (bl.data||[]).forEach(x=>lastB[x.account_id]=x); const netW=Object.values(lastB).reduce((s,x)=>s+x.amount,0), netAsof=Object.values(lastB).map(x=>x.as_of).sort().pop();
   /* 이번 달 지출 = 가계부와 같은 합산 (직접 기록 + 경조사·명절 보낸 돈 + 여행 경비) */
@@ -208,6 +209,8 @@ async function openHome(){ setTimeout(syncTabs);
   const isHol=x=>/^(명절|용돈|선물|생신|어버이날|가족 행사)$/.test(x.occasion||""), ups=gup.data||[];
   const gNext=ups.find(x=>!isHol(x)), hNext=ups.find(isHol);
   /* 여행: 다가오는 여행 또는 올해 경비 */
+  /* 대회: 열릴 신청(60일 안)·내 대회(신청함·당첨) */
+  const races=rc.data||[], rNext=races.filter(x=>x.reg_open&&x.reg_open>=today).sort((a,b)=>a.reg_open.localeCompare(b.reg_open))[0], rMine=races.filter(x=>["신청함","당첨"].includes(x.status)&&x.race_date>=today).sort((a,b)=>a.race_date.localeCompare(b.race_date))[0];
   const trips=tr.data||[], upTrip=trips.filter(t=>t.start_date&&t.start_date>=today).sort((a,b)=>a.start_date.localeCompare(b.start_date))[0];
   const yr=today.slice(0,4), yTrips=trips.filter(t=>(t.start_date||"").startsWith(yr)), yCost=yTrips.reduce((a,t)=>a+(t.total_krw||0),0);
   const pn=Object.fromEntries((pp.data||[]).map(x=>[x.id,x.name])), gName=x=>[pn[x.person_id],x.occasion&&x.occasion!=="기타"?x.occasion:(x.label||"")].filter(Boolean).join(" ")||"경조사";
@@ -223,6 +226,7 @@ async function openHome(){ setTimeout(syncTabs);
     items:`<div class="num">${fm(itemsV)}</div><span>물건 ${live.length}개${sale?` · 판매 예정 ${sale}개`:""}</span>`,
     gifts:gNext?`<div class="num">D-${dday(gNext.occurred_on)}</div><span>${esc(gName(gNext))} · ${md(gNext.occurred_on)}</span>`:`<span>다가오는 경조사 없음</span>`,
     holidays:hNext?`<div class="num">D-${dday(hNext.occurred_on)}</div><span>${esc(gName(hNext))} · ${md(hNext.occurred_on)}</span>`:`<span>다가오는 일정 없음</span>`,
+    races:rMine?`<div class="num">D-${dday(rMine.race_date)}</div><span>${esc(rMine.name)} · ${md(rMine.race_date)}</span>`:rNext?`<div class="num">신청 D-${dday(rNext.reg_open)}</div><span>${esc(rNext.name)} · ${md(rNext.reg_open)}</span>`:`<div class="num">${races.length}개</div><span>관심 대회</span>`,
     trips:upTrip?`<div class="num">D-${dday(upTrip.start_date)}</div><span>${esc(upTrip.title)} · ${md(upTrip.start_date)}</span>`:`<div class="num">${yTrips.length}번</div><span>${yr}년 여행${yCost?` · ${fm(yCost)}`:""}</span>`,
     wedding:`<div class="num">${wedDays.toLocaleString("ko-KR")}일</div><span>함께한 날 · 2023.8.15</span>`,
     family:fam?`<div class="num">${fam}명</div><span>양가 가족</span>`:""
@@ -232,6 +236,8 @@ async function openHome(){ setTimeout(syncTabs);
   open.filter(x=>x.interest).forEach(x=>todo.push([x.receipt_end,`📝 ${x.name} 청약 접수 마감`,"apply"]));
   soon.filter(x=>x.interest&&dday(x.receipt_start)<=14).forEach(x=>todo.push([x.receipt_start,`📝 ${x.name} 청약 접수 시작`,"apply"]));
   ups.filter(x=>dday(x.occurred_on)<=30).slice(0,3).forEach(x=>todo.push([x.occurred_on,`${isHol(x)?"🧧":"🎁"} ${gName(x)}`,isHol(x)?"holidays":"gifts"]));
+  races.filter(x=>x.reg_open&&x.reg_open>=today&&dday(x.reg_open)<=60).forEach(x=>todo.push([x.reg_open,`🏃 ${x.name} 신청 시작`,"races"]));
+  if(rMine&&dday(rMine.race_date)<=60) todo.push([rMine.race_date,`🏃 ${rMine.name}`,"races"]);
   if(upTrip&&dday(upTrip.start_date)<=45) todo.push([upTrip.start_date,`✈️ ${upTrip.title} 출발`,"trips"]);
   if(jeon&&dday(jeon.end_date)<=180) todo.push([jeon.end_date,`🏠 전세 만기`,"realestate"]);
   todo.sort((a,b)=>a[0].localeCompare(b[0]));
@@ -244,7 +250,7 @@ async function openHome(){ setTimeout(syncTabs);
 let APPS=[], MEMBERS=[];
 /* 홈 묶음: 돈 / 생활 / 가족 (여기 없는 새 앱은 "기타"로) */
 /* 앱 순서 = 자주 쓰고 중요한 순 (한 곳에서 정함: 홈 타일·PC 상단 버튼·드롭다운 모두 이 순서) */
-const GROUPS=[["돈",["ledger","assets","investments","apply","realestate","sim"]],["가족",["gifts","holidays","family"]],["생활",["items","trips","life","wedding"]],["설정",["connect"]]];
+const GROUPS=[["돈",["ledger","assets","investments","apply","realestate","sim"]],["가족",["gifts","holidays","family"]],["생활",["items","trips","races","life","wedding"]],["설정",["connect"]]];
 const GCOL={"돈":"#0C7480","가족":"#C06A30","생활":"#6E5AA6","설정":"#5D6A75"};
 const SHORT={connect:"연결",sim:"시뮬레이터",life:"타임라인",wedding:"결혼식",apply:"청약",holidays:"명절·용돈",investments:"투자"}; /* PC 상단 한 줄에 다 들어가게 */
 /* 시뮬레이터 시작값: 자산 앱 계좌별 최신 잔액 + 살림살이 현재 시세 합계 */
