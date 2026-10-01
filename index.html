@@ -172,8 +172,8 @@ async function openHome(){ setTimeout(syncTabs);
   const dday=d=>Math.round((Date.parse(d)-Date.parse(today))/864e5), md=d=>d?`${+d.slice(5,7)}/${+d.slice(8,10)}`:"";
   const q=(p)=>p.then(r=>r).catch(()=>({data:null}));
   /* 홈 미리보기: 각 앱의 핵심 숫자 한두 개. 앱과 같은 원본(DB)에서 읽기만 함 */
-  const [tx,gf,tc,it,st,bl,ac,hd,qt,ct,rw,sub,gup,tr,pp,rc]=await Promise.all([
-    q(sb.from("transactions").select("amount").gte("occurred_on",mFrom).lt("occurred_on",mTo).lt("amount",0)),
+  const [tx,gf,tc,it,st,bl,ac,hd,qt,ct,rw,sub,gup,tr,pp,rc,cg]=await Promise.all([
+    q(sb.from("transactions").select("amount,category_id").gte("occurred_on",mFrom).lt("occurred_on",mTo).lt("amount",0)),
     q(sb.from("gifts").select("cash,goods_value,direction").gte("occurred_on",mFrom).lt("occurred_on",mTo).eq("direction","보냄")),
     q(sb.from("trip_costs").select("amount").gte("spent_on",mFrom).lt("spent_on",mTo)),
     q(sb.from("items").select("value_now,status,account_id")), q(sb.from("app_state").select("data").eq("app","sim").eq("key","inputs").maybeSingle()),
@@ -185,11 +185,13 @@ async function openHome(){ setTimeout(syncTabs);
     q(sb.from("gifts").select("occurred_on,label,occasion,direction,person_id").gte("occurred_on",today).order("occurred_on").limit(20)),
     q(sb.from("trips").select("title,start_date,end_date,total_krw,status").order("start_date",{ascending:false})),
     q(sb.from("people").select("id,name,relation")),
-    q(sb.from("races").select("name,race_date,reg_open,reg_close,status"))
+    q(sb.from("races").select("name,race_date,reg_open,reg_close,status")),
+    q(sb.from("categories").select("id").eq("kind","transfer"))
   ]);
   const lastB={}; (bl.data||[]).forEach(x=>lastB[x.account_id]=x); const netW=Object.values(lastB).reduce((s,x)=>s+x.amount,0), netAsof=Object.values(lastB).map(x=>x.as_of).sort().pop();
   /* 이번 달 지출 = 가계부와 같은 합산 (직접 기록 + 경조사·명절 보낸 돈 + 여행 경비) */
-  const spent=(tx.data||[]).reduce((a,x)=>a-x.amount,0)+(gf.data||[]).reduce((a,x)=>a+(x.cash||0)+(x.goods_value||0),0)+(tc.data||[]).reduce((a,x)=>a+(x.amount||0),0);
+  const trIds=new Set((cg.data||[]).map(x=>x.id)); /* 이체(내 계좌 사이·카드대금·충전)는 지출 아님 — 가계부 앱과 같은 기준 */
+  const spent=(tx.data||[]).filter(x=>!trIds.has(x.category_id)).reduce((a,x)=>a-x.amount,0)+(gf.data||[]).reduce((a,x)=>a+(x.cash||0)+(x.goods_value||0),0)+(tc.data||[]).reduce((a,x)=>a+(x.amount||0),0);
   const budget=((st.data&&st.data.data&&st.data.data.monthly)||300)*1e4;
   const live=(it.data||[]).filter(x=>!["판매함","폐기"].includes(x.status)), itemsV=live.reduce((a,x)=>a+(x.value_now||0),0), sale=live.filter(x=>x.status==="판매 예정").length;
   /* 투자: 계좌별 최신 보유분 합계, 오늘 등락은 종목 등락률로 추정 */
