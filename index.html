@@ -50,13 +50,53 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 .authed #status:not(:empty){display:block}
 @media (min-width:1280px){#home{max-width:none;padding-inline:28px}.tiles{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}.up{grid-template-columns:repeat(auto-fill,minmax(440px,1fr))}}
 .tile{align-content:start} /* 같은 줄 타일 높이가 달라도 내용은 위에서부터 (제목 줄이 들쭉날쭉하지 않게) */
-@media (min-width:1100px) and (max-width:1500px){#tabsbar .ti{display:none}#tabsbar button{padding:5px 6px!important}#tabsbar .tg{margin-left:6px!important}#bar #who{display:none}}
+
+/* ===== 메뉴: PC는 왼쪽 세로 메뉴(접기 가능), 휴대폰은 아래 탭 바 + '전체' 시트 ===== */
+:root{--sw:228px}html.side-mini{--sw:64px}
+#btm,#allSheet{display:none}#sideTog{display:none}
+@media (min-width:1100px){
+ .authed #bar{display:flex!important;flex-direction:column;align-items:stretch;top:0;bottom:0;left:0;right:auto;width:var(--sw);height:auto;border-right:1px solid var(--line);border-bottom:0;padding:calc(12px + env(safe-area-inset-top,0px)) 10px 12px;gap:8px;overflow-y:auto;box-sizing:border-box}
+ #bar b#who{flex:0 0 auto!important;display:block!important;font-size:15px;padding:2px 6px}
+ #sideTog{display:block;align-self:flex-end;border:0;background:none;color:var(--muted);padding:2px 6px;font-size:16px}
+ #tabsbar{flex-direction:column!important;flex:1!important;overflow:visible!important;gap:1px!important}
+ #tabsbar button{text-align:left;padding:7px 10px!important;font-size:13.5px!important;border-radius:9px!important;border-bottom:0!important;border-left:3px solid transparent!important;display:flex;gap:8px;align-items:center}
+ #tabsbar button[data-app]:not([data-app="home"]){border-left-color:color-mix(in srgb,var(--gc) 30%,transparent)!important}
+ #tabsbar button[aria-current="page"]{border-left-color:var(--gc,var(--accent))!important}
+ #tabsbar .tg{display:block;text-align:left;margin:12px 0 4px!important;border-left:0!important;background:none!important;padding:0 10px!important;font-size:11.5px!important;letter-spacing:.08em}
+ #tabsbar .ti{display:inline!important;width:1.3em;text-align:center}
+ #themeSeg{justify-content:space-between}#bar #installBar,#bar #out{width:100%}
+ .authed #home{margin-left:var(--sw);padding-top:calc(24px + env(safe-area-inset-top,0px))}
+ #app{left:var(--sw)!important;top:0!important;width:calc(100% - var(--sw))!important;height:100%!important}
+ #status{top:12px;left:calc(50% + var(--sw)/2)}
+ html.side-mini #tabsbar .ln,html.side-mini #tabsbar .tg,html.side-mini #bar #who,html.side-mini #themeSeg,html.side-mini #installBar,html.side-mini #out{display:none!important}
+ html.side-mini #tabsbar button{justify-content:center;padding:8px 0!important}html.side-mini #sideTog{align-self:center}
+}
+@media (max-width:1099px){
+ .authed #bar{display:none!important}
+ .authed #btm{display:grid;position:fixed;left:0;right:0;bottom:0;z-index:4;grid-template-columns:repeat(5,1fr);height:calc(58px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:var(--card);border-top:1px solid var(--line);box-sizing:border-box}
+ #btm button{border:0;border-radius:0;background:none;color:var(--muted);padding:6px 0 4px;display:grid;justify-items:center;gap:2px;font-size:11px}
+ #btm button i{font-style:normal;font-size:20px;line-height:1.1}#btm button[aria-current="page"]{color:var(--accent);font-weight:700}
+ #app{top:env(safe-area-inset-top,0px)!important;height:calc(100% - 58px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px))!important}
+ .authed #home{padding-top:calc(18px + env(safe-area-inset-top,0px));padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+ #status{top:calc(8px + env(safe-area-inset-top,0px))}
+ #allSheet.open{display:block;position:fixed;inset:0;z-index:6;background:rgba(0,0,0,.35)}
+ #allSheet .sheet{position:absolute;left:0;right:0;bottom:0;max-height:86%;overflow-y:auto;background:var(--card);border-radius:18px 18px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+ #allSheet .sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}#allSheet .sh button{padding:6px 12px}
+ #allList .ag{margin:12px 0 6px;font-size:12px;font-weight:800;letter-spacing:.06em}
+ #allList .al{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+ #allList .al button{display:grid;justify-items:center;gap:4px;padding:10px 4px;font-size:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+ #allList .al button i{font-style:normal;font-size:22px}#allList .al button[aria-current="page"]{border-color:var(--accent);color:var(--accent);font-weight:700}
+ #allSheet .sopt{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}#themeSeg2{display:flex;gap:2px;border:1px solid var(--line);border-radius:10px;padding:2px}#themeSeg2 button{border:0;padding:5px 10px;font-size:12.5px;background:none}#themeSeg2 button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:700}
+}
 </style></head><body>
-<div id="gate"><div class="card"><h1>상지홈</h1><p>지훈·상아 전용입니다.<br>GitHub 계정으로 로그인하세요.</p>
+<div id="gate"><div class="card"><h1>상지홈</h1><p>가족 전용입니다.<br>GitHub 계정으로 로그인하세요.</p>
 <button class="gh" id="login"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub로 로그인</button>
 <button class="install" id="installGate" type="button">앱 설치</button><div id="msg"></div></div></div>
-<div id="bar"><b id="who"></b><select id="pick" aria-label="앱 고르기"></select><nav id="tabsbar" aria-label="앱"></nav><select id="theme" aria-label="화면 테마"><option value="">시스템</option><option value="light">라이트</option><option value="dark">다크</option></select><span id="themeSeg" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button id="installBar" type="button">앱 설치</button><button id="out" type="button">로그아웃</button></div>
+<div id="bar"><button type="button" id="sideTog" title="메뉴 접기·펴기">⇤</button><b id="who"></b><select id="pick" aria-label="앱 고르기"></select><nav id="tabsbar" aria-label="앱"></nav><select id="theme" aria-label="화면 테마"><option value="">시스템</option><option value="light">라이트</option><option value="dark">다크</option></select><span id="themeSeg" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button id="installBar" type="button">앱 설치</button><button id="out" type="button">로그아웃</button></div>
 <div id="status" role="status" aria-live="polite"></div>
+<nav id="btm" aria-label="자주 쓰는 앱"></nav>
+<div id="allSheet" aria-hidden="true"><div class="sheet"><div class="sh"><b>전체 앱</b><button type="button" id="allClose" aria-label="닫기">닫기</button></div><div id="allList"></div>
+  <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="upnext"></div><div id="tiles"></div></main>
 <iframe id="app" title="앱"></iframe>
 <script src="./install.js?v=20261001-1"></script>
@@ -91,11 +131,18 @@ function applyTheme(){ const set=el=>{ if(!el) return; if(theme) el.setAttribute
 /* 앱(iframe) 쪽에서 쓰는 다리: 입력값을 부부 공용 DB(app_state)에 저장 */
 window.__hh={sb,inputs:null,open:app=>{ $("pick").value=app; openApp(app); },saveInputs(d){ const app=curApp; clearTimeout(timer); timer=setTimeout(async()=>{ const {error}=await sb.from("app_state").upsert({app,key:"inputs",data:d,updated_at:new Date().toISOString()}); if(error) console.warn(error); },700); }};
 const setTheme=t=>{ theme=t; $("theme").value=t; try{localStorage.setItem("hh-theme",t);}catch(_){} applyTheme(); syncSeg(); };
-function syncSeg(){ document.querySelectorAll("#themeSeg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.t===theme))); }
+function syncSeg(){ document.querySelectorAll("#themeSeg button,#themeSeg2 button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.t===theme))); }
 $("theme").value=theme; applyTheme(); syncSeg(); $("theme").onchange=e=>setTheme(e.target.value);
 $("themeSeg").onclick=e=>{ const b=e.target.closest("button[data-t]"); if(b) setTheme(b.dataset.t); };
 /* PC 앱 버튼: 드롭다운(#pick)과 같은 값을 쓰고, 현재 앱을 표시 */
-function syncTabs(){ const v=$("pick").value; document.querySelectorAll("#tabsbar button").forEach(b=>b.setAttribute("aria-current",b.dataset.app===v?"page":"false")); }
+function syncTabs(){ const v=$("pick").value; document.querySelectorAll("#tabsbar button,#btm button[data-app],#allList button").forEach(b=>b.setAttribute("aria-current",b.dataset.app===v?"page":"false")); }
+const goApp=k=>{ $("pick").value=k; if(k==="home") openHome(); else openApp(k); syncTabs(); };
+const closeAll=()=>{ $("allSheet").classList.remove("open"); $("allSheet").setAttribute("aria-hidden","true"); };
+$("btm").onclick=e=>{ if(e.target.closest("#allOpen")){ $("allSheet").classList.add("open"); $("allSheet").setAttribute("aria-hidden","false"); syncSeg(); $("install2").hidden=$("installBar").hidden; return; } const b=e.target.closest("button[data-app]"); if(b) goApp(b.dataset.app); };
+$("allSheet").onclick=e=>{ if(e.target===$("allSheet")||e.target.closest("#allClose")){ closeAll(); return; } const b=e.target.closest("button[data-app]"); if(b){ closeAll(); goApp(b.dataset.app); return; }
+  const t=e.target.closest("#themeSeg2 button[data-t]"); if(t){ setTheme(t.dataset.t); return; } if(e.target.closest("#out2")) $("out").click(); if(e.target.closest("#install2")) $("installBar").click(); };
+try{ if(localStorage.getItem("hh-side")==="mini") document.documentElement.classList.add("side-mini"); }catch(_){}
+$("sideTog").onclick=()=>{ const m=document.documentElement.classList.toggle("side-mini"); $("sideTog").textContent=m?"⇥":"⇤"; try{ localStorage.setItem("hh-side",m?"mini":""); }catch(_){} };
 $("tabsbar").onclick=e=>{ const b=e.target.closest("button[data-app]"); if(!b) return; $("pick").value=b.dataset.app; if(b.dataset.app==="home") openHome(); else openApp(b.dataset.app); syncTabs(); };
 $("app").addEventListener("load",applyTheme);
 // Keep OAuth in this browsing context. Mobile PWA popups may lose opener,
@@ -117,7 +164,7 @@ const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 const fm=v=>v==null?"–":(Math.abs(v)>=1e8?(v/1e8).toFixed(1)+"억":Math.round(v/1e4).toLocaleString("ko-KR")+"만");
 window.addEventListener("popstate",e=>{ const a=e.state&&e.state.app; if(a){ $("pick").value=a; openApp(a,true); } else openHome(); });
 async function openHome(){ setTimeout(syncTabs);
-  curApp=null; msg(""); $("app").style.display="none"; $("app").srcdoc=""; $("gate").style.display="none"; $("bar").style.display="flex"; $("home").style.display="block"; $("pick").value="home";
+  curApp=null; msg(""); $("app").style.display="none"; $("app").srcdoc=""; document.documentElement.classList.add("authed"); $("gate").style.display="none"; $("bar").style.display="flex"; $("home").style.display="block"; $("pick").value="home";
   document.title="상지홈"; history.replaceState({home:1},"",location.pathname);
   const now=new Date(), ym=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
   const nx=new Date(now.getFullYear(),now.getMonth()+1,1), nym=nx.getFullYear()+"-"+String(nx.getMonth()+1).padStart(2,"0");
@@ -164,7 +211,7 @@ async function openHome(){ setTimeout(syncTabs);
   const trips=tr.data||[], upTrip=trips.filter(t=>t.start_date&&t.start_date>=today).sort((a,b)=>a.start_date.localeCompare(b.start_date))[0];
   const yr=today.slice(0,4), yTrips=trips.filter(t=>(t.start_date||"").startsWith(yr)), yCost=yTrips.reduce((a,t)=>a+(t.total_krw||0),0);
   const pn=Object.fromEntries((pp.data||[]).map(x=>[x.id,x.name])), gName=x=>[pn[x.person_id],x.occasion&&x.occasion!=="기타"?x.occasion:(x.label||"")].filter(Boolean).join(" ")||"경조사";
-  const fam=(pp.data||[]).filter(x=>/^(지훈|상아)/.test(x.relation||"")).length;
+  const shorts=(MEMBERS||[]).map(m=>String(m.name||"").slice(-2)).filter(Boolean), fam=(pp.data||[]).filter(x=>shorts.some(n=>String(x.relation||"").startsWith(n))).length; /* 관계 앞 글자 = 구성원 이름(뒤 두 글자) */
   const wedDays=dday("2023-08-15")*-1;
   const extra={
     assets:`<div class="num">${fm(netW)}</div><span>순자산 · ${netAsof?md(netAsof)+" 기준":"잔액 입력 전"}</span>`,
@@ -194,7 +241,7 @@ async function openHome(){ setTimeout(syncTabs);
   $("tiles").innerHTML=GROUPS.map(([t,ks])=>[t,ks.map(k=>APPS.find(a=>a.app===k)).filter(Boolean)]).concat(rest.length?[["기타",rest]]:[]).filter(g=>g[1].length)
     .map(([t,l])=>`<div class="grp" style="color:${GCOL[t]||"var(--muted)"}">${t}</div><div class="tiles">${l.map(tile).join("")}</div>`).join("");
 }
-let APPS=[];
+let APPS=[], MEMBERS=[];
 /* 홈 묶음: 돈 / 생활 / 가족 (여기 없는 새 앱은 "기타"로) */
 /* 앱 순서 = 자주 쓰고 중요한 순 (한 곳에서 정함: 홈 타일·PC 상단 버튼·드롭다운 모두 이 순서) */
 const GROUPS=[["돈",["ledger","assets","investments","apply","realestate","sim"]],["가족",["gifts","holidays","family"]],["생활",["items","trips","life","wedding"]],["설정",["connect"]]];
@@ -235,7 +282,7 @@ async function openApp(app,fromPop){ setTimeout(syncTabs);
   const [b,st]=await Promise.all([sb.from("app_bundles").select("html,title").eq("app",app).maybeSingle(), sb.from("app_state").select("data").eq("app",app).eq("key","inputs").maybeSingle()]);
   if(b.error||!b.data){ msg("앱을 불러오지 못했습니다."); return; }
   window.__hh.inputs=st.data?st.data.data:null; window.__hh.snapshot=app==="sim"? await simSnapshot() : null; document.title=b.data.title+" · 상지홈";
-  $("gate").style.display="none"; $("bar").style.display="flex"; $("app").style.display="block"; $("app").srcdoc=b.data.html; msg("");
+  document.documentElement.classList.add("authed"); $("gate").style.display="none"; $("bar").style.display="flex"; $("app").style.display="block"; $("app").srcdoc=b.data.html; msg("");
   /* 뒤로가기 → 홈: 앱은 홈 위에 한 칸만 쌓음 */
   if(fromPop||(history.state&&history.state.app)) history.replaceState({app},"","?app="+encodeURIComponent(app)); else { history.replaceState({home:1},"",location.pathname); history.pushState({app},"","?app="+encodeURIComponent(app)); }
 }
@@ -251,7 +298,7 @@ async function bootSession(){
   const {data:{session}}=await sb.auth.getSession(); if(!session){ unauth(); if(!authError&&!/실패/.test($("msg").textContent)) msg(""); return; }
   if(booted) return;
   msg("확인 중…");
-  const m=await sb.from("members").select("id,name,github_login");
+  const m=await sb.from("members").select("id,name,github_login"); MEMBERS=m.data||[];
   if(m.error) throw m.error;
   const me=(m.data||[]).find(x=>x.github_login===(session.user.user_metadata||{}).user_name);
   if(!me){ unauth(); msg("이 GitHub 계정은 접근 권한이 없습니다."); await sb.auth.signOut(); return; }
@@ -262,10 +309,14 @@ async function bootSession(){
   APPS=apps.data||[];
   $("pick").innerHTML=`<option value="home">🏠 홈</option>`+APPS.map(a=>`<option value="${a.app}">${a.title}</option>`).join("");
   /* PC 상단: 묶음(돈·가족·생활)마다 색 이름표 + 구분선, 버튼에 아이콘 */
-  { const gOf=k=>(GROUPS.find(g=>g[1].includes(k))||["기타"])[0]; let h=`<button type="button" data-app="home">🏠 홈</button>`, cur=null;
-    APPS.forEach(a=>{ const g=gOf(a.app); if(g!==cur){ h+=`<span class="tg" style="--gc:${GCOL[g]||"#888"}">${g}</span>`; cur=g; } h+=`<button type="button" data-app="${a.app}" style="--gc:${GCOL[g]||"#888"}" title="${a.title}"><i class="ti">${(INFO[a.app]||{}).ic||""}</i> ${SHORT[a.app]||a.title}</button>`; });
-    $("tabsbar").innerHTML=h; }
-  $("hello").textContent=`${me.name}님, 안녕하세요`; $("hsub").textContent="지훈·상아 가계 앱";
+  { const gOf=k=>(GROUPS.find(g=>g[1].includes(k))||["기타"])[0]; let h=`<button type="button" data-app="home" title="홈"><i class="ti">🏠</i><span class="ln">홈</span></button>`, cur=null;
+    APPS.forEach(a=>{ const g=gOf(a.app); if(g!==cur){ h+=`<span class="tg" style="--gc:${GCOL[g]||"#888"}">${g}</span>`; cur=g; } h+=`<button type="button" data-app="${a.app}" style="--gc:${GCOL[g]||"#888"}" title="${a.title}"><i class="ti">${(INFO[a.app]||{}).ic||""}</i><span class="ln">${a.title}</span></button>`; });
+    $("tabsbar").innerHTML=h;
+    /* 휴대폰 아래 탭: 홈·가계부·자산·청약 + 전체 / 전체 시트: 묶음별 모든 앱 */
+    const ic=k=>(INFO[k]||{}).ic||"", nm=k=>(APPS.find(a=>a.app===k)||{}).title||k;
+    $("btm").innerHTML=[["home","🏠","홈"],...["ledger","assets","apply"].filter(k=>APPS.some(a=>a.app===k)).map(k=>[k,ic(k),SHORT[k]||nm(k)])].map(([k,i,l])=>`<button type="button" data-app="${k}"><i>${i}</i>${l}</button>`).join("")+`<button type="button" id="allOpen"><i>☰</i>전체</button>`;
+    $("allList").innerHTML=GROUPS.map(([g,ks])=>{ const L=ks.filter(k=>APPS.some(a=>a.app===k)); return L.length?`<div class="ag" style="color:${GCOL[g]}">${g}</div><div class="al">${L.map(k=>`<button type="button" data-app="${k}"><i>${ic(k)}</i>${SHORT[k]||nm(k)}</button>`).join("")}</div>`:""; }).join(""); }
+  $("hello").textContent=`${me.name}님, 안녕하세요`; $("hsub").textContent="우리집 가계 앱";
   $("home").onclick=e=>{ const t=e.target.closest(".tile,.upi"); if(t){ $("pick").value=t.dataset.app; openApp(t.dataset.app); } };
   const want=new URLSearchParams(location.search).get("app")||"home"; $("pick").value=want; $("pick").onchange=e=>openApp(e.target.value);
   await openApp(want);
