@@ -200,7 +200,7 @@ async function openHome(){ setTimeout(syncTabs);
   const invV=hs.reduce((a,h)=>a+(h.value||0),0), invPnl=hs.reduce((a,h)=>a+(h.pnl||0),0), invDay=hs.reduce((a,h)=>{const c=cp[h.symbol];return c?a+(h.value||0)*c/(100+c):a},0);
   const sgn=v=>v>0?"+":v<0?"−":"", abs=v=>fm(Math.abs(v)), col=v=>v>0?"var(--up)":v<0?"var(--down)":"var(--muted)";
   /* 부동산: 전세 만기, 목표 단지 최신 시세 */
-  const jeon=(ct.data||[]).filter(c=>c.end_date).sort((a,b)=>a.end_date.localeCompare(b.end_date))[0];
+  const jeon=(ct.data||[]).filter(c=>c.end_date&&["jeonse","monthly_rent"].includes(c.kind)).sort((a,b)=>a.end_date.localeCompare(b.end_date))[0];
   const tgt=(rw.data||[]).find(x=>x.sim_target)||null; let tgtP=null;
   if(tgt){ const pr=await q(sb.from("realestate_prices").select("recent_trade_price,asking_price,deal_date,checked_on").eq("watch_id",tgt.id).order("deal_date",{ascending:false,nullsFirst:false}).limit(1)); const x=pr.data&&pr.data[0]; tgtP=x&&(x.recent_trade_price||x.asking_price); }
   const nCand=(rw.data||[]).filter(x=>x.purpose!=="current_home").length;
