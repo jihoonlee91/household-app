@@ -179,7 +179,7 @@ async function openHome(){ setTimeout(syncTabs);
     q(sb.from("items").select("value_now,status,account_id")), q(sb.from("app_state").select("data").eq("app","sim").eq("key","inputs").maybeSingle()),
     q(sb.from("balances").select("account_id,as_of,amount").order("as_of")), q(sb.from("accounts").select("id,kind").in("kind",["invest","isa","pension","stock"]).eq("active",true)),
     q(sb.from("holdings").select("account_id,as_of,symbol,name,value,pnl").order("as_of",{ascending:false})), q(sb.from("quotes").select("symbol,change_pct")),
-    q(sb.from("contracts").select("kind,title,end_date,amount").in("kind",["jeonse","monthly_rent"])),
+    q(sb.from("contracts").select("kind,title,end_date,amount,meta").in("kind",["jeonse","monthly_rent","insurance"])),
     q(sb.from("realestate_watchlist").select("id,name,sim_target,purpose").eq("active",true)),
     q(sb.from("subscriptions").select("name,receipt_start,receipt_end,rank1_date,interest").gte("receipt_end",today).order("receipt_start")),
     q(sb.from("gifts").select("occurred_on,label,occasion,direction,person_id").gte("occurred_on",today).order("occurred_on").limit(20)),
@@ -241,6 +241,8 @@ async function openHome(){ setTimeout(syncTabs);
   races.filter(x=>x.reg_open&&x.reg_open>=today&&dday(x.reg_open)<=60).forEach(x=>todo.push([x.reg_open,`🏃 ${x.name} 신청 시작`,"races"]));
   if(rMine&&dday(rMine.race_date)<=60) todo.push([rMine.race_date,`🏃 ${rMine.name}`,"races"]);
   if(upTrip&&dday(upTrip.start_date)<=45) todo.push([upTrip.start_date,`✈️ ${upTrip.title} 출발`,"trips"]);
+  /* 보험 만기(60일 안) — 우리 것만 (meta.ours=false: 아버지 차 보험 등 참고용) */
+  (ct.data||[]).filter(x=>x.kind==="insurance"&&x.end_date&&!(x.meta&&x.meta.ours===false)&&dday(x.end_date)>=0&&dday(x.end_date)<=60).forEach(x=>todo.push([x.end_date,`🛡️ ${x.title} 만기${x.meta&&x.meta.renew?"·갱신":""}`,"assets"]));
   if(jeon&&dday(jeon.end_date)<=180) todo.push([jeon.end_date,`🏠 전세 만기`,"realestate"]);
   todo.sort((a,b)=>a[0].localeCompare(b[0]));
   $("upnext").innerHTML=todo.length?`<div class="grp">다가오는 일</div><div class="up">${todo.slice(0,5).map(([d,t,a])=>`<button type="button" class="upi" data-app="${a}"><b>${dday(d)<=0?"오늘":"D-"+dday(d)}</b><span>${esc(t)}</span><em>${md(d)}</em></button>`).join("")}</div>`:"";
