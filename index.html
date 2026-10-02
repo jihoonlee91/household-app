@@ -159,7 +159,7 @@ $("login").onclick=async()=>{
 };
 window.addEventListener("pageshow",()=>{ $("login").disabled=false; });
 $("out").onclick=async()=>{ await sb.auth.signOut(); location.replace(location.pathname); };
-const INFO={races:{ic:"🏃",d:"관심 마라톤·트레일 대회 — 신청 기간·대회일·완주 기록"},connect:{ic:"🔌",d:"결제 문자 자동 입력·카드/은행 알림 설정·뱅크샐러드 내보내기"},assets:{ic:"🏦",d:"통장·증권·대출 잔액 업데이트, 순자산 추이"},realestate:{ic:"🏠",d:"전세·월세·자가·투자부동산 계약과 자산 관리"},apply:{ic:"📝",d:"서울·경기남부 아파트 분양 청약 일정, 관심 단지"},investments:{ic:"📊",d:"주식·ETF·펀드·TDF 투자자산을 따로 보기"},sim:{ic:"📈",d:"연봉·성과급·투자·집 매수·은퇴를 연도별로 굴려 보기 (자산 시뮬레이터)"},ledger:{ic:"🧾",d:"지출·수입 입력, 월별 합계와 예산 대비"},items:{ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"},gifts:{ic:"🎁",d:"결혼식·장례 등 경조사 주고받은 기록, 사람별 정리"},holidays:{ic:"🧧",d:"설·추석, 부모님 용돈·선물, 가족 생일·환갑 일정"},life:{ic:"🧭",d:"이지훈·이상아 학교·직장·이사, 나란히 보는 인생 연표"},family:{ic:"🌳",d:"양가 가계도, 가족 관계·생년"},trips:{ic:"✈️",d:"같이 다녀온 여행, 경비, 가고 싶은 곳"},wedding:{ic:"💍",d:"2023.8.15 결혼식 — 축의금·비용·식순·문서"}};
+const INFO={company:{ic:"🏢",d:"급여·성과급 등 회사에서 받은 돈과 패밀리넷 대납을 월별·1년 합계로"},races:{ic:"🏃",d:"관심 마라톤·트레일 대회 — 신청 기간·대회일·완주 기록"},connect:{ic:"🔌",d:"결제 문자 자동 입력·카드/은행 알림 설정·뱅크샐러드 내보내기"},assets:{ic:"🏦",d:"통장·증권·대출 잔액 업데이트, 순자산 추이"},realestate:{ic:"🏠",d:"전세·월세·자가·투자부동산 계약과 자산 관리"},apply:{ic:"📝",d:"서울·경기남부 아파트 분양 청약 일정, 관심 단지"},investments:{ic:"📊",d:"주식·ETF·펀드·TDF 투자자산을 따로 보기"},sim:{ic:"📈",d:"연봉·성과급·투자·집 매수·은퇴를 연도별로 굴려 보기 (자산 시뮬레이터)"},ledger:{ic:"🧾",d:"지출·수입 입력, 월별 합계와 예산 대비"},items:{ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"},gifts:{ic:"🎁",d:"결혼식·장례 등 경조사 주고받은 기록, 사람별 정리"},holidays:{ic:"🧧",d:"설·추석, 부모님 용돈·선물, 가족 생일·환갑 일정"},life:{ic:"🧭",d:"이지훈·이상아 학교·직장·이사, 나란히 보는 인생 연표"},family:{ic:"🌳",d:"양가 가계도, 가족 관계·생년"},trips:{ic:"✈️",d:"같이 다녀온 여행, 경비, 가고 싶은 곳"},wedding:{ic:"💍",d:"2023.8.15 결혼식 — 축의금·비용·식순·문서"}};
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fm=v=>v==null?"–":(Math.abs(v)>=1e8?(v/1e8).toFixed(1)+"억":Math.round(v/1e4).toLocaleString("ko-KR")+"만");
 window.addEventListener("popstate",e=>{ const a=e.state&&e.state.app; if(a){ $("pick").value=a; openApp(a,true); } else openHome(); });
@@ -254,9 +254,9 @@ async function openHome(){ setTimeout(syncTabs);
 let APPS=[], MEMBERS=[];
 /* 홈 묶음: 돈 / 생활 / 가족 (여기 없는 새 앱은 "기타"로) */
 /* 앱 순서 = 자주 쓰고 중요한 순 (한 곳에서 정함: 홈 타일·PC 상단 버튼·드롭다운 모두 이 순서) */
-const GROUPS=[["돈",["ledger","assets","investments","apply","realestate","sim"]],["가족",["gifts","holidays","family"]],["생활",["items","trips","races","life","wedding"]],["설정",["connect"]]];
+const GROUPS=[["돈",["ledger","assets","company","investments","apply","realestate","sim"]],["가족",["gifts","holidays","family"]],["생활",["items","trips","races","life","wedding"]],["설정",["connect"]]];
 const GCOL={"돈":"#0C7480","가족":"#C06A30","생활":"#6E5AA6","설정":"#5D6A75"};
-const SHORT={connect:"연결",sim:"시뮬레이터",life:"타임라인",wedding:"결혼식",apply:"청약",holidays:"명절·용돈",investments:"투자"}; /* PC 상단 한 줄에 다 들어가게 */
+const SHORT={company:"회사",connect:"연결",sim:"시뮬레이터",life:"타임라인",wedding:"결혼식",apply:"청약",holidays:"명절·용돈",investments:"투자"}; /* PC 상단 한 줄에 다 들어가게 */
 /* 시뮬레이터 시작값: 자산 앱 계좌별 최신 잔액 + 살림살이 현재 시세 합계 */
 async function simSnapshot(){
   try{ await sb.functions.invoke("refresh-quotes",{body:{}}); }catch(e){}
