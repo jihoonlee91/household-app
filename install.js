@@ -1,8 +1,8 @@
 (()=>{
   let promptEvent=null;
-  const APP_NAME='상지홈', META_VER='20261004-2', LOCAL_APP='houseplan', WISH_APP='wishlist', PLANNER_APP='planner';
+  const APP_NAME='상지홈', META_VER='20261004-3', LOCAL_APP='houseplan', WISH_APP='wishlist', PLANNER_APP='planner';
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
-  const loadMobileUi=()=>{if(!document.getElementById('hh-mobile-ui'))return;const s=document.createElement('script');s.id='hh-mobile-ui';s.src='./mobile-ui.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
+  const loadMobileUi=()=>{if(document.getElementById('hh-mobile-ui'))return;const s=document.createElement('script');s.id='hh-mobile-ui';s.src='./mobile-ui.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
   const loadShare=()=>{if(document.getElementById('hh-share-js'))return;const s=document.createElement('script');s.id='hh-share-js';s.src='./share.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
   loadMobileUi();loadShare();
   const buttons=()=>['installGate','installBar'].map(id=>document.getElementById(id)).filter(Boolean);
