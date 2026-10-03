@@ -1,6 +1,6 @@
 (()=>{
   let promptEvent=null;
-  const APP_NAME='상지홈', META_VER='20261003-3', LOCAL_APP='houseplan';
+  const APP_NAME='상지홈', META_VER='20261003-4', LOCAL_APP='houseplan', WISH_APP='wishlist';
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const loadMobileUi=()=>{if(document.getElementById('hh-mobile-ui'))return;const s=document.createElement('script');s.id='hh-mobile-ui';s.src='./mobile-ui.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
   const loadShare=()=>{if(document.getElementById('hh-share-js'))return;const s=document.createElement('script');s.id='hh-share-js';s.src='./share.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
@@ -45,26 +45,48 @@
     const tiles=document.getElementById('tiles');
     if(tiles&&!tiles.querySelector('[data-app="'+LOCAL_APP+'"]')){const sim=tiles.querySelector('.tile[data-app="sim"]'),b=document.createElement('button');b.type='button';b.className='tile';b.dataset.app=LOCAL_APP;b.innerHTML='<div class="ic" aria-hidden="true">🏘️</div><b>주거 전략</b><span class="d">2027 동센자 · 2029 동센자 · 2031 옥수 매수 시나리오와 기회비용</span><span>3개 매수 시나리오 비교</span>';sim?sim.after(b):tiles.appendChild(b);}
   }
-  async function openHousing(fromPop){
-    const pick=document.getElementById('pick'),home=document.getElementById('home'),frame=document.getElementById('app'),bar=document.getElementById('bar'),gate=document.getElementById('gate');
-    injectHousingNav(); if(pick)pick.value=LOCAL_APP;
-    try{if(window.__hh&&typeof window.simSnapshot==='function')window.__hh.snapshot=await window.simSnapshot();}catch(e){console.warn(e)}
-    if(home)home.style.display='none'; if(gate)gate.style.display='none'; if(bar)bar.style.display='flex';
-    document.documentElement.classList.add('authed','authed-app'); document.title='주거 전략 · 상지홈';
-    if(frame){frame.style.display='block';try{const r=await fetch('./sim.html?v='+META_VER,{cache:'no-store'});if(!r.ok)throw new Error('sim.html '+r.status);frame.srcdoc=await r.text();}catch(e){frame.srcdoc='<p style="padding:20px">주거 전략 화면을 불러오지 못했습니다.</p>';console.warn(e)}}
-    if(!fromPop){if(history.state&&history.state.app)history.replaceState({app:LOCAL_APP},'','?app='+LOCAL_APP);else{history.replaceState({home:1},'',location.pathname);history.pushState({app:LOCAL_APP},'','?app='+LOCAL_APP)}}
-    setTimeout(()=>{try{window.syncTabs&&window.syncTabs()}catch(e){}},0);
+  function injectWishlistNav(){
+    const pick=document.getElementById('pick');
+    if(pick&&!pick.querySelector('option[value="'+WISH_APP+'"]')){const o=document.createElement('option');o.value=WISH_APP;o.textContent='✨ 해보고 싶은 것들';const trips=pick.querySelector('option[value="trips"]');trips?trips.after(o):pick.appendChild(o);}
+    const tabs=document.getElementById('tabsbar');
+    if(tabs&&!tabs.querySelector('[data-app="'+WISH_APP+'"]')){const trips=tabs.querySelector('[data-app="trips"]'),b=document.createElement('button');b.type='button';b.dataset.app=WISH_APP;b.style.setProperty('--gc','#6E5AA6');b.title='해보고 싶은 것들';b.innerHTML='<i class="ti">✨</i><span class="ln">해보고 싶은 것들</span>';trips?trips.after(b):tabs.appendChild(b);}
+    const all=document.getElementById('allList');
+    if(all&&!all.querySelector('[data-app="'+WISH_APP+'"]')){const trips=all.querySelector('[data-app="trips"]'),b=document.createElement('button');b.type='button';b.dataset.app=WISH_APP;b.innerHTML='<i>✨</i>해보고 싶은 것들';if(trips){trips.after(b)}else{const boxes=all.querySelectorAll('.al'),box=boxes[Math.min(2,boxes.length-1)];box&&box.appendChild(b)}}
+    const tiles=document.getElementById('tiles');
+    if(tiles&&!tiles.querySelector('[data-app="'+WISH_APP+'"]')){const trips=tiles.querySelector('.tile[data-app="trips"]'),b=document.createElement('button');b.type='button';b.className='tile';b.dataset.app=WISH_APP;b.innerHTML='<div class="ic" aria-hidden="true">✨</div><b>해보고 싶은 것들</b><span class="d">여행·도전·운동·언어·취미 버킷리스트</span><span>추가하고 완료 체크</span>';trips?trips.after(b):tiles.appendChild(b);}
   }
-  function installHousingHook(){
-    if(typeof window.openApp!=='function'||window.openApp.__hhHousing)return false;
+  function prepareLocal(app,title){
+    const pick=document.getElementById('pick'),home=document.getElementById('home'),frame=document.getElementById('app'),bar=document.getElementById('bar'),gate=document.getElementById('gate');
+    injectHousingNav();injectWishlistNav();if(pick)pick.value=app;
+    if(home)home.style.display='none';if(gate)gate.style.display='none';if(bar)bar.style.display='flex';
+    document.documentElement.classList.add('authed','authed-app');document.title=title+' · 상지홈';
+    return frame;
+  }
+  function pushLocalHistory(app,fromPop){
+    if(fromPop)return;
+    if(history.state&&history.state.app)history.replaceState({app},'','?app='+app);else{history.replaceState({home:1},'',location.pathname);history.pushState({app},'','?app='+app)}
+  }
+  async function openHousing(fromPop){
+    const frame=prepareLocal(LOCAL_APP,'주거 전략');
+    try{if(window.__hh&&typeof window.simSnapshot==='function')window.__hh.snapshot=await window.simSnapshot();}catch(e){console.warn(e)}
+    if(frame){frame.style.display='block';try{const r=await fetch('./sim.html?v='+META_VER,{cache:'no-store'});if(!r.ok)throw new Error('sim.html '+r.status);frame.srcdoc=await r.text();}catch(e){frame.srcdoc='<p style="padding:20px">주거 전략 화면을 불러오지 못했습니다.</p>';console.warn(e)}}
+    pushLocalHistory(LOCAL_APP,fromPop);setTimeout(()=>{try{window.syncTabs&&window.syncTabs()}catch(e){}},0);
+  }
+  async function openWishlist(fromPop){
+    const frame=prepareLocal(WISH_APP,'해보고 싶은 것들');
+    if(frame){frame.style.display='block';try{const r=await fetch('./wishlist.html?v='+META_VER,{cache:'no-store'});if(!r.ok)throw new Error('wishlist.html '+r.status);frame.srcdoc=await r.text();}catch(e){frame.srcdoc='<p style="padding:20px">해보고 싶은 것들 화면을 불러오지 못했습니다.</p>';console.warn(e)}}
+    pushLocalHistory(WISH_APP,fromPop);setTimeout(()=>{try{window.syncTabs&&window.syncTabs()}catch(e){}},0);
+  }
+  function installLocalHook(){
+    if(typeof window.openApp!=='function'||window.openApp.__hhLocal)return false;
     const old=window.openApp;
-    const wrapped=async function(app,fromPop){if(app===LOCAL_APP)return openHousing(fromPop);return old(app,fromPop)};wrapped.__hhHousing=true;window.openApp=wrapped;
-    injectHousingNav();
-    const want=new URLSearchParams(location.search).get('app');if(want===LOCAL_APP)setTimeout(()=>openHousing(true),0);
+    const wrapped=async function(app,fromPop){if(app===LOCAL_APP)return openHousing(fromPop);if(app===WISH_APP)return openWishlist(fromPop);return old(app,fromPop)};wrapped.__hhLocal=true;window.openApp=wrapped;
+    injectHousingNav();injectWishlistNav();
+    const want=new URLSearchParams(location.search).get('app');if(want===LOCAL_APP)setTimeout(()=>openHousing(true),0);else if(want===WISH_APP)setTimeout(()=>openWishlist(true),0);
     return true;
   }
-  function keepInjected(){injectHousingNav();installHousingHook()}
+  function keepInjected(){injectHousingNav();injectWishlistNav();installLocalHook()}
   window.hhInstallApp=install;
   window.addEventListener('DOMContentLoaded',()=>{refreshMetadata();addShareButtons();buttons().forEach(b=>b.addEventListener('click',install));refresh();setTimeout(keepInjected,0);});
-  window.addEventListener('load',async()=>{addShareButtons();keepInjected();const mo=new MutationObserver(()=>injectHousingNav());['tabsbar','allList','tiles','pick'].forEach(id=>{const el=document.getElementById(id);if(el)mo.observe(el,{childList:true,subtree:true})});if('serviceWorker' in navigator){try{const r=await navigator.serviceWorker.register('./sw.js?v='+META_VER,{updateViaCache:'none'});await r.update();}catch(e){console.warn(e);}}});
+  window.addEventListener('load',async()=>{addShareButtons();keepInjected();const mo=new MutationObserver(()=>{injectHousingNav();injectWishlistNav()});['tabsbar','allList','tiles','pick'].forEach(id=>{const el=document.getElementById(id);if(el)mo.observe(el,{childList:true,subtree:true})});if('serviceWorker' in navigator){try{const r=await navigator.serviceWorker.register('./sw.js?v='+META_VER,{updateViaCache:'none'});await r.update();}catch(e){console.warn(e);}}});
 })();
