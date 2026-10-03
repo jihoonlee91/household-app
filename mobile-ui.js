@@ -1,5 +1,5 @@
 (()=>{
-  const VER='20261002-1';
+  const VER='20261004-1';
   const addCss=(doc,id,url)=>{if(!doc||doc.getElementById(id))return;const l=doc.createElement('link');l.id=id;l.rel='stylesheet';l.href=url;(doc.head||doc.documentElement).appendChild(l)};
   const shellUrl=new URL('./mobile-shell.css?v='+VER,location.href).href;
   const appUrl=new URL('./mobile-app.css?v='+VER,location.href).href;
