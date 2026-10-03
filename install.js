@@ -1,6 +1,6 @@
 (()=>{
   let promptEvent=null;
-  const APP_NAME='상지홈', META_VER='20261003-4', LOCAL_APP='houseplan', WISH_APP='wishlist';
+  const APP_NAME='상지홈', META_VER='20261004-1', LOCAL_APP='houseplan', WISH_APP='wishlist', PLANNER_APP='planner';
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const loadMobileUi=()=>{if(document.getElementById('hh-mobile-ui'))return;const s=document.createElement('script');s.id='hh-mobile-ui';s.src='./mobile-ui.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
   const loadShare=()=>{if(document.getElementById('hh-share-js'))return;const s=document.createElement('script');s.id='hh-share-js';s.src='./share.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
@@ -55,9 +55,23 @@
     const tiles=document.getElementById('tiles');
     if(tiles&&!tiles.querySelector('[data-app="'+WISH_APP+'"]')){const trips=tiles.querySelector('.tile[data-app="trips"]'),b=document.createElement('button');b.type='button';b.className='tile';b.dataset.app=WISH_APP;b.innerHTML='<div class="ic" aria-hidden="true">✨</div><b>해보고 싶은 것들</b><span class="d">여행·도전·운동·언어·취미 버킷리스트</span><span>추가하고 완료 체크</span>';trips?trips.after(b):tiles.appendChild(b);}
   }
+  function cleanupEmptyGroups(root,groupSelector,itemSelector){
+    if(!root)return;
+    root.querySelectorAll(groupSelector).forEach(g=>{let n=g.nextElementSibling,has=false;while(n&&!n.matches(groupSelector)){if(n.matches(itemSelector)||n.querySelector?.(itemSelector)){has=true;break}n=n.nextElementSibling}if(!has&&g.textContent.trim()==='기타')g.remove();});
+  }
+  function injectPlannerNav(){
+    const pick=document.getElementById('pick');
+    if(pick){let o=pick.querySelector('option[value="'+PLANNER_APP+'"]');if(!o){o=document.createElement('option');o.value=PLANNER_APP;o.textContent='🗓️ 생활 계획';}const anchor=pick.querySelector('option[value="'+WISH_APP+'"]')||pick.querySelector('option[value="trips"]');anchor?anchor.after(o):pick.appendChild(o);}
+    const tabs=document.getElementById('tabsbar');
+    if(tabs){let b=tabs.querySelector('[data-app="'+PLANNER_APP+'"]');if(!b){b=document.createElement('button');b.type='button';b.dataset.app=PLANNER_APP;}b.style.setProperty('--gc','#6E5AA6');b.title='생활 계획';b.innerHTML='<i class="ti">🗓️</i><span class="ln">생활 계획</span>';const anchor=tabs.querySelector('[data-app="'+WISH_APP+'"]')||tabs.querySelector('[data-app="trips"]');anchor?anchor.after(b):tabs.appendChild(b);cleanupEmptyGroups(tabs,'.tg','button[data-app]');}
+    const all=document.getElementById('allList');
+    if(all){let b=all.querySelector('[data-app="'+PLANNER_APP+'"]');if(!b){b=document.createElement('button');b.type='button';b.dataset.app=PLANNER_APP;}b.innerHTML='<i>🗓️</i>생활 계획';const anchor=all.querySelector('[data-app="'+WISH_APP+'"]')||all.querySelector('[data-app="trips"]');if(anchor)anchor.after(b);else{const boxes=all.querySelectorAll('.al'),box=boxes[Math.min(2,boxes.length-1)];box&&box.appendChild(b)}}
+    const tiles=document.getElementById('tiles');
+    if(tiles){let b=tiles.querySelector('.tile[data-app="'+PLANNER_APP+'"]');const oldParent=b&&b.parentElement;if(!b){b=document.createElement('button');b.type='button';b.className='tile';b.dataset.app=PLANNER_APP;}b.innerHTML='<div class="ic" aria-hidden="true">🗓️</div><b>생활 계획</b><span class="d">중요 일정·주거 로드맵·자산 마일스톤·생활 예산·앞으로 갈 여행</span><span>우리집 중장기 계획 관리</span>';const anchor=tiles.querySelector('.tile[data-app="'+WISH_APP+'"]')||tiles.querySelector('.tile[data-app="trips"]');if(anchor)anchor.after(b);else tiles.appendChild(b);if(oldParent&&oldParent!==b.parentElement&&!oldParent.querySelector('.tile')){const h=oldParent.previousElementSibling;if(h&&h.classList.contains('grp')&&h.textContent.trim()==='기타')h.remove();oldParent.remove();}}
+  }
   function prepareLocal(app,title){
     const pick=document.getElementById('pick'),home=document.getElementById('home'),frame=document.getElementById('app'),bar=document.getElementById('bar'),gate=document.getElementById('gate');
-    injectHousingNav();injectWishlistNav();if(pick)pick.value=app;
+    injectHousingNav();injectWishlistNav();injectPlannerNav();if(pick)pick.value=app;
     if(home)home.style.display='none';if(gate)gate.style.display='none';if(bar)bar.style.display='flex';
     document.documentElement.classList.add('authed','authed-app');document.title=title+' · 상지홈';
     return frame;
@@ -81,12 +95,12 @@
     if(typeof window.openApp!=='function'||window.openApp.__hhLocal)return false;
     const old=window.openApp;
     const wrapped=async function(app,fromPop){if(app===LOCAL_APP)return openHousing(fromPop);if(app===WISH_APP)return openWishlist(fromPop);return old(app,fromPop)};wrapped.__hhLocal=true;window.openApp=wrapped;
-    injectHousingNav();injectWishlistNav();
+    injectHousingNav();injectWishlistNav();injectPlannerNav();
     const want=new URLSearchParams(location.search).get('app');if(want===LOCAL_APP)setTimeout(()=>openHousing(true),0);else if(want===WISH_APP)setTimeout(()=>openWishlist(true),0);
     return true;
   }
-  function keepInjected(){injectHousingNav();injectWishlistNav();installLocalHook()}
+  function keepInjected(){injectHousingNav();injectWishlistNav();injectPlannerNav();installLocalHook()}
   window.hhInstallApp=install;
   window.addEventListener('DOMContentLoaded',()=>{refreshMetadata();addShareButtons();buttons().forEach(b=>b.addEventListener('click',install));refresh();setTimeout(keepInjected,0);});
-  window.addEventListener('load',async()=>{addShareButtons();keepInjected();const mo=new MutationObserver(()=>{injectHousingNav();injectWishlistNav()});['tabsbar','allList','tiles','pick'].forEach(id=>{const el=document.getElementById(id);if(el)mo.observe(el,{childList:true,subtree:true})});if('serviceWorker' in navigator){try{const r=await navigator.serviceWorker.register('./sw.js?v='+META_VER,{updateViaCache:'none'});await r.update();}catch(e){console.warn(e);}}});
+  window.addEventListener('load',async()=>{addShareButtons();keepInjected();const mo=new MutationObserver(()=>{injectHousingNav();injectWishlistNav();injectPlannerNav()});['tabsbar','allList','tiles','pick'].forEach(id=>{const el=document.getElementById(id);if(el)mo.observe(el,{childList:true,subtree:true})});if('serviceWorker' in navigator){try{const r=await navigator.serviceWorker.register('./sw.js?v='+META_VER,{updateViaCache:'none'});await r.update();}catch(e){console.warn(e);}}});
 })();
