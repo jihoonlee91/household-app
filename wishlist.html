@@ -9,35 +9,49 @@
 </style></head><body>
 <div class="wrap">
   <div class="head"><div><h1>해보고 싶은 것들</h1><p class="sub">하고 싶은 일을 쌓아두고, 해낸 것은 바로 체크.</p></div><div class="progress"><b id="ratio">0 / 0</b><span id="pct">0% 완료</span><div class="pbar"><i id="bar" style="width:0%"></i></div></div></div>
-  <div class="panel"><form class="add" id="addForm"><input id="newTitle" maxlength="80" autocomplete="off" placeholder="새로 해보고 싶은 것"><select id="newCat"><option>도전</option><option>마라톤</option><option>여행</option><option>스포츠</option><option>음악</option><option>언어</option><option>자격·요리</option><option selected>기타</option></select><button type="submit">추가</button></form></div>
+  <div class="panel"><form class="add" id="addForm"><input id="newTitle" maxlength="80" autocomplete="off" placeholder="새로 해보고 싶은 것"><select id="newCat"><option>도전</option><option>마라톤</option><option>여행</option><option>스포츠</option><option>사진</option><option>음악</option><option>언어</option><option>자격·요리</option><option selected>기타</option></select><button type="submit">추가</button></form></div>
   <div class="toolbar"><div class="seg" id="seg"><button type="button" data-filter="all" class="on">전체</button><button type="button" data-filter="todo">미완료</button><button type="button" data-filter="done">완료</button></div><div class="count" id="count"></div></div>
   <div class="list" id="list"></div>
 </div><div class="toast" id="toast"></div>
 <script>
 (()=>{
 const APP='wishlist', KEY='inputs';
-const seedTitles=[
- ['UTMB','도전'],['TMB','도전'],['파타고니아 여행','여행'],['호빗 마라톤','마라톤'],['융프라우 마라톤','마라톤'],['8대 마라톤','마라톤'],['서브3','도전'],['백두대간','도전'],
- ['한식 조리사','자격·요리'],['중식 조리사','자격·요리'],['일식 조리사','자격·요리'],['양식 조리사','자격·요리'],['기타 배우기','음악'],['피아노 배우기','음악'],['스키 배우기','스포츠'],['클라이밍','스포츠'],
- ['프랑스어','언어'],['독일어','언어'],['이탈리아어','언어'],['스페인어','언어'],['일본어','언어'],['트라이애슬론 텐언더','도전']
+const goals=[
+ ['UTMB Finals 완주','도전'],['TMB','도전'],['파타고니아 여행','여행'],['산티아고 순례길 완주','여행'],['부부 국토종주','도전'],['호빗 마라톤','마라톤'],['융프라우 마라톤','마라톤'],['8대 마라톤 완주','마라톤'],['서브3','도전'],['백두대간','도전'],
+ ['보스포러스 해협 횡단 수영','스포츠'],['프리다이빙 배우기','스포츠'],['서핑 배우기','스포츠'],['해외 스키여행','여행'],['클라이밍','스포츠'],['트라이애슬론 텐언더','도전'],
+ ['사진전 열기','사진'],['기타 배우기','음악'],['피아노 배우기','음악'],
+ ['한식 조리사','자격·요리'],['중식 조리사','자격·요리'],['일식 조리사','자격·요리'],['양식 조리사','자격·요리'],['제과기능사','자격·요리'],['제빵기능사','자격·요리'],['바리스타 · SCA Barista Skills Intermediate','자격·요리'],['소믈리에/와인 · WSET Level 2','자격·요리'],
+ ['프랑스어 회화 · DELF B1','언어'],['독일어 회화 · Goethe-Zertifikat B1','언어'],['이탈리아어 회화 · CILS UNO-B1','언어'],['스페인어 회화 · DELE B1','언어'],['일본어 회화 · JSST Level 7+','언어']
 ];
+const aliases={
+ 'UTMB':'UTMB Finals 완주','8대 마라톤':'8대 마라톤 완주',
+ '프랑스어':'프랑스어 회화 · DELF B1','독일어':'독일어 회화 · Goethe-Zertifikat B1','이탈리아어':'이탈리아어 회화 · CILS UNO-B1','스페인어':'스페인어 회화 · DELE B1','일본어':'일본어 회화 · JSST Level 7+'
+};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8), now=()=>new Date().toISOString();
-const makeSeed=()=>({version:1,items:seedTitles.map((x,i)=>({id:'seed-'+(i+1),title:x[0],category:x[1],done:false,createdAt:now(),completedAt:null}))});
-let state={version:1,items:[]}, filter='all', saving=false;
+const makeSeed=()=>({version:2,items:goals.map((x,i)=>({id:'goal-'+(i+1),title:x[0],category:x[1],done:false,createdAt:now(),completedAt:null}))});
+let state={version:2,items:[]}, filter='all';
 const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]||c));
 const sb=parent&&parent.__hh&&parent.__hh.sb;
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1500)}
+function migrate(){
+ let changed=false;
+ state.items=(state.items||[]).map(x=>{const to=aliases[x.title];if(to){changed=true;return {...x,title:to}}return x});
+ const byTitle=new Set(state.items.map(x=>x.title));
+ goals.forEach(([title,category])=>{if(!byTitle.has(title)){state.items.push({id:uid(),title,category,done:false,createdAt:now(),completedAt:null});byTitle.add(title);changed=true}});
+ if(state.version!==2){state.version=2;changed=true}
+ return changed;
+}
 async function load(){
  if(!sb){$('list').innerHTML='<div class="empty">저장 연결을 불러오지 못했습니다.</div>';return}
  const {data,error}=await sb.from('app_state').select('data').eq('app',APP).eq('key',KEY).maybeSingle();
  if(error){console.warn(error);toast('목록을 불러오지 못했습니다');return}
- if(data&&data.data&&Array.isArray(data.data.items)){state=data.data}else{state=makeSeed();await save(true)}
+ if(data&&data.data&&Array.isArray(data.data.items)){state=data.data;const changed=migrate();if(changed)await save(true)}else{state=makeSeed();await save(true)}
  render();
 }
 async function save(silent){
- if(!sb)return; saving=true;
+ if(!sb)return;
  const {error}=await sb.from('app_state').upsert({app:APP,key:KEY,data:state,updated_at:now()});
- saving=false;if(error){console.warn(error);toast('저장에 실패했습니다')}else if(!silent)toast('저장됨');
+ if(error){console.warn(error);toast('저장에 실패했습니다')}else if(!silent)toast('저장됨');
 }
 function sortedItems(){return [...state.items].sort((a,b)=>(a.done-b.done)||((a.category||'').localeCompare(b.category||'','ko'))||((a.createdAt||'').localeCompare(b.createdAt||'')))}
 function render(){
