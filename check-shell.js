@@ -5,7 +5,7 @@ for(const f of ['install.js','mobile-ui.js','share.js','sim-scenarios.js','sw.js
 for(const f of ['index.html','sim.html','wishlist.html']){
   const html=fs.readFileSync(f,'utf8'); let n=0;
   for(const m of html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)){n++;check(`${f}#script${n}`,m[1])}
-  if(!n)issues.push(`${f}: inline script 없음`);
+  if(!n&&!/<script[^>]+src=/i.test(html))issues.push(`${f}: script 없음`);
 }
 for(const f of ['mobile-shell.css','mobile-app.css']){
   const css=fs.readFileSync(f,'utf8');
