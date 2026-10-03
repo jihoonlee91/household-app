@@ -1,6 +1,6 @@
 (()=>{
   let promptEvent=null;
-  const APP_NAME='상지홈', META_VER='20261004-3', LOCAL_APP='houseplan', WISH_APP='wishlist', PLANNER_APP='planner';
+  const APP_NAME='상지홈', META_VER='20261004-4', LOCAL_APP='houseplan', WISH_APP='wishlist', PLANNER_APP='planner';
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const loadMobileUi=()=>{if(document.getElementById('hh-mobile-ui'))return;const s=document.createElement('script');s.id='hh-mobile-ui';s.src='./mobile-ui.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
   const loadShare=()=>{if(document.getElementById('hh-share-js'))return;const s=document.createElement('script');s.id='hh-share-js';s.src='./share.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
@@ -100,7 +100,9 @@
     return true;
   }
   function keepInjected(){injectHousingNav();injectWishlistNav();injectPlannerNav();installLocalHook()}
+  let navRaf=0;
+  function scheduleKeep(){if(navRaf)return;navRaf=requestAnimationFrame(()=>{navRaf=0;keepInjected()})}
   window.hhInstallApp=install;
   window.addEventListener('DOMContentLoaded',()=>{refreshMetadata();addShareButtons();buttons().forEach(b=>b.addEventListener('click',install));refresh();setTimeout(keepInjected,0);});
-  window.addEventListener('load',async()=>{addShareButtons();keepInjected();const mo=new MutationObserver(()=>{injectHousingNav();injectWishlistNav();injectPlannerNav()});['tabsbar','allList','tiles','pick'].forEach(id=>{const el=document.getElementById(id);if(el)mo.observe(el,{childList:true,subtree:true})});if('serviceWorker' in navigator){try{const r=await navigator.serviceWorker.register('./sw.js?v='+META_VER,{updateViaCache:'none'});await r.update();}catch(e){console.warn(e);}}});
+  window.addEventListener('load',async()=>{addShareButtons();keepInjected();const mo=new MutationObserver(scheduleKeep);['tabsbar','allList','tiles','pick'].forEach(id=>{const el=document.getElementById(id);if(el)mo.observe(el,{childList:true,subtree:true})});if('serviceWorker' in navigator){try{const r=await navigator.serviceWorker.register('./sw.js?v='+META_VER,{updateViaCache:'none'});await r.update();}catch(e){console.warn(e);}}});
 })();
