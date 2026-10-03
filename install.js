@@ -1,10 +1,9 @@
 (()=>{
   let promptEvent=null;
-  const APP_NAME='상지홈', META_VER='20261002-1';
+  const APP_NAME='상지홈', META_VER='20261003-1';
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const loadMobileUi=()=>{if(document.getElementById('hh-mobile-ui'))return;const s=document.createElement('script');s.id='hh-mobile-ui';s.src='./mobile-ui.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
   loadMobileUi();
-  /* 설치 버튼: 로그인 화면(installGate)·위 막대(installBar) 안에만 둠. 화면 위에 떠 있는 버튼은 로그아웃 버튼을 가려서 없앰 */
   const buttons=()=>['installGate','installBar'].map(id=>document.getElementById(id)).filter(Boolean);
   function refresh(){const installed=standalone();buttons().forEach(b=>{b.hidden=installed;b.style.display=installed?'none':'';});}
   function refreshMetadata(){
@@ -28,6 +27,15 @@
     else if(/chrome|crios/.test(ua)) alert('브라우저 메뉴(⋮) → 앱 설치 또는 홈 화면에 추가를 선택하세요.');
     else alert('브라우저 메뉴에서 “앱 설치” 또는 “홈 화면에 추가”를 선택하세요.');
   }
+  async function useLocalSimulator(){
+    const frame=document.getElementById('app'); if(!frame) return;
+    try{const r=await fetch('./sim.html?v='+META_VER,{cache:'no-store'});if(r.ok)frame.srcdoc=await r.text();else console.warn('sim.html',r.status);}catch(e){console.warn('local simulator',e);}
+  }
+  function wrapSimulator(){
+    const old=window.openApp; if(typeof old!=='function'||old.__hhLocalSim) return;
+    const wrapped=async function(app,fromPop){const out=await old(app,fromPop);if(app==='sim')await useLocalSimulator();return out;}; wrapped.__hhLocalSim=true; window.openApp=wrapped;
+    if(new URLSearchParams(location.search).get('app')==='sim') setTimeout(useLocalSimulator,0);
+  }
   window.hhInstallApp=install;
   window.addEventListener('DOMContentLoaded',()=>{
     refreshMetadata();
@@ -35,5 +43,6 @@
   });
   window.addEventListener('load',async()=>{
     if('serviceWorker' in navigator){try{const r=await navigator.serviceWorker.register('./sw.js?v='+META_VER,{updateViaCache:'none'});await r.update();}catch(e){console.warn(e);}}
+    wrapSimulator();
   });
 })();
