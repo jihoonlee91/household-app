@@ -1,8 +1,8 @@
 (()=>{
   let promptEvent=null;
-  const APP_NAME='상지홈', META_VER='20261003-4', LOCAL_APP='houseplan', WISH_APP='wishlist';
+  const APP_NAME='상지홈', META_VER='20261004-2', LOCAL_APP='houseplan', WISH_APP='wishlist', PLANNER_APP='planner';
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
-  const loadMobileUi=()=>{if(document.getElementById('hh-mobile-ui'))return;const s=document.createElement('script');s.id='hh-mobile-ui';s.src='./mobile-ui.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
+  const loadMobileUi=()=>{if(!document.getElementById('hh-mobile-ui'))return;const s=document.createElement('script');s.id='hh-mobile-ui';s.src='./mobile-ui.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
   const loadShare=()=>{if(document.getElementById('hh-share-js'))return;const s=document.createElement('script');s.id='hh-share-js';s.src='./share.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
   loadMobileUi();loadShare();
   const buttons=()=>['installGate','installBar'].map(id=>document.getElementById(id)).filter(Boolean);
@@ -55,9 +55,23 @@
     const tiles=document.getElementById('tiles');
     if(tiles&&!tiles.querySelector('[data-app="'+WISH_APP+'"]')){const trips=tiles.querySelector('.tile[data-app="trips"]'),b=document.createElement('button');b.type='button';b.className='tile';b.dataset.app=WISH_APP;b.innerHTML='<div class="ic" aria-hidden="true">✨</div><b>해보고 싶은 것들</b><span class="d">여행·도전·운동·언어·취미 버킷리스트</span><span>추가하고 완료 체크</span>';trips?trips.after(b):tiles.appendChild(b);}
   }
+  function injectPlannerNav(){
+    const all=document.getElementById('allList');
+    if(all&&!all.querySelector('[data-app="'+PLANNER_APP+'"]')){const anchor=all.querySelector('[data-app="'+WISH_APP+'"]')||all.querySelector('[data-app="trips"]'),b=document.createElement('button');b.type='button';b.dataset.app=PLANNER_APP;b.innerHTML='<i>🗓️</i>생활 계획';if(anchor)anchor.after(b);else{const boxes=all.querySelectorAll('.al'),box=boxes[Math.min(2,boxes.length-1)];box&&box.appendChild(b)}}
+    const tabs=document.getElementById('tabsbar'),tb=tabs&&tabs.querySelector('[data-app="'+PLANNER_APP+'"]'),ta=tabs&&(tabs.querySelector('[data-app="'+WISH_APP+'"]')||tabs.querySelector('[data-app="trips"]'));
+    if(tb&&ta&&tb.dataset.hhPlaced!=='1'){
+      ta.after(tb);tb.dataset.hhPlaced='1';tb.style.setProperty('--gc','#6E5AA6');tb.title='생활 계획';const i=tb.querySelector('.ti'),n=tb.querySelector('.ln');if(i)i.textContent='🗓️';if(n)n.textContent='생활 계획';
+      const other=[...tabs.querySelectorAll('.tg')].find(g=>g.textContent.trim()==='기타');if(other){let x=other.nextElementSibling,has=false;while(x&&!x.matches('.tg')){if(x.matches('button[data-app]')){has=true;break}x=x.nextElementSibling}if(!has)other.remove()}
+    }
+    const tiles=document.getElementById('tiles'),pb=tiles&&tiles.querySelector('.tile[data-app="'+PLANNER_APP+'"]'),pa=tiles&&(tiles.querySelector('.tile[data-app="'+WISH_APP+'"]')||tiles.querySelector('.tile[data-app="trips"]'));
+    if(pb&&pa&&pb.dataset.hhPlaced!=='1'){
+      const old=pb.parentElement;pa.after(pb);pb.dataset.hhPlaced='1';const ic=pb.querySelector('.ic'),d=pb.querySelector('.d');if(ic)ic.textContent='🗓️';if(d)d.textContent='중요 일정·주거 로드맵·자산 마일스톤·생활 예산·앞으로 갈 여행';
+      if(old&&old!==pb.parentElement&&!old.querySelector('.tile')){const h=old.previousElementSibling;if(h&&h.classList.contains('grp')&&h.textContent.trim()==='기타')h.remove();old.remove()}
+    }
+  }
   function prepareLocal(app,title){
     const pick=document.getElementById('pick'),home=document.getElementById('home'),frame=document.getElementById('app'),bar=document.getElementById('bar'),gate=document.getElementById('gate');
-    injectHousingNav();injectWishlistNav();if(pick)pick.value=app;
+    injectHousingNav();injectWishlistNav();injectPlannerNav();if(pick)pick.value=app;
     if(home)home.style.display='none';if(gate)gate.style.display='none';if(bar)bar.style.display='flex';
     document.documentElement.classList.add('authed','authed-app');document.title=title+' · 상지홈';
     return frame;
@@ -81,12 +95,12 @@
     if(typeof window.openApp!=='function'||window.openApp.__hhLocal)return false;
     const old=window.openApp;
     const wrapped=async function(app,fromPop){if(app===LOCAL_APP)return openHousing(fromPop);if(app===WISH_APP)return openWishlist(fromPop);return old(app,fromPop)};wrapped.__hhLocal=true;window.openApp=wrapped;
-    injectHousingNav();injectWishlistNav();
+    injectHousingNav();injectWishlistNav();injectPlannerNav();
     const want=new URLSearchParams(location.search).get('app');if(want===LOCAL_APP)setTimeout(()=>openHousing(true),0);else if(want===WISH_APP)setTimeout(()=>openWishlist(true),0);
     return true;
   }
-  function keepInjected(){injectHousingNav();injectWishlistNav();installLocalHook()}
+  function keepInjected(){injectHousingNav();injectWishlistNav();injectPlannerNav();installLocalHook()}
   window.hhInstallApp=install;
   window.addEventListener('DOMContentLoaded',()=>{refreshMetadata();addShareButtons();buttons().forEach(b=>b.addEventListener('click',install));refresh();setTimeout(keepInjected,0);});
-  window.addEventListener('load',async()=>{addShareButtons();keepInjected();const mo=new MutationObserver(()=>{injectHousingNav();injectWishlistNav()});['tabsbar','allList','tiles','pick'].forEach(id=>{const el=document.getElementById(id);if(el)mo.observe(el,{childList:true,subtree:true})});if('serviceWorker' in navigator){try{const r=await navigator.serviceWorker.register('./sw.js?v='+META_VER,{updateViaCache:'none'});await r.update();}catch(e){console.warn(e);}}});
+  window.addEventListener('load',async()=>{addShareButtons();keepInjected();const mo=new MutationObserver(()=>{injectHousingNav();injectWishlistNav();injectPlannerNav()});['tabsbar','allList','tiles','pick'].forEach(id=>{const el=document.getElementById(id);if(el)mo.observe(el,{childList:true,subtree:true})});if('serviceWorker' in navigator){try{const r=await navigator.serviceWorker.register('./sw.js?v='+META_VER,{updateViaCache:'none'});await r.update();}catch(e){console.warn(e);}}});
 })();
