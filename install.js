@@ -1,6 +1,6 @@
 (()=>{
   let promptEvent=null;
-  const APP_NAME='상지홈', META_VER='20261004-4', LOCAL_APP='houseplan', WISH_APP='wishlist', PLANNER_APP='planner';
+  const APP_NAME='상지홈', META_VER='20261004-5', LOCAL_APP='houseplan', WISH_APP='wishlist', PLANNER_APP='planner', CAR_APP='car';
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const loadMobileUi=()=>{if(document.getElementById('hh-mobile-ui'))return;const s=document.createElement('script');s.id='hh-mobile-ui';s.src='./mobile-ui.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
   const loadShare=()=>{if(document.getElementById('hh-share-js'))return;const s=document.createElement('script');s.id='hh-share-js';s.src='./share.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
@@ -43,7 +43,7 @@
     const all=document.getElementById('allList');
     if(all&&!all.querySelector('[data-app="'+LOCAL_APP+'"]')){const sim=all.querySelector('[data-app="sim"]'),b=document.createElement('button');b.type='button';b.dataset.app=LOCAL_APP;b.innerHTML='<i>🏘️</i>주거 전략';if(sim){sim.after(b)}else{const box=all.querySelector('.al');box&&box.appendChild(b)}}
     const tiles=document.getElementById('tiles');
-    if(tiles&&!tiles.querySelector('[data-app="'+LOCAL_APP+'"]')){const sim=tiles.querySelector('.tile[data-app="sim"]'),b=document.createElement('button');b.type='button';b.className='tile';b.dataset.app=LOCAL_APP;b.innerHTML='<div class="ic" aria-hidden="true">🏘️</div><b>주거 전략</b><span class="d">2027 동센자 · 2029 동센자 · 2031 옥수 매수 시나리오와 기회비용</span><span>3개 매수 시나리오 비교</span>';sim?sim.after(b):tiles.appendChild(b);}
+    if(tiles&&!tiles.querySelector('[data-app="'+LOCAL_APP+'"]')){const sim=tiles.querySelector('.tile[data-app="sim"]'),b=document.createElement('button');b.type='button';b.className='tile';b.dataset.app=LOCAL_APP;b.innerHTML='<div class="ic" aria-hidden="true">🏘️</div><b>주거 전략</b><span class="d">27.2 전세 갱신 → 29.2 동센자 206동 40평 → 서울 갈아타기</span><span>중심 주거 시나리오</span>';sim?sim.after(b):tiles.appendChild(b);}
   }
   function injectWishlistNav(){
     const pick=document.getElementById('pick');
@@ -69,9 +69,19 @@
       if(old&&old!==pb.parentElement&&!old.querySelector('.tile')){const h=old.previousElementSibling;if(h&&h.classList.contains('grp')&&h.textContent.trim()==='기타')h.remove();old.remove()}
     }
   }
+  function injectCarNav(){
+    const pick=document.getElementById('pick');
+    if(pick&&!pick.querySelector('option[value="'+CAR_APP+'"]')){const o=document.createElement('option');o.value=CAR_APP;o.textContent='🚙 차량 관리';const items=pick.querySelector('option[value="items"]');items?items.after(o):pick.appendChild(o);}
+    const tabs=document.getElementById('tabsbar');
+    if(tabs&&!tabs.querySelector('[data-app="'+CAR_APP+'"]')){const items=tabs.querySelector('[data-app="items"]'),b=document.createElement('button');b.type='button';b.dataset.app=CAR_APP;b.style.setProperty('--gc','#6E5AA6');b.title='차량 관리';b.innerHTML='<i class="ti">🚙</i><span class="ln">차량 관리</span>';items?items.after(b):tabs.appendChild(b);}
+    const all=document.getElementById('allList');
+    if(all&&!all.querySelector('[data-app="'+CAR_APP+'"]')){const items=all.querySelector('[data-app="items"]'),b=document.createElement('button');b.type='button';b.dataset.app=CAR_APP;b.innerHTML='<i>🚙</i>차량 관리';if(items)items.after(b);else{const boxes=all.querySelectorAll('.al'),box=boxes[Math.min(2,boxes.length-1)];box&&box.appendChild(b)}}
+    const tiles=document.getElementById('tiles');
+    if(tiles&&!tiles.querySelector('[data-app="'+CAR_APP+'"]')){const items=tiles.querySelector('.tile[data-app="items"]'),b=document.createElement('button');b.type='button';b.className='tile';b.dataset.app=CAR_APP;b.innerHTML='<div class="ic" aria-hidden="true">🚙</div><b>차량 관리</b><span class="d">싼타페 TM 정비·보험·검사·비용·Drive 문서와 GV80급 교체계획</span><span>현재차 싼타페 TM</span>';items?items.after(b):tiles.appendChild(b);}
+  }
   function prepareLocal(app,title){
     const pick=document.getElementById('pick'),home=document.getElementById('home'),frame=document.getElementById('app'),bar=document.getElementById('bar'),gate=document.getElementById('gate');
-    injectHousingNav();injectWishlistNav();injectPlannerNav();if(pick)pick.value=app;
+    injectHousingNav();injectWishlistNav();injectPlannerNav();injectCarNav();if(pick)pick.value=app;
     if(home)home.style.display='none';if(gate)gate.style.display='none';if(bar)bar.style.display='flex';
     document.documentElement.classList.add('authed','authed-app');document.title=title+' · 상지홈';
     return frame;
@@ -80,26 +90,26 @@
     if(fromPop)return;
     if(history.state&&history.state.app)history.replaceState({app},'','?app='+app);else{history.replaceState({home:1},'',location.pathname);history.pushState({app},'','?app='+app)}
   }
+  async function openLocalFile(app,title,file,fromPop){
+    const frame=prepareLocal(app,title);
+    if(frame){frame.style.display='block';try{const r=await fetch('./'+file+'?v='+META_VER,{cache:'no-store'});if(!r.ok)throw new Error(file+' '+r.status);frame.srcdoc=await r.text();}catch(e){frame.srcdoc='<p style="padding:20px">'+title+' 화면을 불러오지 못했습니다.</p>';console.warn(e)}}
+    pushLocalHistory(app,fromPop);setTimeout(()=>{try{window.syncTabs&&window.syncTabs()}catch(e){}},0);
+  }
   async function openHousing(fromPop){
-    const frame=prepareLocal(LOCAL_APP,'주거 전략');
     try{if(window.__hh&&typeof window.simSnapshot==='function')window.__hh.snapshot=await window.simSnapshot();}catch(e){console.warn(e)}
-    if(frame){frame.style.display='block';try{const r=await fetch('./sim.html?v='+META_VER,{cache:'no-store'});if(!r.ok)throw new Error('sim.html '+r.status);frame.srcdoc=await r.text();}catch(e){frame.srcdoc='<p style="padding:20px">주거 전략 화면을 불러오지 못했습니다.</p>';console.warn(e)}}
-    pushLocalHistory(LOCAL_APP,fromPop);setTimeout(()=>{try{window.syncTabs&&window.syncTabs()}catch(e){}},0);
+    return openLocalFile(LOCAL_APP,'주거 전략','sim.html',fromPop);
   }
-  async function openWishlist(fromPop){
-    const frame=prepareLocal(WISH_APP,'해보고 싶은 것들');
-    if(frame){frame.style.display='block';try{const r=await fetch('./wishlist.html?v='+META_VER,{cache:'no-store'});if(!r.ok)throw new Error('wishlist.html '+r.status);frame.srcdoc=await r.text();}catch(e){frame.srcdoc='<p style="padding:20px">해보고 싶은 것들 화면을 불러오지 못했습니다.</p>';console.warn(e)}}
-    pushLocalHistory(WISH_APP,fromPop);setTimeout(()=>{try{window.syncTabs&&window.syncTabs()}catch(e){}},0);
-  }
+  async function openWishlist(fromPop){return openLocalFile(WISH_APP,'해보고 싶은 것들','wishlist.html',fromPop);}
+  async function openCar(fromPop){return openLocalFile(CAR_APP,'차량 관리','car.html',fromPop);}
   function installLocalHook(){
     if(typeof window.openApp!=='function'||window.openApp.__hhLocal)return false;
     const old=window.openApp;
-    const wrapped=async function(app,fromPop){if(app===LOCAL_APP)return openHousing(fromPop);if(app===WISH_APP)return openWishlist(fromPop);return old(app,fromPop)};wrapped.__hhLocal=true;window.openApp=wrapped;
-    injectHousingNav();injectWishlistNav();injectPlannerNav();
-    const want=new URLSearchParams(location.search).get('app');if(want===LOCAL_APP)setTimeout(()=>openHousing(true),0);else if(want===WISH_APP)setTimeout(()=>openWishlist(true),0);
+    const wrapped=async function(app,fromPop){if(app===LOCAL_APP)return openHousing(fromPop);if(app===WISH_APP)return openWishlist(fromPop);if(app===CAR_APP)return openCar(fromPop);return old(app,fromPop)};wrapped.__hhLocal=true;window.openApp=wrapped;
+    injectHousingNav();injectWishlistNav();injectPlannerNav();injectCarNav();
+    const want=new URLSearchParams(location.search).get('app');if(want===LOCAL_APP)setTimeout(()=>openHousing(true),0);else if(want===WISH_APP)setTimeout(()=>openWishlist(true),0);else if(want===CAR_APP)setTimeout(()=>openCar(true),0);
     return true;
   }
-  function keepInjected(){injectHousingNav();injectWishlistNav();injectPlannerNav();installLocalHook()}
+  function keepInjected(){injectHousingNav();injectWishlistNav();injectPlannerNav();injectCarNav();installLocalHook()}
   let navRaf=0;
   function scheduleKeep(){if(navRaf)return;navRaf=requestAnimationFrame(()=>{navRaf=0;keepInjected()})}
   window.hhInstallApp=install;
