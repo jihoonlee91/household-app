@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>상지홈</title><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0C7480"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="상지홈"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg"><link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="preconnect" href="https://jdidzokxoaxqcnraowyu.supabase.co">
+<link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"><link rel="preconnect" href="https://jdidzokxoaxqcnraowyu.supabase.co">
 <script>/* 저장된 로그인이 있으면 첫 화면부터 로그인 창 없이 (새로고침 깜빡임 방지). 실제 확인은 아래 boot()가 하고, 로그인이 없으면 되돌림 */
 try{ const v=JSON.parse(localStorage.getItem("sb-jdidzokxoaxqcnraowyu-auth-token")||"null"), h=location.hash;
   if((v&&v.refresh_token)||/access_token=/.test(h)){ document.documentElement.classList.add("authed"); if(new URLSearchParams(location.search).get("app")) document.documentElement.classList.add("authed-app"); } }catch(e){}</script>
@@ -9,7 +9,7 @@ try{ const v=JSON.parse(localStorage.getItem("sb-jdidzokxoaxqcnraowyu-auth-token
 :root{--bg:#F3F5F6;--card:#fff;--ink:#15202A;--muted:#5B6873;--line:#D5DCE0;--accent:#0C7480;--up:#C2472F;--down:#1F5FAF;color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1419;--card:#161E25;--ink:#E4EAEE;--muted:#9AA7B1;--line:#2A3641;--accent:#4DB8C2;--up:#EE7A62;--down:#6FA8F0;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#0E1419;--card:#161E25;--ink:#E4EAEE;--muted:#9AA7B1;--line:#2A3641;--accent:#4DB8C2;--up:#EE7A62;--down:#6FA8F0;color-scheme:dark}
-html,body{height:100%;margin:0}body{background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+html,body{height:100%;margin:0}body{background:var(--bg);color:var(--ink);font:15px "IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
 #gate{min-height:100%;display:grid;place-items:center;padding:16px;box-sizing:border-box}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 24px;max-width:340px;width:100%;text-align:center}
 h1{font-size:22px;margin:0 0 6px}p{color:var(--muted);margin:0 0 20px;font-size:14px}
@@ -35,13 +35,13 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
 .tile{display:grid;gap:6px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;color:var(--ink);cursor:pointer;font:inherit}
 .tile:hover{border-color:var(--accent)}.tile b{font-size:16px}.tile span{color:var(--muted);font-size:13px}
-.tile .num{font:600 20px ui-monospace,Menlo,monospace;color:var(--ink);font-variant-numeric:tabular-nums}
+.tile .num{font:600 20px "IBM Plex Mono",ui-monospace,Consolas,Menlo,monospace;color:var(--ink);font-variant-numeric:tabular-nums}
 .tile .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--bg);font-size:18px}
 .grp{margin:22px 0 10px;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:10px}.grp:first-of-type{margin-top:6px}.grp::after{content:"";flex:1;height:1px;background:var(--line)}
 @media (max-width:560px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.tile{padding:12px;gap:4px;border-radius:12px}.tile b{font-size:15px}.tile .d{display:none}.tile .num{font-size:16px}.tile span{font-size:11.5px}.tile .ic{width:30px;height:30px;font-size:16px}}
 .tile .bar{display:block;height:5px;border-radius:5px;background:var(--bg);overflow:hidden;margin-top:2px}.tile .bar b{display:block;height:100%;border-radius:5px}
 .up{display:grid;gap:6px}.upi{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);font:inherit;cursor:pointer}
-.upi b{font:700 13px ui-monospace,Menlo,monospace;color:var(--accent);min-width:3.2em}.upi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}.upi em{font-style:normal;color:var(--muted);font-size:12.5px}
+.upi b{font:600 13px "IBM Plex Mono",ui-monospace,Consolas,Menlo,monospace;color:var(--accent);min-width:3.2em}.upi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}.upi em{font-style:normal;color:var(--muted);font-size:12.5px}
 .tile span{overflow-wrap:anywhere}
 #app{display:none;position:fixed;left:0;right:0;bottom:0;top:calc(39px + env(safe-area-inset-top,0px));width:100%;height:calc(100% - 39px - env(safe-area-inset-top,0px));border:0}
 
@@ -99,7 +99,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="upnext"></div><div id="tiles"></div></main>
 <iframe id="app" title="앱"></iframe>
-<script src="./install.js?v=20261001-1"></script>
+<script src="./install.js?v=20261005-1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>
 /* 로그인 안정화
@@ -293,7 +293,7 @@ async function openApp(app,fromPop){ setTimeout(syncTabs);
   if(app==="home"){ openHome(); return; }
   curApp=app; $("home").style.display="none"; $("app").style.display="none"; msg("불러오는 중…");
   const [b,st]=await Promise.all([sb.from("app_bundles").select("html,title").eq("app",app).maybeSingle(), sb.from("app_state").select("data").eq("app",app).eq("key","inputs").maybeSingle()]);
-  if(b.error||!b.data){ msg("앱을 불러오지 못했습니다."); return; }
+  if(b.error||!b.data){ msg((window.__hhLocalApps||[]).includes(app)?"":"앱을 불러오지 못했습니다."); return; }
   window.__hh.inputs=st.data?st.data.data:null; window.__hh.snapshot=app==="sim"? await simSnapshot() : null; document.title=b.data.title+" · 상지홈";
   document.documentElement.classList.add("authed"); $("gate").style.display="none"; $("bar").style.display="flex"; $("app").style.display="block"; $("app").srcdoc=b.data.html; msg("");
   /* 뒤로가기 → 홈: 앱은 홈 위에 한 칸만 쌓음 */

@@ -1,6 +1,7 @@
 (()=>{
   let promptEvent=null;
-  const APP_NAME='상지홈', META_VER='20261004-5', LOCAL_APP='houseplan', WISH_APP='wishlist', PLANNER_APP='planner', CAR_APP='car';
+  const APP_NAME='상지홈', META_VER='20261005-1', LOCAL_APP='houseplan', WISH_APP='wishlist', PLANNER_APP='planner', CAR_APP='car';
+  window.__hhLocalApps=[LOCAL_APP,WISH_APP,CAR_APP]; /* 셸에 있는 화면: DB 번들이 없어도 오류 아님 */
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const loadMobileUi=()=>{if(document.getElementById('hh-mobile-ui'))return;const s=document.createElement('script');s.id='hh-mobile-ui';s.src='./mobile-ui.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
   const loadShare=()=>{if(document.getElementById('hh-share-js'))return;const s=document.createElement('script');s.id='hh-share-js';s.src='./share.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
