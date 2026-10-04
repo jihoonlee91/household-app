@@ -1,11 +1,14 @@
 (()=>{
-  const VER='20261004-1';
+  const VER='20261004-2';
   const addCss=(doc,id,url)=>{if(!doc||doc.getElementById(id))return;const l=doc.createElement('link');l.id=id;l.rel='stylesheet';l.href=url;(doc.head||doc.documentElement).appendChild(l)};
+  const addScript=(doc,id,url)=>{if(!doc||doc.getElementById(id))return;const s=doc.createElement('script');s.id=id;s.src=url;s.defer=true;(doc.head||doc.documentElement).appendChild(s)};
   const shellUrl=new URL('./mobile-shell.css?v='+VER,location.href).href;
   const appUrl=new URL('./mobile-app.css?v='+VER,location.href).href;
+  const delightCssUrl=new URL('./delight-shell.css?v='+VER,location.href).href;
+  const delightJsUrl=new URL('./delight.js?v='+VER,location.href).href;
   const patchFrame=()=>{const f=document.getElementById('app');if(!f)return;try{const d=f.contentDocument;if(!d||!d.documentElement)return;if(!d.querySelector('meta[name="viewport"]')){const m=d.createElement('meta');m.name='viewport';m.content='width=device-width,initial-scale=1,viewport-fit=cover';(d.head||d.documentElement).appendChild(m)}addCss(d,'hh-mobile-app',appUrl)}catch(_){}};
   const bind=()=>{
-    addCss(document,'hh-mobile-shell',shellUrl);
+    addCss(document,'hh-mobile-shell',shellUrl);addCss(document,'hh-delight-shell',delightCssUrl);addScript(document,'hh-delight-js',delightJsUrl);
     const f=document.getElementById('app');if(f)f.addEventListener('load',()=>{patchFrame();setTimeout(patchFrame,80)});
     const sh=document.getElementById('allSheet');
     if(sh){
