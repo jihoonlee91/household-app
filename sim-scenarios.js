@@ -1,57 +1,231 @@
 (()=>{
-const W=1e4,E=1e8,KEY='hh-housing-scenarios-v2';
-const $=id=>document.getElementById(id);const money=v=>Math.abs(v)>=E?(v/E).toFixed(2).replace(/\.00$/,'')+'억':Math.round(v/W).toLocaleString('ko-KR')+'만';
-const defaults={dongPrice:144000,oksuPrice:260000,dongGrow:4.5,oksuGrow:4.5,stockUsd:10,fx:0,buyCost:4,dongMove:2500,oksuMove:5000,companyLoan:50000,companyRate:1.5,mortgageRate:4.5,grace:3,amort:10,bridgeRate:5.5,reserve:3000,compareYear:2036,annualLiving:7500,annualNetIncome:10500};
-let S={...defaults};try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
-let HH=null,LIVE=null;try{HH=parent&&parent.__hh||null;LIVE=HH&&HH.snapshot||null}catch(e){}
+const W=1e4,E=1e8,KEY='hh-housing-scenarios-v3';
+const $=id=>document.getElementById(id);
+const money=v=>Math.abs(v)>=E?(v/E).toFixed(2).replace(/\.00$/,'')+'억':Math.round(v/W).toLocaleString('ko-KR')+'만';
+
+const defaults={
+  dongPrice:160000,oksuPrice:260000,dongGrow:3.5,oksuGrow:4.0,stockUsd:7.0,fx:0,
+  buyCost:3.8,dongMove:4500,oksuMove:7000,companyLoan:50000,companyRate:1.5,
+  mortgageRate:4.5,grace:3,amort:10,bridgeRate:5.5,reserve:5000,compareYear:2036,
+  annualLiving:7500,annualNetIncome:11000
+};
+let S={...defaults};
+try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+
+let HH=null,LIVE=null;
+try{HH=parent&&parent.__hh||null;LIVE=HH&&HH.snapshot||null}catch(e){}
+
 const baseVals={cash:4700000,cheongMe:32965000,cheongSp:35350000,dojak:23800000,inv:126946308,opi:45603826,isa:9410719,pen:26352244,jeonse:4e8};
-const baseDebts=[{n:'우리 WON 직장인 마통',b:143508300,r:5.06},{n:'Sh 신용대출',b:14100000,r:5.71},{n:'우리 예적금담보',b:21447059,r:4},{n:'IBK 예금담보',b:31216414,r:3.95},{n:'HF 전세대출',b:30000000,r:3.43,hf:true},{n:'학자금',b:14891916,r:2.62}];
-const vals={...baseVals,...(LIVE&&LIVE.vals||{})},debts=(LIVE&&LIVE.debts&&LIVE.debts.length?LIVE.debts:baseDebts).map(x=>({...x}));
-if(LIVE&&LIVE.params&&LIVE.params.housePrice&&S.dongPrice===defaults.dongPrice)S.dongPrice=+LIVE.params.housePrice;
+const baseDebts=[
+  {n:'우리 WON 직장인 마통',b:143508300,r:5.06},
+  {n:'Sh 신용대출',b:14100000,r:5.71},
+  {n:'우리 예적금담보',b:21447059,r:4},
+  {n:'IBK 예금담보',b:31216414,r:3.95},
+  {n:'HF 전세대출',b:30000000,r:3.43,hf:true},
+  {n:'학자금',b:14891916,r:2.62}
+];
+const vals={...baseVals,...(LIVE&&LIVE.vals||{})};
+const debts=(LIVE&&LIVE.debts&&LIVE.debts.length?LIVE.debts:baseDebts).map(x=>({...x}));
+
 const ids=['dongPrice','oksuPrice','dongGrow','oksuGrow','stockUsd','fx','buyCost','dongMove','oksuMove','companyLoan','companyRate','mortgageRate','grace','amort','bridgeRate','reserve','compareYear','annualLiving','annualNetIncome'];
-function write(){ids.forEach(k=>{const e=$(k);if(e)e.value=S[k]})}function read(){ids.forEach(k=>{const e=$(k);if(e)S[k]=+e.value||0});localStorage.setItem(KEY,JSON.stringify(S))}
-function debt(re){return debts.find(x=>re.test(x.n||''))||{b:0,r:0}}function totalDebt(re){return debts.filter(x=>re.test(x.n||'')).reduce((a,x)=>a+(+x.b||0),0)}
-function krStockRet(){return(1+S.stockUsd/100)*(1+S.fx/100)-1}function grow(v,r,y){return v*Math.pow(1+r/100,Math.max(0,y))}
-function compLoan(P,years){const rm=S.companyRate/100/12,g=Math.round(S.grace*12),n=Math.max(1,Math.round(S.amort*12)),m=Math.max(0,Math.round(years*12));let bal=P,interest=0,paid=0;const pay=rm?P*rm/(1-Math.pow(1+rm,-n)):P/n;for(let i=0;i<m&&bal>1;i++){if(i<g){const it=bal*rm;interest+=it;paid+=it}else{const it=bal*rm,pr=Math.min(bal,Math.max(0,pay-it));interest+=it;bal-=pr;paid+=it+pr}}return{bal,interest,paid,pay}}
-const specialNet={2027:3.50*E,2028:3.79*E,2029:3.08*E,2030:3.00*E,2031:3.00*E};
-const regBonusNet={2027:.315*E,2028:.32*E,2029:.33*E,2030:.34*E,2031:.35*E};
-function unlockAt(y){let v=0;for(const [gy,net] of Object.entries(specialNet)){const g=+gy;if(y>=g&&y<=g+2)v+=net/3}return v}
+function write(){ids.forEach(k=>{const e=$(k);if(e)e.value=S[k]})}
+function read(){ids.forEach(k=>{const e=$(k);if(e)S[k]=+e.value||0});localStorage.setItem(KEY,JSON.stringify(S))}
+function debt(re){return debts.find(x=>re.test(x.n||''))||{b:0,r:0}}
+function totalDebt(re){return debts.filter(x=>re.test(x.n||'')).reduce((a,x)=>a+(+x.b||0),0)}
+function krStockRet(){return(1+S.stockUsd/100)*(1+S.fx/100)-1}
+function grow(v,r,y){return v*Math.pow(1+r/100,Math.max(0,y))}
+function compLoan(P,years){
+  const rm=S.companyRate/100/12,g=Math.round(S.grace*12),n=Math.max(1,Math.round(S.amort*12)),m=Math.max(0,Math.round(years*12));
+  let bal=P,interest=0,paid=0;
+  const pay=rm?P*rm/(1-Math.pow(1+rm,-n)):P/n;
+  for(let i=0;i<m&&bal>1;i++){
+    if(i<g){const it=bal*rm;interest+=it;paid+=it}
+    else{const it=bal*rm,pr=Math.min(bal,Math.max(0,pay-it));interest+=it;bal-=pr;paid+=it+pr}
+  }
+  return{bal,interest,paid,pay}
+}
+
+/* Planning values only. 2026 agreement: DS special bonus pool is 10.5%, common org is ~70% of Memory,
+   stock vests 1/3 immediately + 1/3 after 1y + 1/3 after 2y. Official annual payout can differ materially. */
+const specialNet={2027:3.50*E,2028:3.30*E,2029:3.00*E,2030:2.70*E,2031:2.50*E,2032:2.30*E,2033:2.10*E,2034:1.90*E,2035:1.70*E};
+const regBonusNet={2027:.315*E,2028:.32*E,2029:.33*E,2030:.34*E,2031:.35*E,2032:.36*E,2033:.37*E,2034:.38*E,2035:.39*E};
+function unlockAt(y){
+  let v=0;
+  for(const [gy,net] of Object.entries(specialNet)){
+    const g=+gy;
+    if(y>=g&&y<=g+2)v+=net/3;
+  }
+  return v
+}
+
 function projectedLiquidFeb(year){
-  const hf=debt(/HF|전세|전월세/).b||0,woori=debt(/WON|직장인.*마통|우리은행 마이너스/).b||0,sh=debt(/Sh|더드림|수협/).b||0;
+  const hf=debt(/HF|전세|전월세/).b||0;
+  const woori=debt(/WON|직장인.*마통|우리은행 마이너스/).b||0;
+  const sh=debt(/Sh|더드림|수협/).b||0;
   let liquid=(vals.cash||0)+(vals.inv||0)+(vals.cheongMe||0)+(vals.cheongSp||0)+(vals.dojak||0)+Math.max(0,(vals.jeonse||0)-hf);
-  if(year===2027)liquid+=(vals.opi||0)+specialNet[2027]/3+regBonusNet[2027];
   let bankDebt=woori+sh+totalDebt(/예적금담보|예금담보|학자금/);
-  if(year>=2029){
-    const rentLoan=3*E,payoff=Math.min(rentLoan,bankDebt+hf);bankDebt=Math.max(0,bankDebt+hf-payoff);liquid+=rentLoan-payoff;
-    const r=krStockRet(),surplus=Math.max(0,S.annualNetIncome-S.annualLiving)*W;
-    for(let y=2027;y<year;y++){
-      if(y===2027&&bankDebt>0){const p=Math.min(liquid,bankDebt);liquid-=p;bankDebt-=p}
-      liquid+=unlockAt(y)+(regBonusNet[y]||0)+surplus;liquid*=1+r;
+  const r=krStockRet(),surplus=Math.max(0,S.annualNetIncome-S.annualLiving)*W;
+
+  for(let y=2027;y<year;y++){
+    liquid+=unlockAt(y)+(regBonusNet[y]||0)+surplus;
+    if(y===2027&&bankDebt>0){
+      const p=Math.min(liquid,bankDebt);
+      liquid-=p; bankDebt-=p;
     }
-    liquid+=unlockAt(year)+(regBonusNet[year]||0);liquid-=rentLoan;
-    if(year>=2029){const maturity=grow(vals.dojak||0,4.5,1.75)+70*W*21;liquid+=Math.max(0,maturity-(vals.dojak||0))}
+    liquid*=1+r;
+  }
+  liquid+=unlockAt(year)+(regBonusNet[year]||0);
+
+  if(year>=2029){
+    const youthMaturity=grow(vals.dojak||0,4.5,1.75)+70*W*21;
+    liquid+=Math.max(0,youthMaturity-(vals.dojak||0));
   }
   return Math.max(0,liquid-S.reserve*W)
 }
-function scenario(c){const t=(c.year+1/12)-2026.75,price=grow(c.base,c.grow,t),extra=price*S.buyCost/100+c.move*W,total=price+extra,liquid=projectedLiquidFeb(c.year),loan=S.companyLoan*W,gap=Math.max(0,total-liquid-loan),remain=Math.max(0,liquid+loan-total),bridge=gap*S.bridgeRate/100*c.bridgeMonths/12;const yrs=Math.max(0,S.compareYear-c.year),houseFV=grow(price,c.grow,yrs),own=Math.max(0,total-loan-gap),stockFV=own*Math.pow(1+krStockRet(),yrs),stockGain=stockFV-own,houseGain=houseFV-price,lm=compLoan(loan,yrs),opp=houseGain-stockGain-lm.interest-extra-bridge;return{...c,t,price,extra,total,liquid,loan,gap,remain,bridge,yrs,houseFV,own,stockGain,houseGain,lm,opp}}
-function scenarios(){return[
- {key:'27',year:2027,label:'2027.2 동센자',name:'동천센트럴자이',base:S.dongPrice*W,grow:S.dongGrow,move:S.dongMove,bridgeMonths:11},
- {key:'29',year:2029,label:'2029.2 동센자',name:'동천센트럴자이',base:S.dongPrice*W,grow:S.dongGrow,move:S.dongMove,bridgeMonths:0},
- {key:'31',year:2031,label:'2031.2 옥수',name:'옥수파크힐스 84㎡',base:S.oksuPrice*W,grow:S.oksuGrow,move:S.oksuMove,bridgeMonths:0}
-].map(scenario)}
-function strategyText(x){if(x.key==='27')return['청약·청년도약 매수자금으로 해지','회사 매매대출 5억 우선','우리 마통은 27.5 연장 기본, 30% 감액 스트레스','부족자금은 28.1 성과급까지 단기 브리지'];if(x.key==='29')return['27.2 현 전세 2년 연장','회사 전세대출 3억으로 고금리 은행빚 우선 정리','청년도약은 28.7 만기 수령','29.2 전세대출 상환 → 회사 매매대출 5억 전환'];return['31.2까지 청약 유지 후 매수 시 해지','연금·IRP·ISA 계속 유지','성과주 해제분·일반계좌 복리 최대 활용','옥수 진입 시 수리·이사비를 동센자보다 넉넉히 반영']}
-function shareCard(x){const host=$('shareStage');host.innerHTML=`<section class="sharecard" id="shareOne"><div class="sc-brand">상지홈 · 주거전략</div><div class="sc-head"><div><small>SCENARIO ${x.key}</small><h2>${x.label}</h2><p>${x.name}</p></div><div class="sc-gap ${x.gap?'bad':'good'}"><small>${x.gap?'추가 마련':'잔여 여유'}</small><b>${money(x.gap||x.remain)}</b></div></div><div class="sc-grid"><div><small>예상 매수가</small><b>${money(x.price)}</b></div><div><small>취득·수리·이사</small><b>${money(x.extra)}</b></div><div><small>매수 직전 가용자금</small><b>${money(x.liquid)}</b></div><div><small>회사대출</small><b>${money(x.loan)}</b></div></div><div class="sc-flow"><b>자금 전략</b>${strategyText(x).map(t=>`<span>• ${t}</span>`).join('')}</div><div class="sc-assume"><span>집값 <b>${x.grow.toFixed(1)}%</b>/년</span><span>S&P(달러) <b>${S.stockUsd.toFixed(1)}%</b>/년</span><span>환율 <b>${S.fx.toFixed(1)}%</b>/년</span><span>회사금리 <b>${S.companyRate.toFixed(1)}%</b></span><span>대체 주담대 <b>${S.mortgageRate.toFixed(1)}%</b></span></div><div class="sc-opp"><div><small>${S.compareYear}년 집 예상가</small><b>${money(x.houseFV)}</b></div><div><small>집값 상승이익</small><b>${money(x.houseGain)}</b></div><div><small>동일 자기자금 주식이익</small><b>${money(x.stockGain)}</b></div><div><small>주택−주식 기회비용</small><b class="${x.opp>=0?'good':'bad'}">${x.opp>=0?'+':'−'}${money(Math.abs(x.opp))}</b></div></div><footer>연금·IRP·ISA는 매수자금 제외 · 청약은 매수 직전까지 유지 · 성과급 전망 2026.10.04 기준</footer></section>`;return $('shareOne')}
-async function shareScenario(key,orientation='portrait'){const x=scenarios().find(s=>s.key===key);if(!x)return;const el=shareCard(x);try{if(window.hhCaptureElement)await window.hhCaptureElement(el,{orientation,name:`상지홈-${x.label}`,full:false});else alert('공유 모듈을 불러오지 못했습니다.')}finally{$('shareStage').innerHTML=''}}
-function render(){read();const list=scenarios(),best=[...list].sort((a,b)=>a.gap-b.gap||b.opp-a.opp)[0],w=debt(/WON|직장인.*마통|우리은행 마이너스/).b||0,sh=debt(/Sh|더드림|수협/).b||0,stress=w*.3+sh,worst=w+sh;
-$('live').textContent=LIVE?`상지홈 DB ${LIVE.asof||''} 기준`:'기본 스냅샷 기준';
-$('cards').innerHTML=list.map(x=>`<article class="scenario ${x===best?'best':''}"><div class="scenarioTop"><h3>${x.label}${x===best?'<span class="tag">자금여유</span>':''}</h3><button class="shareBtn hh-share-inline" data-share="${x.key}" type="button">공유</button></div><div class="kv"><span>예상 매수가</span><b>${money(x.price)}</b><span>취득·수리·이사</span><b>${money(x.extra)}</b><span>매수 직전 가용자금</span><b>${money(x.liquid)}</b><span>회사대출</span><b>${money(x.loan)}</b><span>추가 마련 필요</span><b class="gap ${x.gap?'bad':'good'}">${x.gap?money(x.gap):'0'}</b><span>매수 후 현금여유</span><b>${x.remain?money(x.remain):'–'}</b></div>${x.key==='27'?`<div class="warn">27년 만기 스트레스: 우리 마통 30% 감액 + Sh 상환 ${money(stress)} · 전액 미연장 최악 ${money(worst)} · 28.1까지 브리지 이자 약 ${money(x.bridge)}</div>`:''}</article>`).join('');
-$('opp').innerHTML=`<table><thead><tr><th>${S.compareYear}년 기준</th><th>집 예상가</th><th>집값 상승이익</th><th>동일 자기자금 주식 기대이익</th><th>회사대출 누적이자</th><th>취득·수리비</th><th>브리지비용</th><th>주택−주식 기회비용</th></tr></thead><tbody>${list.map(x=>`<tr><td>${x.label}</td><td>${money(x.houseFV)}</td><td>${money(x.houseGain)}</td><td>${money(x.stockGain)}</td><td>${money(x.lm.interest)}</td><td>${money(x.extra)}</td><td>${x.bridge?money(x.bridge):'–'}</td><td class="${x.opp>=0?'good':'bad'}"><b>${x.opp>=0?'+':'−'}${money(Math.abs(x.opp))}</b></td></tr>`).join('')}</tbody></table>`;
-const rr=krStockRet()*100;$('ret').textContent=`S&P500 달러 ${S.stockUsd.toFixed(1)}% × 환율 ${S.fx.toFixed(1)}% → 원화 기대수익률 ${rr.toFixed(2)}%/년 · 대체 은행 주담대 ${S.mortgageRate.toFixed(1)}%`;
-const currentDebt=debts.reduce((a,x)=>a+(x.b||0),0),protectedAmt=(vals.isa||0)+(vals.pen||0);$('metrics').innerHTML=`<div class="metric"><small>현재 전세보증금</small><b>${money(vals.jeonse||0)}</b></div><div class="metric"><small>현재 총대출</small><b>${money(currentDebt)}</b></div><div class="metric"><small>보호자산(ISA·연금)</small><b>${money(protectedAmt)}</b></div><div class="metric"><small>회사 매매대출</small><b>${money(S.companyLoan*W)}</b></div>`;
-$('timeline').innerHTML=[['2027.02','현 집 만기. 27 시나리오는 동센자 매수, 29/31은 2년 갱신 + 회사 전세대출 3억으로 고금리 은행부채 정리.'],['2027.05',`우리 큰 마통 만기. 기본은 연장, 스트레스는 30% 감액(${money(w*.3)}).`],['2027.06',`Sh 신용대출 만기 ${money(sh)}. 연장되면 유지, 아니면 현금버퍼 또는 28.1 성과급 전 브리지.`],['2028.01','특별성과급 신규분 1/3 + 기존분 해제분 중첩. 27 시나리오의 브리지·신용부채 우선 축소.'],['2028.07','청년도약 만기. 29/31 시나리오는 중도해지 없이 만기금 매수재원으로 이동.'],['2029.02','29 시나리오: 동센자 매수. 회사 전세대출 상환 후 회사 매매대출 5억 전환.'],['2031.02','31 시나리오: 옥수 매수. 청약은 이때까지 유지 후 매수 시 해지.'],['매수+3년',`회사대출 거치 종료. 이후 10년 원리금 상환. 5억·1.5% 기준 월 약 ${money(compLoan(5*E,3.01).pay)}.`]].map(x=>`<div class="event"><b>${x[0]}</b><div>${x[1]}</div></div>`).join('');
-$('note').innerHTML=`청약은 세 시나리오 모두 <b>매수 직전까지 유지 후 해지</b>. 청년도약은 27 시나리오에서 부족자금이 크면 중도해지 가능, 29/31은 28.7 만기 유지가 기본입니다. 연금·IRP·ISA는 매수자금에서 제외했습니다. <b>성과급 전망은 2026-10-04 업데이트</b>: 2026년 삼성전자 영업이익 시장 눈높이 약 360조원을 반영해 2027년 수령 특별성과급 세후 계획값을 3.50억으로 상향했고, 2027년 시장 전망 분산(약 346~590조)을 감안해 2028년 이후는 보수적인 계획값으로 낮췄습니다. DS 특별경영성과급의 사업부별 세부 산식은 아직 확정 공지 전이므로 2026-10-07 공식안이 나오면 그 수치가 우선입니다. 29/31 가용자금은 현재 자산, 성과주 해제, 세후 생활잉여 및 일반계좌 수익을 단순화한 계획값입니다.`
+
+function mainPurchase(){
+  const year=2029;
+  const t=(year+1/12)-2026.75;
+  const price=grow(S.dongPrice*W,S.dongGrow,t);
+  const extra=price*S.buyCost/100+S.dongMove*W;
+  const total=price+extra;
+  const liquid=projectedLiquidFeb(year);
+  const companyLoan=S.companyLoan*W;
+  const gap=Math.max(0,total-liquid-companyLoan);
+  const remain=Math.max(0,liquid+companyLoan-total);
+  return{key:'29',year,label:'2029.2 동센자 입주',name:'동천센트럴자이 206동 · 40평 · 중층 이상',t,price,extra,total,liquid,loan:companyLoan,gap,remain}
 }
-async function loadPrices(){try{if(!HH||!HH.sb)return;const w=await HH.sb.from('realestate_watchlist').select('id,name').eq('active',true);for(const a of w.data||[]){let k=/동천.*센트럴.*자이|동센자/.test(a.name||'')?'dongPrice':/옥수.*파크힐스|옥수/.test(a.name||'')?'oksuPrice':null;if(!k)continue;const p=await HH.sb.from('realestate_prices').select('recent_trade_price,asking_price,deal_date,checked_on').eq('watch_id',a.id).order('deal_date',{ascending:false,nullsFirst:false}).order('checked_on',{ascending:false}).limit(1);const x=p.data&&p.data[0],v=x&&(x.recent_trade_price||x.asking_price);if(v)S[k]=Math.round(v/W)}write();render()}catch(e){console.warn(e)}}
+
+function seoulMove(main){
+  const surplus=Math.max(0,S.annualNetIncome-S.annualLiving)*W;
+  let invest=main.remain;
+  let earliest=null;
+  const rows=[];
+  for(let y=2030;y<=2042;y++){
+    invest=(invest+surplus+unlockAt(y)+(regBonusNet[y]||0))*(1+krStockRet());
+    const yearsFromBuy=Math.max(0,y-2029);
+    const dongValue=grow(main.price,S.dongGrow,yearsFromBuy);
+    const loan=compLoan(main.loan,yearsFromBuy).bal;
+    const saleCost=dongValue*0.8/100;
+    const dongEquity=Math.max(0,dongValue-loan-saleCost);
+    const seoulPrice=grow(S.oksuPrice*W,S.oksuGrow,(y+1/12)-2026.75);
+    const seoulExtra=seoulPrice*S.buyCost/100+S.oksuMove*W;
+    const required=seoulPrice+seoulExtra;
+    const available=dongEquity+invest+S.companyLoan*W;
+    const gap=Math.max(0,required-available);
+    rows.push({y,dongValue,dongEquity,seoulPrice,seoulExtra,required,available,gap,invest});
+    if(!earliest&&gap<=0)earliest=rows[rows.length-1];
+  }
+  return{earliest,rows}
+}
+
+function shareCard(x){
+  const host=$('shareStage');
+  host.innerHTML=`<section class="sharecard" id="shareOne">
+    <div class="sc-brand">상지홈 · 중심 주거 시나리오</div>
+    <div class="sc-head"><div><small>BASE CASE</small><h2>${x.label}</h2><p>${x.name}</p></div>
+    <div class="sc-gap ${x.gap?'bad':'good'}"><small>${x.gap?'추가 마련':'잔여 여유'}</small><b>${money(x.gap||x.remain)}</b></div></div>
+    <div class="sc-grid"><div><small>예상 매수가</small><b>${money(x.price)}</b></div><div><small>취득·수리·이사</small><b>${money(x.extra)}</b></div>
+    <div><small>매수 직전 가용자금</small><b>${money(x.liquid)}</b></div><div><small>회사 매매대출</small><b>${money(x.loan)}</b></div></div>
+    <div class="sc-flow"><b>중심 전략</b><span>• 2027.2 전세 묵시적 갱신</span><span>• 2029.2 206동 40평 중층 이상 매수</span><span>• 준신축 상태를 살리고 필요한 부분만 수리</span><span>• 이후 자산을 다시 축적해 서울 진입 가능 시점에 갈아타기</span></div>
+    <div class="sc-assume"><span>동센자 <b>${S.dongGrow.toFixed(1)}%</b>/년</span><span>서울 목표 <b>${S.oksuGrow.toFixed(1)}%</b>/년</span><span>S&P500(USD) <b>${S.stockUsd.toFixed(1)}%</b>/년</span><span>주담대 스트레스 <b>${S.mortgageRate.toFixed(1)}%</b></span></div>
+    <footer>2026-10-04 기준 계획값 · 실제 대출한도/성과급/실거래가에 따라 자동 재계산</footer>
+  </section>`;
+  return $('shareOne')
+}
+
+async function shareScenario(){
+  const x=mainPurchase(),el=shareCard(x);
+  try{
+    if(window.hhCaptureElement)await window.hhCaptureElement(el,{orientation:'portrait',name:'상지홈-중심주거시나리오',full:false});
+    else alert('공유 모듈을 불러오지 못했습니다.')
+  }finally{$('shareStage').innerHTML=''}
+}
+
+function render(){
+  read();
+  const main=mainPurchase(),seoul=seoulMove(main),target=seoul.earliest;
+  const w=debt(/WON|직장인.*마통|우리은행 마이너스/).b||0,sh=debt(/Sh|더드림|수협/).b||0;
+  const currentDebt=debts.reduce((a,x)=>a+(x.b||0),0),protectedAmt=(vals.isa||0)+(vals.pen||0);
+
+  $('live').textContent=LIVE?`상지홈 DB ${LIVE.asof||''} 기준 · 중심 시나리오`:'기본 스냅샷 기준 · 중심 시나리오';
+
+  $('cards').innerHTML=`
+    <article class="scenario best">
+      <div class="scenarioTop"><h3>중심 시나리오 <span class="tag">BASE</span></h3><button class="shareBtn hh-share-inline" data-share="main" type="button">공유</button></div>
+      <div class="kv">
+        <span>2027.02</span><b>현 전세 묵시적 갱신</b>
+        <span>2029.02 목표</span><b>206동 40평 · 중층 이상</b>
+        <span>2029.02 예상 매수가</span><b>${money(main.price)}</b>
+        <span>취득·약간 수리·이사</span><b>${money(main.extra)}</b>
+        <span>매수 직전 가용자금</span><b>${money(main.liquid)}</b>
+        <span>회사 매매대출</span><b>${money(main.loan)}</b>
+        <span>추가 마련 필요</span><b class="gap ${main.gap?'bad':'good'}">${main.gap?money(main.gap):'0'}</b>
+        <span>매수 후 현금여유</span><b>${main.remain?money(main.remain):'–'}</b>
+      </div>
+      <div class="warn">2027.2에는 매수하지 않고 현 전세를 묵시적 갱신하는 것이 기본. 우리 마통 30% 감액 + Sh 상환 스트레스는 약 ${money(w*.3+sh)}, 전액 미연장 최악은 ${money(w+sh)}.</div>
+    </article>
+    <article class="scenario">
+      <div class="scenarioTop"><h3>서울 갈아타기</h3></div>
+      <div class="kv">
+        <span>목표주택 기준값</span><b>${money(S.oksuPrice*W)} 현재가</b>
+        <span>서울 집값 가정</span><b>${S.oksuGrow.toFixed(1)}%/년</b>
+        <span>예상 진입 시점</span><b>${target?target.y+'년':'2042년 이후'}</b>
+        <span>그때 서울 목표가</span><b>${target?money(target.seoulPrice):'–'}</b>
+        <span>동센자 순자산</span><b>${target?money(target.dongEquity):'–'}</b>
+        <span>별도 축적자산</span><b>${target?money(target.invest):'–'}</b>
+      </div>
+      <div class="warn">서울 매수는 연도를 고정하지 않고, 동센자 매각 순자산 + 축적자산 + 회사대출로 목표주택 총비용을 감당 가능한 첫 해를 자동 탐색합니다.</div>
+    </article>`;
+
+  $('opp').innerHTML=`<table><thead><tr><th>연도</th><th>동센자 예상가</th><th>동센자 순자산</th><th>서울 목표가</th><th>별도 축적자산</th><th>서울 진입 부족액</th></tr></thead>
+    <tbody>${seoul.rows.filter(r=>r.y%2===1||r.y===2030||r===target).map(r=>`<tr><td>${r.y}</td><td>${money(r.dongValue)}</td><td>${money(r.dongEquity)}</td><td>${money(r.seoulPrice)}</td><td>${money(r.invest)}</td><td class="${r.gap?'bad':'good'}"><b>${r.gap?money(r.gap):'진입 가능'}</b></td></tr>`).join('')}</tbody></table>`;
+
+  const rr=krStockRet()*100;
+  $('ret').textContent=`현실 기본값: 동센자 40평 현재 16.0억 · 동센자 ${S.dongGrow.toFixed(1)}%/년 · 서울 ${S.oksuGrow.toFixed(1)}%/년 · S&P500 달러 ${S.stockUsd.toFixed(1)}%/년 · 원화 기대수익률 ${rr.toFixed(2)}%/년 · 은행 주담대 스트레스 ${S.mortgageRate.toFixed(1)}%`;
+
+  $('metrics').innerHTML=`<div class="metric"><small>현재 전세보증금</small><b>${money(vals.jeonse||0)}</b></div>
+    <div class="metric"><small>현재 총대출</small><b>${money(currentDebt)}</b></div>
+    <div class="metric"><small>보호자산(ISA·연금)</small><b>${money(protectedAmt)}</b></div>
+    <div class="metric"><small>회사 매매대출</small><b>${money(S.companyLoan*W)}</b></div>`;
+
+  $('timeline').innerHTML=[
+    ['2026.12.03','묵시적 갱신 안전선. 별도 종료 통보가 없다면 2027.2 이후 갱신 상태로 가는 중심 계획.'],
+    ['2027.02','현 집 전세 계속 거주. 동센자 조기매수는 기본 시나리오에서 제외.'],
+    ['2027.05~06',`우리 마통·Sh 만기 대응. 고금리 부채 우선 축소, 주거자금 현금버퍼 ${money(S.reserve*W)} 유지.`],
+    ['2028.01','성과급/성과주 해제분을 부채 정리와 2029 매수자금으로 우선 적립.'],
+    ['2028.07','청년도약 만기금은 2029 매수재원으로 이동.'],
+    ['2028.10~2029.01','206동 40평 중층 이상 매물만 추적. 급매·동호수·수리상태를 가격보다 우선 확인.'],
+    ['2029.02','동천센트럴자이 206동 40평 매수 후 필요한 부분만 수리하고 입주.'],
+    [target?`${target.y}`:'2030s','동센자 이후에는 서울 매수 연도를 고정하지 않고, 목표주택 구매력이 충족되는 시점에 이동.']
+  ].map(x=>`<div class="event"><b>${x[0]}</b><div>${x[1]}</div></div>`).join('');
+
+  $('note').innerHTML=`<b>기본 시나리오를 하나로 고정했습니다.</b> 27.2 전세 묵시적 갱신 → 29.2 동천센트럴자이 206동 40평 중층 이상 매수 → 약간의 수리 후 입주 → 이후 서울 집을 살 수 있는 첫 시점에 갈아타기입니다. 
+  현재 40평 기준값은 16.0억, 206동 40평 최근 확인 거래는 18층 14.2억이므로 206동·중층 이상 프리미엄과 최근 시세를 함께 반영했습니다. 동센자 장기 상승률은 최근 급등을 그대로 연장하지 않고 ${S.dongGrow.toFixed(1)}%, 서울 목표는 ${S.oksuGrow.toFixed(1)}%, S&P500은 장기 계획용 ${S.stockUsd.toFixed(1)}%로 낮췄습니다. 
+  기준금리 3.0% 환경을 고려해 은행 주담대는 ${S.mortgageRate.toFixed(1)}% 스트레스로 둡니다. 특별성과급은 10.5% 재원·공통조직 메모리의 약 70%·3년 분할 매각 구조를 반영한 <b>계획값</b>이며, 공식 연도별 산식/실적이 확정되면 실제 DB 값이 우선입니다. 연금·IRP·ISA는 매수자금에서 제외하고 현금버퍼를 남기는 보수적 구조입니다.`;
+}
+
+async function loadPrices(){
+  try{
+    if(!HH||!HH.sb)return;
+    const w=await HH.sb.from('realestate_watchlist').select('id,name').eq('active',true);
+    for(const a of w.data||[]){
+      let k=/동천.*센트럴.*자이|동센자/.test(a.name||'')?'dongPrice':/옥수.*파크힐스|옥수/.test(a.name||'')?'oksuPrice':null;
+      if(!k)continue;
+      const p=await HH.sb.from('realestate_prices').select('recent_trade_price,asking_price,deal_date,checked_on').eq('watch_id',a.id).order('deal_date',{ascending:false,nullsFirst:false}).order('checked_on',{ascending:false}).limit(1);
+      const x=p.data&&p.data[0],v=x&&(x.asking_price||x.recent_trade_price);
+      if(v)S[k]=Math.round(v/W);
+    }
+    write();render()
+  }catch(e){console.warn(e)}
+}
 function reset(){S={...defaults};write();render()}
-write();ids.forEach(k=>$(k)&&$(k).addEventListener('input',render));$('loadPrices').addEventListener('click',loadPrices);$('reset').addEventListener('click',reset);$('cards').addEventListener('click',e=>{const b=e.target.closest('[data-share]');if(b)shareScenario(b.dataset.share,'portrait')});render();setTimeout(loadPrices,80);
+
+write();
+ids.forEach(k=>$(k)&&$(k).addEventListener('input',render));
+$('loadPrices')&&$('loadPrices').addEventListener('click',loadPrices);
+$('reset')&&$('reset').addEventListener('click',reset);
+$('cards')&&$('cards').addEventListener('click',e=>{const b=e.target.closest('[data-share]');if(b)shareScenario()});
+render();
+setTimeout(loadPrices,80);
 })();
