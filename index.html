@@ -244,7 +244,10 @@ async function openHome(){ setTimeout(syncTabs);
   /* 보험 만기(60일 안) — 우리 것만 (meta.ours=false: 아버지 차 보험 등 참고용) */
   (ct.data||[]).filter(x=>x.kind==="insurance"&&x.end_date&&!(x.meta&&x.meta.ours===false)&&dday(x.end_date)>=0&&dday(x.end_date)<=60).forEach(x=>todo.push([x.end_date,`🛡️ ${x.title} 만기${x.meta&&x.meta.renew?"·갱신":""}`,"assets"]));
   if(jeon&&dday(jeon.end_date)<=180) todo.push([jeon.end_date,`🏠 전세 만기`,"realestate"]);
+  /* 놓친 결제 의심(알림 꺼짐·MacroDroid 멈춤·카드대금 차이) — 있으면 맨 앞에 */
+  const ms=await q(sb.from("missed_payment_suspects").select("key"));
   todo.sort((a,b)=>a[0].localeCompare(b[0]));
+  if(ms.data&&ms.data.length) todo.unshift([today,`🔔 놓친 결제 의심 ${ms.data.length}건 확인`,"connect"]);
   $("upnext").innerHTML=todo.length?`<div class="grp">다가오는 일</div><div class="up">${todo.slice(0,5).map(([d,t,a])=>`<button type="button" class="upi" data-app="${a}"><b>${dday(d)<=0?"오늘":"D-"+dday(d)}</b><span>${esc(t)}</span><em>${md(d)}</em></button>`).join("")}</div>`:"";
   const tile=a=>`<button type="button" class="tile" data-app="${a.app}"><div class="ic" aria-hidden="true">${(INFO[a.app]||{}).ic||"📄"}</div><b>${a.title}</b><span class="d">${(INFO[a.app]||{}).d||""}</span>${extra[a.app]||""}</button>`;
   const used=new Set(GROUPS.flatMap(g=>g[1])), rest=APPS.filter(a=>!used.has(a.app));
