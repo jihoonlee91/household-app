@@ -5,7 +5,7 @@
   const COLORS={ledger:'#0C7480',assets:'#6E5AA6',company:'#2F5D8A',payroll:'#2F5D8A',dashboard:'#2F5D8A',investments:'#6E5AA6',sim:'#6E5AA6',realestate:'#0C7480',apply:'#0C7480',planner:'#6E5AA6',houseplan:'#0C7480',items:'#A8620B',gifts:'#C06A30',holidays:'#C06A30',trips:'#C06A30',wishlist:'#6E5AA6',races:'#C06A30',life:'#2F5D8A',family:'#2F5D8A',wedding:'#C06A30',connect:'#64727D',settlements:'#64727D'};
   const ICON={home:'🏠',ledger:'🧾',assets:'🏦',company:'🏢',payroll:'💼',dashboard:'📌',investments:'📊',sim:'📈',realestate:'🏠',apply:'📝',planner:'🗓️',houseplan:'🏘️',items:'🛋️',gifts:'🎁',holidays:'🧧',trips:'✈️',wishlist:'✨',races:'🏃',life:'🧭',family:'🌳',wedding:'💍',connect:'🔌',settlements:'✅'};
   const recentKey='hh-recent-apps';
-  let toastTimer=0,busyTimer=0,commandIndex=0,commandItems=[];
+  let toastTimer=0,busyTimer=0,slowTimer=0,commandIndex=0,commandItems=[];
 
   function ensureBase(){
     if(!$('#hh-progress'))document.body.insertAdjacentHTML('beforeend','<div id="hh-progress" aria-hidden="true"></div>');
@@ -16,7 +16,7 @@
     ensureBase();const t=$('#hh-shell-toast'),m=t.querySelector('.hh-toast-msg'),b=t.querySelector('button');m.textContent=message;b.hidden=!actionLabel;b.textContent=actionLabel||'';b.onclick=()=>{try{action&&action()}finally{t.classList.remove('on')}};clearTimeout(toastTimer);requestAnimationFrame(()=>t.classList.add('on'));toastTimer=setTimeout(()=>t.classList.remove('on'),actionLabel?6500:2600);
   }
   window.hhToast=toast;
-  function setBusy(on){ensureBase();clearTimeout(busyTimer);if(on){document.documentElement.classList.add('hh-busy');busyTimer=setTimeout(()=>document.documentElement.classList.remove('hh-busy'),12000)}else document.documentElement.classList.remove('hh-busy')}
+  function setBusy(on){ensureBase();clearTimeout(busyTimer);clearTimeout(slowTimer);if(on){document.documentElement.classList.add('hh-busy');busyTimer=setTimeout(()=>document.documentElement.classList.remove('hh-busy'),12000);slowTimer=setTimeout(()=>{if(document.documentElement.classList.contains('hh-busy')){const app=$('#pick')?.value;toast('앱을 불러오는 데 평소보다 오래 걸리고 있어요.','다시 열기',()=>{if(app&&app!=='home')window.openApp?.(app)})}},4500)}else document.documentElement.classList.remove('hh-busy')}
 
   function appTitle(app){
     const b=$(`#tabsbar [data-app="${CSS.escape(app)}"]`)||$(`#allList [data-app="${CSS.escape(app)}"]`)||$(`#tiles [data-app="${CSS.escape(app)}"]`);
@@ -28,6 +28,7 @@
   function navigate(app){
     const pick=$('#pick');if(pick)pick.value=app;if(app==='home')window.openHome?.();else window.openApp?.(app);window.syncTabs?.();remember(app);closeCommand();
   }
+  function scrollActiveToTop(){const f=$('#app');try{f?.contentWindow?.scrollTo({top:0,behavior:'smooth'});f?.contentDocument?.documentElement?.scrollTo?.({top:0,behavior:'smooth'});return true}catch(_){return false}}
   function recentRow(id){
     const apps=getRecent().filter(a=>$(`[data-app="${CSS.escape(a)}"]`));if(!apps.length)return null;const row=document.createElement('div');row.id=id;row.className='hh-recent';row.innerHTML='<span class="hh-rlabel">최근</span>'+apps.map(a=>`<button type="button" data-hh-recent="${esc(a)}"><i>${ICON[a]||'•'}</i>${esc(appTitle(a))}</button>`).join('');row.addEventListener('click',e=>{const b=e.target.closest('[data-hh-recent]');if(b)navigate(b.dataset.hhRecent)});return row
   }
@@ -67,15 +68,16 @@
   }
   function network(){ensureBase();const offline=!navigator.onLine;document.documentElement.classList.toggle('hh-offline',offline);if(!offline&&window.__hhWasOffline)toast('연결이 복구됐어요. 다시 동기화할 수 있습니다.');window.__hhWasOffline=offline}
 
-  document.addEventListener('click',e=>{const b=e.target.closest('[data-app]');if(!b)return;const app=b.dataset.app;if(app&&app!=='home'){setBusy(true);remember(app)}} ,true);
+  document.addEventListener('click',e=>{const b=e.target.closest('[data-app]');if(!b)return;const app=b.dataset.app;if(!app||app==='home')return;const current=$('#pick')?.value;if(app===current&&b.closest('#btm')){e.preventDefault();e.stopImmediatePropagation();setBusy(false);if(scrollActiveToTop())toast(`${appTitle(app)} 맨 위로 이동했어요.`);return}setBusy(true);remember(app)} ,true);
   document.addEventListener('keydown',e=>{
     const typing=/^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName)||e.target?.isContentEditable;
     if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openCommand();return}
     const cmd=$('#hh-command');if(cmd?.classList.contains('open')){if(e.key==='Escape'){e.preventDefault();closeCommand()}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();commandIndex=(commandIndex+(e.key==='ArrowDown'?1:-1)+Math.max(1,commandItems.length))%Math.max(1,commandItems.length);renderCommand(cmd.querySelector('input').value)}else if(e.key==='Enter'&&document.activeElement===cmd.querySelector('input')&&commandItems[commandIndex]){e.preventDefault();navigate(commandItems[commandIndex].app)}return}
     if(e.key==='/'&&!typing&&innerWidth>=700){e.preventDefault();openCommand()}
+    if(!typing&&e.altKey&&e.key.toLowerCase()==='h'){e.preventDefault();navigate('home');return}
     if(e.key==='Escape')$('#hh-install-guide')?._close?.()
   });
   window.addEventListener('online',network);window.addEventListener('offline',network);
-  window.addEventListener('DOMContentLoaded',()=>{decorateShell();network();const st=$('#status');if(st)new MutationObserver(()=>{const txt=st.textContent||'';if(/불러오는 중|확인 중|로그인.*중|마무리 중/.test(txt))setBusy(true);else if(!txt)setBusy(false)}).observe(st,{childList:true,subtree:true,characterData:true});const f=$('#app');if(f)f.addEventListener('load',()=>{setBusy(false);const app=$('#pick')?.value;if(app&&app!=='home')remember(app)});const sheet=$('#allSheet');if(sheet)new MutationObserver(()=>{if(sheet.classList.contains('open')){ensureAllSearch();const s=$('#hh-all-search');if(s){s.value='';filterAll('')}}}).observe(sheet,{attributes:true,attributeFilter:['class']});const root=$('#tiles')||document.body;new MutationObserver(()=>requestAnimationFrame(decorateShell)).observe(root,{childList:true,subtree:true})});
+  window.addEventListener('DOMContentLoaded',()=>{decorateShell();network();const st=$('#status');if(st)new MutationObserver(()=>{const txt=st.textContent||'';if(/불러오는 중|확인 중|로그인.*중|마무리 중/.test(txt))setBusy(true);else if(!txt)setBusy(false)}).observe(st,{childList:true,subtree:true,characterData:true});const f=$('#app');if(f)f.addEventListener('load',()=>{setBusy(false);const app=$('#pick')?.value;if(app&&app!=='home')remember(app);try{f.contentDocument?.body?.setAttribute('data-hh-app',app||'')}catch(_){}});const sheet=$('#allSheet');if(sheet)new MutationObserver(()=>{if(sheet.classList.contains('open')){ensureAllSearch();const s=$('#hh-all-search');if(s){s.value='';filterAll('')}}}).observe(sheet,{attributes:true,attributeFilter:['class']});const root=$('#tiles')||document.body;new MutationObserver(()=>requestAnimationFrame(decorateShell)).observe(root,{childList:true,subtree:true})});
   window.addEventListener('load',()=>{decorateShell();network();let hadController=!!navigator.serviceWorker?.controller;navigator.serviceWorker?.addEventListener('controllerchange',()=>{if(!hadController){hadController=true;return}toast('상지홈이 새 버전으로 업데이트됐어요.','적용',()=>location.reload())})});
 })();
