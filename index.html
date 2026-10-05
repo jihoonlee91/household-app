@@ -94,11 +94,11 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 #qsList{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.14);overflow:hidden}#qsList.on{display:block}
 .qsi{display:grid;grid-template-columns:28px auto 1fr;gap:8px;align-items:center;width:100%;text-align:left;border:0;border-radius:0;background:none;padding:10px 12px;color:var(--ink);font:inherit}.qsi:hover,.qsi.first{background:var(--bg)}.qsi i{font-style:normal;font-size:18px}.qsi span{color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.qsn{padding:12px;color:var(--muted);font-size:13px}
 .tile b .ls{display:none}
-/* 휴대폰 홈: 앱을 아이콘 격자로 한 화면에 (짧은 이름 + 숫자 하나) */
-@media (max-width:560px){
+/* 휴대폰·태블릿 홈: 앱을 아이콘 격자로 한 화면에 (짧은 이름 + 숫자 하나) */
+@media (max-width:1099px){
  #home .tile b .lf{display:none}#home .tile b .ls{display:inline}
  #home{padding-top:calc(14px + env(safe-area-inset-top,0px))!important}#home h2{font-size:17px!important;margin:2px 0 8px!important}#home .sub{display:none}#qs{margin-bottom:8px}#qsIn{padding:9px 12px;font-size:14px}
- #tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px 4px;margin-top:6px}#tiles .grp{display:none}#tiles .tiles{display:contents!important}
+ #tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:6px 4px;margin-top:6px}#tiles .grp{display:none}#tiles .tiles{display:contents!important}
  #home .tile{justify-items:center;align-content:start;text-align:center;padding:7px 1px 6px!important;gap:2px!important;border-radius:12px!important;min-height:0!important;border-left-width:1px!important;box-shadow:none!important}
  #home .tile{background:none!important;border:0!important}#home .tile::after{display:none}
  #home .tile .ic{width:44px!important;height:44px!important;font-size:22px!important;border-radius:14px;background:color-mix(in srgb,var(--gc) 16%,var(--card))!important;border:1px solid color-mix(in srgb,var(--gc) 30%,transparent)}
@@ -108,6 +108,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
  #home .grp{margin:9px 0 4px!important;font-size:11.5px!important}
  #home .up .upi:nth-child(n+4){display:none}
 }
+@media (min-width:561px) and (max-width:1099px){ #tiles{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))!important;gap:14px 8px!important} #home .tile .ic{width:58px!important;height:58px!important;font-size:28px!important;border-radius:18px} #home .tile b{font-size:13.5px!important} #home .tile .num{font-size:12.5px!important} }
 /* 디버그 */
 #dbgBtn{position:fixed;left:10px;bottom:calc(70px + env(safe-area-inset-bottom,0px));z-index:12;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:5px 10px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.15)}#dbgBtn.bad{border-color:var(--up);color:var(--up);font-weight:700}
 #dbgPanel{position:fixed;left:10px;right:10px;bottom:calc(110px + env(safe-area-inset-bottom,0px));max-height:60vh;overflow:auto;z-index:12;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;font:12px/1.4 ui-monospace,Consolas,monospace;box-shadow:0 6px 24px rgba(0,0,0,.25)}
@@ -121,7 +122,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 html{overscroll-behavior-y:contain}
 /* ===== 메뉴 안의 탭 (자산 › 투자 › 10년 시뮬레이터 등) ===== */
 #sub{display:none;position:fixed;z-index:3;left:0;right:0;top:env(safe-area-inset-top,0px);height:40px;box-sizing:border-box;gap:4px;padding:5px 10px;overflow-x:auto;scrollbar-width:none;background:var(--card);border-bottom:1px solid var(--line)}
-#sub::-webkit-scrollbar{display:none}
+#sub::-webkit-scrollbar{display:none}#sub.fr{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}#sub.fl.fr{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 82%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 82%,transparent)}#sub.fl:not(.fr){-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%);mask-image:linear-gradient(90deg,transparent,#000 12%)}
 html.has-sub.authed #sub{display:flex}
 #sub button{flex:0 0 auto;border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:999px;padding:4px 13px;font-size:13px;white-space:nowrap}
 #sub button[aria-current="page"]{background:var(--gc,var(--accent));border-color:var(--gc,var(--accent));color:#fff;font-weight:700}
@@ -227,6 +228,7 @@ try{ if(localStorage.getItem("hh-side")==="mini") document.documentElement.class
 $("sideTog").onclick=()=>{ const m=document.documentElement.classList.toggle("side-mini"); $("sideTog").textContent=m?"⇥":"⇤"; try{ localStorage.setItem("hh-side",m?"mini":""); }catch(_){} };
 $("tabsbar").onclick=e=>{ const b=e.target.closest("button[data-app]"); if(!b) return; $("pick").value=b.dataset.app; if(b.dataset.app==="home") openHome(); else openApp(b.dataset.app); syncTabs(); };
 $("app").addEventListener("load",applyTheme);
+$("sub").addEventListener("scroll",subFade,{passive:true});
 $("sub").onclick=e=>{ const b=e.target.closest("button[data-app]"); if(b) openApp(b.dataset.app); };
 // Keep OAuth in this browsing context. Mobile PWA popups may lose opener,
 // BroadcastChannel messages, or use a different browser's session storage.
@@ -425,7 +427,10 @@ async function simSnapshot(){
 /* 한 메뉴 안의 탭(예: 자산 › 투자 › 10년 시뮬레이터) */
 function renderSub(ent,app){ const tabs=ent&&ent.tabs?ent.tabs.filter(hasApp):[]; const on=tabs.length>1;
   document.documentElement.classList.toggle("has-sub",on);
-  $("sub").innerHTML=on?tabs.map(k=>`<button type="button" data-app="${k}" aria-current="${k===app?"page":"false"}" style="--gc:${ent.c}">${esc(TABT[k]||titleOf(k))}</button>`).join(""):""; }
+  $("sub").innerHTML=on?tabs.map(k=>`<button type="button" data-app="${k}" aria-current="${k===app?"page":"false"}" style="--gc:${ent.c}">${esc(TABT[k]||titleOf(k))}</button>`).join(""):"";
+  if(on) requestAnimationFrame(()=>{ const sb=$("sub"), cur=sb.querySelector('[aria-current="page"]'); if(cur) cur.scrollIntoView({inline:"center",block:"nearest"}); subFade(); }); }
+/* 탭이 화면보다 길면 오른쪽(또는 왼쪽)을 흐리게 → 더 있다는 표시 */
+function subFade(){ const sb=$("sub"); sb.classList.toggle("fr",sb.scrollLeft+sb.clientWidth<sb.scrollWidth-4); sb.classList.toggle("fl",sb.scrollLeft>4); }
 /* 셸이 새 버전으로 배포됐으면 앱을 열 때 새로고침 (열어 둔 탭이 예전 셸로 새 앱을 여는 문제 방지) */
 let shellTag=null; const tagOf=async()=>{ try{ const r=await fetch(location.pathname,{method:"HEAD",cache:"no-store"}); return r.headers.get("etag")||r.headers.get("last-modified"); }catch(e){ return null; } };
 tagOf().then(t=>shellTag=t);
@@ -441,7 +446,7 @@ async function openApp(app,fromPop){ const navigation=window.hhBeginNavigation(a
   if(b.error||!b.data){ msg("앱을 불러오지 못했습니다."); hhLog("error","앱을 불러오지 못함",{err:String(b.error&&b.error.message||b.error)},app); return; }
   const snapshot=(app==="sim"||(file&&file.snap))? await simSnapshot() : null;
   if(!window.hhIsCurrentNavigation(navigation)) return;
-  window.__hh.inputs=st.data?st.data.data:null; window.__hh.snapshot=snapshot; document.title=((ent&&ent.k!==app)?titleOf(ent.k)+" › ":"")+b.data.title+" · 상지홈";
+  window.__hh.inputs=st.data?st.data.data:null; window.__hh.snapshot=snapshot; document.title=((ent&&ent.k!==app)?titleOf(ent.k)+" › ":"")+b.data.title+" · 상지홈"; $("app").title=b.data.title;
   let html=b.data.html; const att=`<script>try{parent.hhAttach&&parent.hhAttach(window,${JSON.stringify(app)})}catch(e){}<\/script>`;
   html=/<head[^>]*>/i.test(html)?html.replace(/<head[^>]*>/i,m=>m+att):att+html;
   if(html.includes("<!--hh-common-->")) html=html.replace("<!--hh-common-->",()=>cm&&cm.html||"");
