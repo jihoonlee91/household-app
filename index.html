@@ -312,7 +312,7 @@ window.__hhLocalApps=Object.keys(FILES);
 /* 시뮬레이터 시작값: 자산 앱 계좌별 최신 잔액 + 살림살이 현재 시세 합계 */
 async function simSnapshot(){
   try{ await sb.functions.invoke("refresh-quotes",{body:{}}); }catch(e){}
-  const [a,b,it,qs,mb]=await Promise.all([sb.from("accounts").select("id,name,kind,owner_id,rate,meta").eq("active",true), sb.from("balances").select("account_id,as_of,amount,updated_at").order("as_of"), sb.from("items").select("value_now,status,account_id"), sb.from("quotes").select("symbol,price").eq("symbol","005930").maybeSingle(), sb.from("members").select("id,birth_date")]);
+  const [a,b,it,qs,mb,sh,po]=await Promise.all([sb.from("accounts").select("id,name,kind,owner_id,rate,meta").eq("active",true), sb.from("balances").select("account_id,as_of,amount,updated_at").order("as_of"), sb.from("items").select("value_now,status,account_id"), sb.from("quotes").select("symbol,price").eq("symbol","005930").maybeSingle(), sb.from("members").select("id,birth_date"), sb.from("salary_history").select("member_id,effective,contract_salary,prev_grade,cl,base_up,perf_raise,note").order("effective"), sb.from("payouts").select("member_id,paid_on,kind,gross")]);
   const birth=Object.fromEntries((mb.data||[]).map(m=>[m.id,m.birth_date]));
   if(!a.data||!b.data) return null;
   const last={}; b.data.forEach(x=>{ last[x.account_id]=x; });
@@ -332,7 +332,7 @@ async function simSnapshot(){
   const up=b.data.map(x=>x.updated_at).filter(Boolean).sort().pop(); const updatedAt=up?new Date(up).toLocaleString("sv-SE",{timeZone:"Asia/Seoul"}):null;
   const gear=(it.data||[]).filter(x=>!["판매함","폐기"].includes(x.status)&&x.account_id==null) /* 자동차 등 계좌와 연결된 물건은 자산 쪽에 이미 있음 */.reduce((s,x)=>s+(x.value_now||0),0); if(gear) vals.gear=gear;
   const debts=a.data.filter(x=>x.kind==="loan"&&v(x)<0).map(x=>{ const d={n:x.name,b:-v(x),r:+x.rate||0,o:x.owner_id}; if(/HF|전세대출|전월세/.test(x.name)) d.hf=true; if(/학자금/.test(x.name)){ d.amort=+((x.meta||{}).amort_year)||0; d.keep=true; } return d; });
-  return {asof,updatedAt,birth,list,params,vals,debts,ssPrice:qs&&qs.data?Number(qs.data.price):null};
+  return {asof,updatedAt,birth,list,params,vals,debts,ssPrice:qs&&qs.data?Number(qs.data.price):null,salHist:sh&&sh.data||null,payouts:po&&po.data||null};
 }
 /* 한 메뉴 안의 탭(예: 자산 › 투자 › 10년 시뮬레이터) */
 function renderSub(ent,app){ const tabs=ent&&ent.tabs?ent.tabs.filter(hasApp):[]; const on=tabs.length>1;
