@@ -1,5 +1,5 @@
 (()=>{
-  const VER='20261003-2';
+  const VER=window.HH_VER||'dev';
   let loader=null;
   const loadCanvas=()=>{
     if(window.html2canvas) return Promise.resolve(window.html2canvas);

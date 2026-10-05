@@ -1,5 +1,6 @@
 const CACHE='sangjihome-shell-v25';
-const SHELL=['./','./manifest.webmanifest','./manifest.webmanifest?v=20261005-5','./icon.svg','./apple-touch-icon.png','./install.js?v=20261005-5','./mobile-ui.js?v=20261005-5','./mobile-shell.css?v=20261005-5','./mobile-app.css?v=20261005-5','./delight-shell.css?v=20261005-5','./delight.js?v=20261005-5','./share.js?v=20261005-5','./sim.html?v=20261005-5','./sim-scenarios.css?v=20261005-5','./sim-scenarios.js?v=20261005-5','./wishlist.html?v=20261005-5','./car.html?v=20261005-5'];
+/* 오프라인 대비 공개 셸 파일 (버전 쿼리는 무시하고 찾음) */
+const SHELL=['./','./manifest.webmanifest','./icon.svg','./apple-touch-icon.png','./install.js','./mobile-ui.js','./mobile-shell.css','./mobile-app.css','./delight-shell.css','./delight.js','./share.js','./sim.html','./sim-scenarios.css','./sim-scenarios.js','./wishlist.html','./car.html'];
 const shellPaths=new Set(SHELL.map(path=>new URL(path,self.location.href).pathname));
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));
