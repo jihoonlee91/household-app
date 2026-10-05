@@ -7,8 +7,8 @@ try{ const v=JSON.parse(localStorage.getItem("sb-jdidzokxoaxqcnraowyu-auth-token
   if((v&&v.refresh_token)||/access_token=/.test(h)){ document.documentElement.classList.add("authed"); if(new URLSearchParams(location.search).get("app")) document.documentElement.classList.add("authed-app"); } }catch(e){}</script>
 <style>
 :root{--bg:#F3F5F6;--card:#fff;--ink:#15202A;--muted:#5B6873;--line:#D5DCE0;--accent:#0C7480;--up:#C2472F;--down:#1F5FAF;color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1419;--card:#161E25;--ink:#E4EAEE;--muted:#9AA7B1;--line:#2A3641;--accent:#4DB8C2;--up:#EE7A62;--down:#6FA8F0;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0E1419;--card:#161E25;--ink:#E4EAEE;--muted:#9AA7B1;--line:#2A3641;--accent:#4DB8C2;--up:#EE7A62;--down:#6FA8F0;color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1419;--card:#161E25;--ink:#E4EAEE;--muted:#9AA7B1;--line:#2A3641;--accent:#4DB8C2;--accent-ink:#0E1419;--up:#EE7A62;--down:#6FA8F0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1419;--card:#161E25;--ink:#E4EAEE;--muted:#9AA7B1;--line:#2A3641;--accent:#4DB8C2;--accent-ink:#0E1419;--up:#EE7A62;--down:#6FA8F0;color-scheme:dark}
 html,body{height:100%;margin:0}body{background:var(--bg);color:var(--ink);font:15px "IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
 #gate{min-height:100%;display:grid;place-items:center;padding:16px;box-sizing:border-box}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 24px;max-width:340px;width:100%;text-align:center}
@@ -24,7 +24,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
  #tabsbar{display:flex;flex:1;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0}#tabsbar::-webkit-scrollbar{display:none}
  #tabsbar button,#themeSeg button{border:0;background:none;color:var(--muted);padding:5px 9px;border-radius:8px;font:inherit;font-size:12.5px;white-space:nowrap;cursor:pointer}
  #tabsbar button:hover,#themeSeg button:hover{background:var(--bg);color:var(--ink)}
- #tabsbar button[aria-current="page"]{background:var(--gc,var(--accent));color:#fff;font-weight:700}#themeSeg button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:700}
+ #tabsbar button[aria-current="page"]{background:var(--gc,var(--accent));color:#fff;font-weight:700}#themeSeg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink,#fff);font-weight:700}
  #tabsbar .ti{font-style:normal}
  #tabsbar .tg{flex:0 0 auto;align-self:center;margin:0 2px 0 10px;padding:1px 7px;border-radius:6px;font-size:11px;font-weight:800;color:var(--gc);background:color-mix(in srgb,var(--gc) 13%,transparent);border-left:3px solid var(--gc)}
  #tabsbar button[data-app]:not([data-app="home"]){border-bottom:2px solid color-mix(in srgb,var(--gc) 35%,transparent);border-radius:8px 8px 4px 4px}
@@ -86,7 +86,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
  #allList .al{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
  #allList .al button{display:grid;justify-items:center;gap:4px;padding:10px 4px;font-size:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
  #allList .al button i{font-style:normal;font-size:22px}#allList .al button[aria-current="page"]{border-color:var(--accent);color:var(--accent);font-weight:700}
- #allSheet .sopt{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}#themeSeg2{display:flex;gap:2px;border:1px solid var(--line);border-radius:10px;padding:2px}#themeSeg2 button{border:0;padding:5px 10px;font-size:12.5px;background:none}#themeSeg2 button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:700}
+ #allSheet .sopt{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}#themeSeg2{display:flex;gap:2px;border:1px solid var(--line);border-radius:10px;padding:2px}#themeSeg2 button{border:0;padding:5px 10px;font-size:12.5px;background:none}#themeSeg2 button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink,#fff);font-weight:700}
 }
 
 /* 찾기 */
@@ -138,7 +138,7 @@ html.has-sub.authed #sub{display:flex}
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="🔍 찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="upnext"></div><div id="tiles"></div></main>
 <div id="ptr" aria-hidden="true">↻</div><nav id="sub" aria-label="탭"></nav><iframe id="app" title="앱"></iframe>
-<script src="./install.js?v=20261005-7"></script><!-- 셸 버전은 여기 한 곳: install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
+<script src="./install.js?v=20261006-1"></script><!-- 셸 버전은 여기 한 곳: install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>
 /* 로그인 안정화
@@ -453,9 +453,11 @@ async function openApp(app,fromPop){ const navigation=window.hhBeginNavigation(a
 let booted=false, bootPromise=null;
 function boot(){
   if(bootPromise) return bootPromise;
-  bootPromise=bootSession().catch(error=>{ const net=navigator.onLine===false||/fetch|network|load failed/i.test(String(error&&error.message)); hhLog(net?"warn":"error","시작 실패",{err:String(error&&error.message).slice(0,300)}); if(net){ msg("인터넷 연결을 기다리는 중… 연결되면 자동으로 이어져요."); return; } if(!booted) unauth(); msg("로그인 확인 중 오류가 발생했습니다. 다시 시도해 주세요. "+error.message); }).finally(()=>{ bootPromise=null; });
+  bootPromise=bootSession().catch(error=>{ const net=navigator.onLine===false||/fetch|network|load failed/i.test(String(error&&error.message)); hhLog(net?"warn":"error","시작 실패",{err:String(error&&error.message).slice(0,300)}); if(net){ showOffline(); return; } if(!booted) unauth(); msg("로그인 확인 중 오류가 발생했습니다. 다시 시도해 주세요. "+error.message); }).finally(()=>{ bootPromise=null; });
   return bootPromise;
 }
+/* 인터넷이 없을 때: 마지막으로 본 홈을 보여 주고, 연결되면 자동으로 이어짐 */
+function showOffline(){ try{ const c=JSON.parse(localStorage.getItem("hh-home")||"null"); if(c){ document.documentElement.classList.add("authed"); $("gate").style.display="none"; $("home").style.display="block"; $("upnext").innerHTML=c.u; $("tiles").innerHTML=c.t; $("hello").textContent="오프라인 · 마지막으로 본 화면"; } }catch(_){} msg("인터넷 연결을 기다리는 중… 연결되면 자동으로 이어져요."); }
 function unauth(){ window.hhBeginNavigation(null); clearTimeout(timer); window.__hh.inputs=null; window.__hh.snapshot=null; $("app").srcdoc=""; document.documentElement.classList.remove("authed","authed-app"); $("bar").style.display="none"; $("home").style.display="none"; $("app").style.display="none"; $("gate").style.display=""; }
 async function bootSession(){
   await handoff;
