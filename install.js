@@ -1,6 +1,6 @@
 (()=>{
   let promptEvent=null;
-  const APP_NAME='상지홈', META_VER='20261005-2', LOCAL_APP='houseplan', WISH_APP='wishlist', PLANNER_APP='planner', CAR_APP='car';
+  const APP_NAME='상지홈', META_VER='20261005-5', LOCAL_APP='houseplan', WISH_APP='wishlist', PLANNER_APP='planner', CAR_APP='car';
   window.__hhLocalApps=[LOCAL_APP,WISH_APP,CAR_APP]; /* 셸에 있는 화면: DB 번들이 없어도 오류 아님 */
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const loadMobileUi=()=>{if(document.getElementById('hh-mobile-ui'))return;const s=document.createElement('script');s.id='hh-mobile-ui';s.src='./mobile-ui.js?v='+META_VER;s.defer=true;document.head.appendChild(s);};
@@ -91,14 +91,19 @@
     if(fromPop)return;
     if(history.state&&history.state.app)history.replaceState({app},'','?app='+app);else{history.replaceState({home:1},'',location.pathname);history.pushState({app},'','?app='+app)}
   }
-  async function openLocalFile(app,title,file,fromPop){
+  async function openLocalFile(app,title,file,fromPop,navigation){
+    if(!document.documentElement.classList.contains('authed'))return;
+    navigation=navigation??window.hhBeginNavigation(app);
     const frame=prepareLocal(app,title);
-    if(frame){frame.style.display='block';try{const r=await fetch('./'+file+'?v='+META_VER,{cache:'no-store'});if(!r.ok)throw new Error(file+' '+r.status);frame.srcdoc=await r.text();}catch(e){frame.srcdoc='<p style="padding:20px">'+title+' 화면을 불러오지 못했습니다.</p>';console.warn(e)}}
+    if(frame){frame.style.display='block';try{const r=await fetch('./'+file+'?v='+META_VER,{cache:'no-store'});if(!r.ok)throw new Error(file+' '+r.status);const html=await r.text();if(!window.hhIsCurrentNavigation(navigation))return;frame.srcdoc=html;}catch(e){if(!window.hhIsCurrentNavigation(navigation))return;frame.srcdoc='<p style="padding:20px">'+title+' 화면을 불러오지 못했습니다.</p>';console.warn(e)}}
+    if(!window.hhIsCurrentNavigation(navigation))return;
     pushLocalHistory(app,fromPop);setTimeout(()=>{try{window.syncTabs&&window.syncTabs()}catch(e){}},0);
   }
   async function openHousing(fromPop){
-    try{if(window.__hh&&typeof window.simSnapshot==='function')window.__hh.snapshot=await window.simSnapshot();}catch(e){console.warn(e)}
-    return openLocalFile(LOCAL_APP,'주거 전략','sim.html',fromPop);
+    if(!document.documentElement.classList.contains('authed'))return;
+    const navigation=window.hhBeginNavigation(LOCAL_APP);
+    try{if(window.__hh&&typeof window.simSnapshot==='function'){const snapshot=await window.simSnapshot();if(!window.hhIsCurrentNavigation(navigation))return;window.__hh.snapshot=snapshot;}}catch(e){console.warn(e)}
+    return openLocalFile(LOCAL_APP,'주거 전략','sim.html',fromPop,navigation);
   }
   async function openWishlist(fromPop){return openLocalFile(WISH_APP,'해보고 싶은 것들','wishlist.html',fromPop);}
   async function openCar(fromPop){return openLocalFile(CAR_APP,'차량 관리','car.html',fromPop);}

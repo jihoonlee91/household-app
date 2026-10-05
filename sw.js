@@ -1,10 +1,31 @@
-const CACHE='sangjihome-shell-v24';
-const SHELL=['./','./manifest.webmanifest','./manifest.webmanifest?v=20261005-2','./icon.svg','./apple-touch-icon.png','./install.js?v=20261005-2','./mobile-ui.js?v=20261005-2','./mobile-shell.css?v=20261005-2','./mobile-app.css?v=20261005-2','./delight-shell.css?v=20261005-2','./delight.js?v=20261005-2','./share.js?v=20261005-2','./sim.html?v=20261005-2','./sim-scenarios.css?v=20261005-1','./sim-scenarios.js?v=20261005-1','./wishlist.html?v=20261005-2','./car.html?v=20261005-2'];
-const PUSH_ACTION='https://jdidzokxoaxqcnraowyu.supabase.co/functions/v1/push-dispatch';
-self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).catch(()=>{}));self.skipWaiting();});
-self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
-self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;const url=new URL(event.request.url);if(url.origin!==location.origin)return;if(event.request.mode==='navigate'){event.respondWith(fetch(event.request,{cache:'no-store'}).catch(()=>caches.match('./')));return;}const fresh=/\/(install\.js|share\.js|mobile-ui\.js|mobile-shell\.css|mobile-app\.css|delight-shell\.css|delight\.js|sim\.html|wishlist\.html|car\.html|sim-scenarios\.(?:js|css))$/.test(url.pathname);event.respondWith(fetch(event.request,fresh?{cache:'no-store'}:undefined).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(event.request,copy)).catch(()=>{});return r;}).catch(()=>caches.match(event.request)));});
+const CACHE='sangjihome-shell-v25';
+const SHELL=['./','./manifest.webmanifest','./manifest.webmanifest?v=20261005-5','./icon.svg','./apple-touch-icon.png','./install.js?v=20261005-5','./mobile-ui.js?v=20261005-5','./mobile-shell.css?v=20261005-5','./mobile-app.css?v=20261005-5','./delight-shell.css?v=20261005-5','./delight.js?v=20261005-5','./share.js?v=20261005-5','./sim.html?v=20261005-5','./sim-scenarios.css?v=20261005-5','./sim-scenarios.js?v=20261005-5','./wishlist.html?v=20261005-5','./car.html?v=20261005-5'];
+const shellPaths=new Set(SHELL.map(path=>new URL(path,self.location.href).pathname));
+self.addEventListener('install',event=>{
+  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));
+});
+self.addEventListener('activate',event=>{
+  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('sangjihome-shell-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));
+});
+self.addEventListener('fetch',event=>{
+  const request=event.request,url=new URL(request.url);
+  if(request.method!=='GET'||url.origin!==self.location.origin)return;
+  // Only public shell files belong in the offline cache.
+  if(request.mode!=='navigate'&&!shellPaths.has(url.pathname))return;
+  event.respondWith((async()=>{
+    const cache=await caches.open(CACHE);
+    try{
+      const response=await fetch(request,{cache:'no-store'});
+      if(response.ok&&response.type!=='opaque')await cache.put(request,response.clone()).catch(()=>{});
+      return response;
+    }catch(error){
+      const fallback=await cache.match(request,{ignoreSearch:true})||(request.mode==='navigate'?await cache.match('./'):null);
+      return fallback||new Response('오프라인 상태입니다. 연결 후 다시 시도해 주세요.',{status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}});
+    }
+  })());
+});
 
+const PUSH_ACTION='https://jdidzokxoaxqcnraowyu.supabase.co/functions/v1/push-dispatch';
 // 서버 payload의 title 자체가 '앱 · 알림종류'라서 잠금화면에서도 카테고리를 바로 알 수 있다.
 self.addEventListener('push',event=>{
   let p={};try{p=event.data?event.data.json():{}}catch(_){p={title:'상지홈',body:event.data?event.data.text():''}}

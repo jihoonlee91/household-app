@@ -1,0 +1,20 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+(async()=>{
+  const handlers={},deleted=[],stored=[];let networkError=false,status=200,matchedOptions;
+  const cache={addAll:async()=>{},put:async(request)=>stored.push(request.url),match:async(request,options)=>{matchedOptions=options;return new Response('cached');}};
+  const context={URL,Response,Set,Promise,self:{location:{href:'https://example.test/household-app/sw.js',origin:'https://example.test'},addEventListener:(type,fn)=>handlers[type]=fn,skipWaiting:async()=>{},clients:{claim:async()=>{}}},caches:{open:async()=>cache,keys:async()=>['other-app','sangjihome-shell-v21','sangjihome-shell-v25'],delete:async key=>deleted.push(key)},fetch:async()=>{if(networkError)throw Error('offline');return new Response('network',{status});}};
+  vm.runInNewContext(fs.readFileSync(__dirname+'/sw.js','utf8'),context);
+  let pending;handlers.activate({waitUntil:p=>pending=p});await pending;
+  assert.deepEqual(deleted,['sangjihome-shell-v21']);
+  const get=async(path,mode='cors')=>{let response;handlers.fetch({request:{method:'GET',url:'https://example.test/household-app/'+path,mode},respondWith:p=>response=p});return response&&await response;};
+  assert.equal(await get('private-data.json'),undefined);
+  assert.equal((await get('install.js?v=new')).status,200);assert.equal(stored.length,1);
+  status=500;await get('install.js?v=bad');assert.equal(stored.length,1);
+  networkError=true;assert.equal(await (await get('install.js?v=missing')).text(),'cached');assert.equal(matchedOptions.ignoreSearch,true);
+  const html=fs.readFileSync(__dirname+'/index.html','utf8');
+  const bridge=html.match(/let timer=null, curApp=null, navigationId=0;([\s\S]*?)window.hhIsCurrentNavigation=id=>id===navigationId;/)[0];
+  const shell={window:{}};vm.runInNewContext(bridge,shell);const first=shell.window.hhBeginNavigation('assets'),second=shell.window.hhBeginNavigation('ledger');
+  assert.equal(shell.window.hhIsCurrentNavigation(first),false);assert.equal(shell.window.hhIsCurrentNavigation(second),true);
+  shell.window.hhBeginNavigation(null);assert.equal(shell.window.hhIsCurrentNavigation(second),false);
+  console.log('runtime OK: navigation ordering, cache isolation, HTTP errors, offline version fallback');
+})().catch(error=>{console.error(error);process.exitCode=1;});

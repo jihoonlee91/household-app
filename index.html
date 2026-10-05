@@ -99,7 +99,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="upnext"></div><div id="tiles"></div></main>
 <iframe id="app" title="앱"></iframe>
-<script src="./install.js?v=20261005-2"></script>
+<script src="./install.js?v=20261005-5"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>
 /* 로그인 안정화
@@ -109,7 +109,9 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 const AUTH_KEY="sb-jdidzokxoaxqcnraowyu-auth-token";
 const sb=supabase.createClient("https://jdidzokxoaxqcnraowyu.supabase.co","sb_publishable_sgaob3nqRHgAaKBs_4yclw_-Wq7stKH",{auth:{flowType:"implicit",persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:AUTH_KEY,lock:async(_n,_t,fn)=>await fn()}});
 const $=id=>document.getElementById(id), msg=t=>{ $("msg").textContent=t; $("status").textContent=t; };
-let timer=null, curApp=null;
+let timer=null, curApp=null, navigationId=0;
+window.hhBeginNavigation=app=>{ curApp=app; return ++navigationId; };
+window.hhIsCurrentNavigation=id=>id===navigationId;
 // Read OAuth errors before successful boot removes the callback URL.
 const authParams=new URLSearchParams(location.hash.slice(1));
 const authQuery=new URLSearchParams(location.search);
@@ -129,7 +131,7 @@ let theme=""; try{ theme=localStorage.getItem("hh-theme")||""; }catch(e){}
 function applyTheme(){ const set=el=>{ if(!el) return; if(theme) el.setAttribute("data-theme",theme); else el.removeAttribute("data-theme"); };
   set(document.documentElement); try{ set($("app").contentDocument&&$("app").contentDocument.documentElement); }catch(e){} }
 /* 앱(iframe) 쪽에서 쓰는 다리: 입력값을 부부 공용 DB(app_state)에 저장 */
-window.__hh={sb,inputs:null,open:app=>{ $("pick").value=app; openApp(app); },saveInputs(d){ const app=curApp; clearTimeout(timer); timer=setTimeout(async()=>{ const {error}=await sb.from("app_state").upsert({app,key:"inputs",data:d,updated_at:new Date().toISOString()}); if(error) console.warn(error); },700); }};
+window.__hh={sb,inputs:null,open:app=>{ $("pick").value=app; openApp(app); },saveInputs(d){ const app=curApp; if(!app) return; clearTimeout(timer); timer=setTimeout(async()=>{ const {error}=await sb.from("app_state").upsert({app,key:"inputs",data:d,updated_at:new Date().toISOString()}); if(error) console.warn(error); },700); }};
 const setTheme=t=>{ theme=t; $("theme").value=t; try{localStorage.setItem("hh-theme",t);}catch(_){} applyTheme(); syncSeg(); };
 function syncSeg(){ document.querySelectorAll("#themeSeg button,#themeSeg2 button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.t===theme))); }
 $("theme").value=theme; applyTheme(); syncSeg(); $("theme").onchange=e=>setTheme(e.target.value);
@@ -163,7 +165,7 @@ const INFO={company:{ic:"🏢",d:"급여·성과급 등 회사에서 받은 돈�
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fm=v=>v==null?"–":(Math.abs(v)>=1e8?(v/1e8).toFixed(1)+"억":Math.round(v/1e4).toLocaleString("ko-KR")+"만");
 window.addEventListener("popstate",e=>{ const a=e.state&&e.state.app; if(a){ $("pick").value=a; openApp(a,true); } else openHome(); });
-async function openHome(){ setTimeout(syncTabs);
+async function openHome(){ window.hhBeginNavigation(null); setTimeout(syncTabs);
   curApp=null; msg(""); $("app").style.display="none"; $("app").srcdoc=""; document.documentElement.classList.add("authed"); $("gate").style.display="none"; $("bar").style.display="flex"; $("home").style.display="block"; $("pick").value="home";
   document.title="상지홈"; history.replaceState({home:1},"",location.pathname);
   const now=new Date(), ym=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
@@ -288,13 +290,16 @@ async function simSnapshot(){
 /* 셸이 새 버전으로 배포됐으면 앱을 열 때 새로고침 (열어 둔 탭이 예전 셸로 새 앱을 여는 문제 방지) */
 let shellTag=null; const tagOf=async()=>{ try{ const r=await fetch(location.pathname,{method:"HEAD",cache:"no-store"}); return r.headers.get("etag")||r.headers.get("last-modified"); }catch(e){ return null; } };
 tagOf().then(t=>shellTag=t);
-async function openApp(app,fromPop){ setTimeout(syncTabs);
-  if(app!=="home"&&shellTag){ const t=await tagOf(); if(t&&t!==shellTag){ location.href=location.pathname+"?app="+encodeURIComponent(app); return; } }
+async function openApp(app,fromPop){ const navigation=window.hhBeginNavigation(app); setTimeout(syncTabs);
+  if(app!=="home"&&shellTag){ const t=await tagOf(); if(!window.hhIsCurrentNavigation(navigation)) return; if(t&&t!==shellTag){ location.href=location.pathname+"?app="+encodeURIComponent(app); return; } }
   if(app==="home"){ openHome(); return; }
   curApp=app; $("home").style.display="none"; $("app").style.display="none"; msg("불러오는 중…");
   const [b,st]=await Promise.all([sb.from("app_bundles").select("html,title").eq("app",app).maybeSingle(), sb.from("app_state").select("data").eq("app",app).eq("key","inputs").maybeSingle()]);
+  if(!window.hhIsCurrentNavigation(navigation)) return;
   if(b.error||!b.data){ msg((window.__hhLocalApps||[]).includes(app)?"":"앱을 불러오지 못했습니다."); return; }
-  window.__hh.inputs=st.data?st.data.data:null; window.__hh.snapshot=app==="sim"? await simSnapshot() : null; document.title=b.data.title+" · 상지홈";
+  const snapshot=app==="sim"? await simSnapshot() : null;
+  if(!window.hhIsCurrentNavigation(navigation)) return;
+  window.__hh.inputs=st.data?st.data.data:null; window.__hh.snapshot=snapshot; document.title=b.data.title+" · 상지홈";
   document.documentElement.classList.add("authed"); $("gate").style.display="none"; $("bar").style.display="flex"; $("app").style.display="block"; $("app").srcdoc=b.data.html; msg("");
   /* 뒤로가기 → 홈: 앱은 홈 위에 한 칸만 쌓음 */
   if(fromPop||(history.state&&history.state.app)) history.replaceState({app},"","?app="+encodeURIComponent(app)); else { history.replaceState({home:1},"",location.pathname); history.pushState({app},"","?app="+encodeURIComponent(app)); }
@@ -305,7 +310,7 @@ function boot(){
   bootPromise=bootSession().catch(error=>{ if(!booted) unauth(); msg("로그인 확인 중 오류가 발생했습니다. 다시 시도해 주세요. "+error.message); }).finally(()=>{ bootPromise=null; });
   return bootPromise;
 }
-function unauth(){ document.documentElement.classList.remove("authed","authed-app"); $("bar").style.display="none"; $("home").style.display="none"; $("app").style.display="none"; $("gate").style.display=""; }
+function unauth(){ window.hhBeginNavigation(null); clearTimeout(timer); window.__hh.inputs=null; window.__hh.snapshot=null; $("app").srcdoc=""; document.documentElement.classList.remove("authed","authed-app"); $("bar").style.display="none"; $("home").style.display="none"; $("app").style.display="none"; $("gate").style.display=""; }
 async function bootSession(){
   await handoff;
   const {data:{session}}=await sb.auth.getSession(); if(!session){ unauth(); if(!authError&&!/실패/.test($("msg").textContent)) msg(""); return; }
@@ -332,6 +337,7 @@ async function bootSession(){
   $("hello").textContent=`${me.name}님, 안녕하세요`; $("hsub").textContent="우리집 가계 앱";
   $("home").onclick=e=>{ const t=e.target.closest(".tile,.upi"); if(t){ $("pick").value=t.dataset.app; openApp(t.dataset.app); } };
   const want=new URLSearchParams(location.search).get("app")||"home"; $("pick").value=want; $("pick").onchange=e=>openApp(e.target.value);
+  document.documentElement.classList.add("authed");
   await openApp(want);
   booted=true;
 }
