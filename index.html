@@ -191,7 +191,8 @@ async function hhFetch(input,init){ const url=String(input&&input.url||input), t
 const sb=supabase.createClient(SB_URL,SB_KEY,{global:{fetch:hhFetch},auth:{flowType:"implicit",persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:AUTH_KEY,lock:async(_n,_t,fn)=>await fn()}});
 const $=id=>document.getElementById(id), msg=t=>{ $("msg").textContent=t; $("status").textContent=t; };
 let timer=null, curApp=null, navigationId=0;
-window.hhBeginNavigation=app=>{ curApp=app; return ++navigationId; };
+/* 화면을 바꿀 때마다 이전 앱이 연 실시간 채널을 닫음 (앱들이 셸의 DB 연결로 채널을 열어서, 안 닫으면 앱을 오갈수록 쌓임) */
+window.hhBeginNavigation=app=>{ curApp=app; try{ if(typeof sb!=="undefined"&&sb.getChannels&&sb.getChannels().length) sb.removeAllChannels(); }catch(_){} return ++navigationId; };
 window.hhIsCurrentNavigation=id=>id===navigationId;
 // Read OAuth errors before successful boot removes the callback URL.
 const authParams=new URLSearchParams(location.hash.slice(1));
