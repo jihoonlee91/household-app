@@ -1,5 +1,5 @@
 (()=>{
-  const VER='20261005-1';
+  const VER='20261005-2';
   const addCss=(doc,id,url)=>{if(!doc||doc.getElementById(id))return;const l=doc.createElement('link');l.id=id;l.rel='stylesheet';l.href=url;(doc.head||doc.documentElement).appendChild(l)};
   const addScript=(doc,id,url)=>{if(!doc||doc.getElementById(id))return;const s=doc.createElement('script');s.id=id;s.src=url;s.defer=true;(doc.head||doc.documentElement).appendChild(s)};
   const shellUrl=new URL('./mobile-shell.css?v='+VER,location.href).href;

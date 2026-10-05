@@ -1,5 +1,5 @@
-const CACHE='sangjihome-shell-v23';
-const SHELL=['./','./manifest.webmanifest','./manifest.webmanifest?v=20261005-1','./icon.svg','./apple-touch-icon.png','./install.js?v=20261005-1','./mobile-ui.js?v=20261005-1','./mobile-shell.css?v=20261005-1','./mobile-app.css?v=20261005-1','./delight-shell.css?v=20261005-1','./delight.js?v=20261005-1','./share.js?v=20261005-1','./sim.html?v=20261005-1','./sim-scenarios.css?v=20261005-1','./sim-scenarios.js?v=20261005-1','./wishlist.html?v=20261005-1','./car.html?v=20261005-1'];
+const CACHE='sangjihome-shell-v24';
+const SHELL=['./','./manifest.webmanifest','./manifest.webmanifest?v=20261005-2','./icon.svg','./apple-touch-icon.png','./install.js?v=20261005-2','./mobile-ui.js?v=20261005-2','./mobile-shell.css?v=20261005-2','./mobile-app.css?v=20261005-2','./delight-shell.css?v=20261005-2','./delight.js?v=20261005-2','./share.js?v=20261005-2','./sim.html?v=20261005-2','./sim-scenarios.css?v=20261005-1','./sim-scenarios.js?v=20261005-1','./wishlist.html?v=20261005-2','./car.html?v=20261005-2'];
 const PUSH_ACTION='https://jdidzokxoaxqcnraowyu.supabase.co/functions/v1/push-dispatch';
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).catch(()=>{}));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
