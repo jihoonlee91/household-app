@@ -280,7 +280,7 @@ const NAV=[
   {k:"insurance",ic:"🛡️",d:"보험별로 무슨 일에 얼마 받는지, 회사 의료비 지원, 청구"}]],
  ["자산","#1F6FA8",[
   {k:"assets",ic:"🏦",d:"통장·증권·대출 잔액, 순자산 추이, 앞으로 10년 시뮬레이션",tabs:["assets","investments","sim"]},
-  {k:"realestate",ic:"🏠",d:"전세 계약·후보 단지 시세·청약 일정·주거 전략",tabs:["realestate","apply","housing","houseplan"]}]],
+  {k:"realestate",ic:"🏠",d:"전세 계약·후보 단지 시세·청약 일정·주거 전략",tabs:["realestate","apply","housing","houseplan","dongcheon"]}]],
  ["생활","#6E5AA6",[
   {k:"planner",ic:"🗓️",d:"다른 앱에 없는 주요 일정"},
   {k:"items",ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"},
@@ -302,7 +302,7 @@ const NAV=[
 /* 셸 저장소에 있는 화면(DB 번들 아님) */
 const FILES={houseplan:{t:"주거 시나리오",f:"sim.html",snap:1},wishlist:{t:"해보고 싶은 것들",f:"wishlist.html"},car:{t:"차량 관리",f:"car.html"}};
 /* 탭 이름(메뉴 이름과 다를 때만) */
-const TABT={ledger:"가계부",dashboard:"한눈에",settlements:"검토함",company:"회사 수입",payroll:"급여명세·공제",assets:"자산",investments:"투자",sim:"10년 시뮬레이터",realestate:"부동산",apply:"청약·분양",housing:"주거 전략",houseplan:"주거 시나리오",connect:"연결",notifications:"알림 설정",macrodroid:"수신 상태"};
+const TABT={ledger:"가계부",dashboard:"한눈에",settlements:"검토함",company:"회사 수입",payroll:"급여명세·공제",assets:"자산",investments:"투자",sim:"10년 시뮬레이터",realestate:"부동산",apply:"청약·분양",housing:"주거 전략",houseplan:"시나리오 계산",dongcheon:"동천센트럴자이",connect:"연결",notifications:"알림 설정",macrodroid:"수신 상태"};
 const SHORT={company:"회사",connect:"설정",assets:"자산",realestate:"부동산",holidays:"명절·용돈",life:"타임라인",wedding:"결혼식",wishlist:"버킷리스트"};
 const ENTRIES=NAV.flatMap(([g,c,es])=>es.map(e=>Object.assign({g,c},e)));
 const INFO=Object.fromEntries(ENTRIES.map(e=>[e.k,e]));
