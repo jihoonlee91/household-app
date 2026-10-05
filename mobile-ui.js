@@ -1,5 +1,5 @@
 (()=>{
-  const VER='20261005-3';
+  const VER='20261005-4';
   const addCss=(doc,id,url)=>{if(!doc||doc.getElementById(id))return;const l=doc.createElement('link');l.id=id;l.rel='stylesheet';l.href=url;(doc.head||doc.documentElement).appendChild(l)};
   const addScript=(doc,id,url)=>{if(!doc||doc.getElementById(id))return;const s=doc.createElement('script');s.id=id;s.src=url;s.defer=true;(doc.head||doc.documentElement).appendChild(s)};
   const shellUrl=new URL('./mobile-shell.css?v='+VER,location.href).href;
@@ -14,6 +14,13 @@
   const NAV={
     payroll:{icon:'💵',label:'급여·공제',group:'돈',after:'company',color:'#0C7480'},
     income:{icon:'💰',label:'소득 비교',group:'돈',after:'payroll',color:'#0C7480'},
+    tax:{icon:'🧮',label:'세금·연말정산',group:'돈',after:'income',color:'#0C7480'},
+    career:{icon:'🧭',label:'커리어·이직',group:'돈',after:'tax',color:'#0C7480'},
+    subscriptions:{icon:'🔁',label:'고정비·구독',group:'돈',after:'career',color:'#0C7480'},
+    health:{icon:'❤️',label:'건강·운동',group:'생활',after:'items',color:'#6E5AA6'},
+    insurance:{icon:'🛡️',label:'보험·보장',group:'생활',after:'health',color:'#6E5AA6'},
+    documents:{icon:'📁',label:'문서·계약',group:'생활',after:'insurance',color:'#6E5AA6'},
+    decisions:{icon:'⚖️',label:'의사결정',group:'생활',after:'documents',color:'#6E5AA6'},
     macrodroid:{icon:'📡',label:'알림 수신 상태',group:'설정',after:'connect',color:'#5D6A75'}
   };
   const groupBox=(root,name)=>{const h=[...root.querySelectorAll('.ag')].find(x=>x.textContent.trim()===name);return h&&h.nextElementSibling&&h.nextElementSibling.classList.contains('al')?h.nextElementSibling:null};
