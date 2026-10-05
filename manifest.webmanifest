@@ -3,16 +3,28 @@
   "name": "상지홈",
   "short_name": "상지홈",
   "description": "지훈·상아 가계 플랫폼",
+  "lang": "ko",
+  "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
+  "display_override": ["standalone", "minimal-ui"],
+  "launch_handler": { "client_mode": "navigate-existing" },
   "background_color": "#F3F5F6",
   "theme_color": "#0C7480",
   "orientation": "any",
+  "categories": ["finance", "lifestyle", "productivity"],
   "icons": [
-    {"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "가계부", "short_name": "가계부", "url": "./?app=ledger", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "자산", "short_name": "자산", "url": "./?app=assets", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "부동산", "short_name": "부동산", "url": "./?app=realestate", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "찾기", "short_name": "찾기", "url": "./?find=1", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
   ]
 }

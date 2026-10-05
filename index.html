@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>상지홈</title><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0C7480"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="상지홈"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg"><link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<title>상지홈</title><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0C7480" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0E1419" media="(prefers-color-scheme: dark)"><meta name="color-scheme" content="light dark"><meta name="format-detection" content="telephone=no"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="상지홈"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg"><link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"><link rel="preconnect" href="https://jdidzokxoaxqcnraowyu.supabase.co">
 <script>/* 저장된 로그인이 있으면 첫 화면부터 로그인 창 없이 (새로고침 깜빡임 방지). 실제 확인은 아래 boot()가 하고, 로그인이 없으면 되돌림 */
 try{ const v=JSON.parse(localStorage.getItem("sb-jdidzokxoaxqcnraowyu-auth-token")||"null"), h=location.hash;
@@ -89,6 +89,36 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
  #allSheet .sopt{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}#themeSeg2{display:flex;gap:2px;border:1px solid var(--line);border-radius:10px;padding:2px}#themeSeg2 button{border:0;padding:5px 10px;font-size:12.5px;background:none}#themeSeg2 button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:700}
 }
 
+/* 찾기 */
+#qs{position:relative;margin:0 0 14px}#qsIn{width:100%;box-sizing:border-box;font:inherit;font-size:15px;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);outline:none}#qsIn:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+#qsList{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.14);overflow:hidden}#qsList.on{display:block}
+.qsi{display:grid;grid-template-columns:28px auto 1fr;gap:8px;align-items:center;width:100%;text-align:left;border:0;border-radius:0;background:none;padding:10px 12px;color:var(--ink);font:inherit}.qsi:hover,.qsi.first{background:var(--bg)}.qsi i{font-style:normal;font-size:18px}.qsi span{color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.qsn{padding:12px;color:var(--muted);font-size:13px}
+.tile b .ls{display:none}
+/* 휴대폰 홈: 앱을 아이콘 격자로 한 화면에 (짧은 이름 + 숫자 하나) */
+@media (max-width:560px){
+ #home .tile b .lf{display:none}#home .tile b .ls{display:inline}
+ #home{padding-top:calc(14px + env(safe-area-inset-top,0px))!important}#home h2{font-size:17px!important;margin:2px 0 8px!important}#home .sub{display:none}#qs{margin-bottom:8px}#qsIn{padding:9px 12px;font-size:14px}
+ #tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px 4px;margin-top:6px}#tiles .grp{display:none}#tiles .tiles{display:contents!important}
+ #home .tile{justify-items:center;align-content:start;text-align:center;padding:7px 1px 6px!important;gap:2px!important;border-radius:12px!important;min-height:0!important;border-left-width:1px!important;box-shadow:none!important}
+ #home .tile{background:none!important;border:0!important}#home .tile::after{display:none}
+ #home .tile .ic{width:44px!important;height:44px!important;font-size:22px!important;border-radius:14px;background:color-mix(in srgb,var(--gc) 16%,var(--card))!important;border:1px solid color-mix(in srgb,var(--gc) 30%,transparent)}
+ #home .tile b{font-size:11.5px!important;font-weight:600;line-height:1.15;word-break:keep-all}
+ #home .tile>span,#home .tile .bar{display:none!important}
+ #home .tile .num{font-size:11px!important;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+ #home .grp{margin:9px 0 4px!important;font-size:11.5px!important}
+ #home .up .upi:nth-child(n+4){display:none}
+}
+/* 디버그 */
+#dbgBtn{position:fixed;left:10px;bottom:calc(70px + env(safe-area-inset-bottom,0px));z-index:12;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:5px 10px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.15)}#dbgBtn.bad{border-color:var(--up);color:var(--up);font-weight:700}
+#dbgPanel{position:fixed;left:10px;right:10px;bottom:calc(110px + env(safe-area-inset-bottom,0px));max-height:60vh;overflow:auto;z-index:12;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;font:12px/1.4 ui-monospace,Consolas,monospace;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+@media (min-width:1100px){#dbgPanel{left:auto;width:560px}#dbgBtn{bottom:12px;left:auto;right:12px}#dbgPanel{bottom:52px}}
+#dbgPanel .dh{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}#dbgPanel .dh span{color:var(--muted);margin-right:auto}#dbgPanel button{border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:2px 8px;font-size:11.5px}
+#dbgPanel h4{margin:8px 0 4px;font-size:12px}#dbgPanel .l{padding:2px 0;border-bottom:1px dashed var(--line);word-break:break-all}#dbgPanel .l i{color:var(--muted);font-style:normal;margin-right:4px}#dbgPanel .l.error b{color:var(--up)}#dbgPanel .l.warn b{color:#B7791F}#dbgPanel .l small{display:block;color:var(--muted)}#dbgPanel em{color:var(--muted)}
+/* 당겨서 새로고침 표시 */
+#ptr{position:fixed;left:50%;top:calc(8px + env(safe-area-inset-top,0px));z-index:9;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.15);color:var(--muted);font-size:18px;opacity:0;transform:translate(-50%,-50px);transition:opacity .15s;pointer-events:none}
+#ptr.on{opacity:1}#ptr.ready{color:var(--accent);border-color:var(--accent)}#ptr.spin{animation:ptrspin .7s linear infinite;opacity:1;transform:translate(-50%,40px)}
+@keyframes ptrspin{to{transform:translate(-50%,40px) rotate(360deg)}}
+html{overscroll-behavior-y:contain}
 /* ===== 메뉴 안의 탭 (자산 › 투자 › 10년 시뮬레이터 등) ===== */
 #sub{display:none;position:fixed;z-index:3;left:0;right:0;top:env(safe-area-inset-top,0px);height:40px;box-sizing:border-box;gap:4px;padding:5px 10px;overflow-x:auto;scrollbar-width:none;background:var(--card);border-bottom:1px solid var(--line)}
 #sub::-webkit-scrollbar{display:none}
@@ -106,17 +136,58 @@ html.has-sub.authed #sub{display:flex}
 <nav id="btm" aria-label="자주 쓰는 앱"></nav>
 <div id="allSheet" aria-hidden="true"><div class="sheet"><div class="sh"><b>전체 앱</b><button type="button" id="allClose" aria-label="닫기">닫기</button></div><div id="allList"></div>
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
-<main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="upnext"></div><div id="tiles"></div></main>
-<nav id="sub" aria-label="탭"></nav><iframe id="app" title="앱"></iframe>
-<script src="./install.js?v=20261005-6"></script><!-- 셸 버전은 여기 한 곳: install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
+<main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="🔍 찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="upnext"></div><div id="tiles"></div></main>
+<div id="ptr" aria-hidden="true">↻</div><nav id="sub" aria-label="탭"></nav><iframe id="app" title="앱"></iframe>
+<script src="./install.js?v=20261005-7"></script><!-- 셸 버전은 여기 한 곳: install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>
 /* 로그인 안정화
    - lock: supabase 기본 잠금(navigator.locks)은 같은 사이트의 모든 탭·설치 앱 창이 같이 씀. 예전 창 하나가 잠금을 쥐고 멈추면
      새 창이 로그인 정보를 영영 못 읽음(서버 로그: GitHub 인증 성공 후 /user 호출 없음). 잠금 없이 바로 실행
    - detectSessionInUrl:false: 돌아온 주소(#access_token=…)는 아래에서 직접 읽어 setSession */
-const AUTH_KEY="sb-jdidzokxoaxqcnraowyu-auth-token";
-const sb=supabase.createClient("https://jdidzokxoaxqcnraowyu.supabase.co","sb_publishable_sgaob3nqRHgAaKBs_4yclw_-Wq7stKH",{auth:{flowType:"implicit",persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:AUTH_KEY,lock:async(_n,_t,fn)=>await fn()}});
+const AUTH_KEY="sb-jdidzokxoaxqcnraowyu-auth-token", SB_URL="https://jdidzokxoaxqcnraowyu.supabase.co", SB_KEY="sb_publishable_sgaob3nqRHgAaKBs_4yclw_-Wq7stKH";
+/* ===== 로깅: 셸·앱 오류, DB 요청 실패·느린 요청, 앱 열기 시간 → app_logs (진단 화면에서 봄) =====
+   같은 메시지는 1분에 한 번만, 5초마다 묶어서 보냄(오류는 0.5초). 로그인 전에는 쌓아 두었다가 로그인 후 보냄 */
+const HH_SESSION=Math.random().toString(36).slice(2,10), rawFetch=window.fetch.bind(window);
+const LOGQ=[], logSeen=new Map(); let logT=null, ME=null;
+window.HH_DEBUG=(()=>{ try{ return new URLSearchParams(location.search).has("debug")||localStorage.getItem("hh-debug")==="1"; }catch(_){ return false; } })();
+window.hhDebugLog=[]; /* 디버그 화면용 최근 200개 (기기 안에만) */
+const accessToken=()=>{ try{ return (JSON.parse(localStorage.getItem(AUTH_KEY)||"null")||{}).access_token||null; }catch(_){ return null; } };
+window.hhLog=(level,message,detail,app)=>{ try{
+  message=String(message||"").slice(0,500); detail=detail||{}; const a=app||curApp||null, k=level+"|"+a+"|"+message, now=Date.now();
+  window.hhDebugLog.push({at:new Date().toISOString(),level,app:a,message,detail}); if(window.hhDebugLog.length>200) window.hhDebugLog.shift();
+  if(window.HH_DEBUG) (level==="error"?console.error:console.log)("[상지홈]",level,a||"",message,detail);
+  if(window.hhDebugPanel) window.hhDebugPanel();
+  if(level!=="perf"&&logSeen.has(k)&&now-logSeen.get(k)<60000) return; logSeen.set(k,now);
+  LOGQ.push({at:new Date().toISOString(),level,message,app:a,source:detail.source||(app?"app":"shell"),detail,url:location.pathname+location.search,ua:navigator.userAgent.slice(0,200),ver:window.HH_VER||null,session:HH_SESSION});
+  if(LOGQ.length>300) LOGQ.splice(0,LOGQ.length-300);
+  clearTimeout(logT); logT=setTimeout(flushLogs,level==="error"?500:5000);
+}catch(_){} };
+async function flushLogs(keepalive){ const tok=accessToken(); if(!LOGQ.length||!tok||!ME) return; const rows=LOGQ.splice(0,100).map(r=>Object.assign(r,{member_id:ME.id}));
+  try{ const r=await rawFetch(SB_URL+"/rest/v1/app_logs",{method:"POST",keepalive:!!keepalive,headers:{apikey:SB_KEY,Authorization:"Bearer "+tok,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(rows)}); if(!r.ok&&r.status>=500) LOGQ.unshift(...rows); }catch(_){ LOGQ.unshift(...rows); } }
+addEventListener("pagehide",()=>flushLogs(true));
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") flushLogs(true); });
+addEventListener("error",e=>hhLog("error",e.message||"셸 오류",{source:"shell",file:e.filename,line:e.lineno,col:e.colno,stack:e.error&&String(e.error.stack||"").slice(0,1200)}));
+addEventListener("unhandledrejection",e=>hhLog("error","처리 안 된 오류: "+String(e.reason&&e.reason.message||e.reason).slice(0,300),{source:"shell",stack:String(e.reason&&e.reason.stack||"").slice(0,1200)}));
+/* 앱(iframe) 안의 오류도 같은 곳으로: 번들 맨 앞에 끼운 한 줄이 이 함수를 부름 → 앱 첫 실행 중 오류도 잡힘 */
+window.hhAttach=(w,app)=>{ try{
+  ptr(w,()=>openApp(app,true));
+  w.addEventListener("error",e=>{ if(e.target&&e.target!==w&&e.target.tagName) { hhLog("warn","불러오기 실패: "+(e.target.src||e.target.href||e.target.tagName),{},app); return; } hhLog("error",e.message||"앱 오류",{file:e.filename,line:e.lineno,col:e.colno,stack:e.error&&String(e.error.stack||"").slice(0,1200)},app); },true);
+  w.addEventListener("unhandledrejection",e=>hhLog("error","처리 안 된 오류: "+String(e.reason&&e.reason.message||e.reason).slice(0,300),{stack:String(e.reason&&e.reason.stack||"").slice(0,1200)},app));
+  const ce=w.console.error.bind(w.console); w.console.error=(...a)=>{ ce(...a); hhLog("error",a.map(x=>x&&x.message||(typeof x==="object"?JSON.stringify(x):String(x))).join(" ").slice(0,400),{},app); };
+  const cw=w.console.warn.bind(w.console); w.console.warn=(...a)=>{ cw(...a); hhLog("warn",a.map(x=>x&&x.message||(typeof x==="object"?JSON.stringify(x):String(x))).join(" ").slice(0,400),{},app); };
+}catch(_){} };
+/* DB 요청 감시: 실패(4xx·5xx)·네트워크 오류·2.5초 넘는 요청. 값(필터)은 빼고 표 이름만 남김 */
+const reqName=u=>{ try{ const x=new URL(u); return x.pathname.replace(/^\/(rest|functions|auth)\/v1\//,"$1:").slice(0,60); }catch(_){ return String(u).slice(0,60); } };
+window.hhReqs=[];
+async function hhFetch(input,init){ const url=String(input&&input.url||input), t0=performance.now(), name=reqName(url), quiet=/app_logs/.test(url);
+  try{ const r=await rawFetch(input,init), ms=Math.round(performance.now()-t0);
+    if(!quiet){ window.hhReqs.push({name,status:r.status,ms,at:Date.now()}); if(window.hhReqs.length>100) window.hhReqs.shift();
+      if(!r.ok&&r.status!==406){ let body=""; try{ body=(await r.clone().text()).slice(0,300); }catch(_){} hhLog(r.status>=500?"error":"warn",`요청 실패 ${r.status} ${name}`,{source:"shell",status:r.status,ms,method:(init&&init.method)||"GET",body},curApp); }
+      else if(ms>2500) hhLog("perf",`느린 요청 ${name}`,{source:"shell",ms},curApp); }
+    return r;
+  }catch(e){ if(!quiet&&!(e&&e.name==="AbortError")) hhLog(navigator.onLine===false?"warn":"error",`${navigator.onLine===false?"오프라인":"네트워크 오류"} ${name}`,{source:"shell",err:String(e).slice(0,200)},curApp); throw e; } }
+const sb=supabase.createClient(SB_URL,SB_KEY,{global:{fetch:hhFetch},auth:{flowType:"implicit",persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:AUTH_KEY,lock:async(_n,_t,fn)=>await fn()}});
 const $=id=>document.getElementById(id), msg=t=>{ $("msg").textContent=t; $("status").textContent=t; };
 let timer=null, curApp=null, navigationId=0;
 window.hhBeginNavigation=app=>{ curApp=app; return ++navigationId; };
@@ -170,7 +241,7 @@ $("login").onclick=async()=>{
   }catch(error){ button.disabled=false; msg("로그인을 시작하지 못했습니다. "+error.message); }
 };
 window.addEventListener("pageshow",()=>{ $("login").disabled=false; });
-$("out").onclick=async()=>{ await sb.auth.signOut(); location.replace(location.pathname); };
+$("out").onclick=async()=>{ try{ localStorage.setItem("hh-auto-login","off"); localStorage.removeItem("hh-home"); }catch(_){} await flushLogs(); await clearBundleCache(); await sb.auth.signOut(); location.replace(location.pathname); };
 /* INFO는 아래 NAV에서 만든다 */
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fm=v=>v==null?"–":(Math.abs(v)>=1e8?(v/1e8).toFixed(1)+"억":Math.round(v/1e4).toLocaleString("ko-KR")+"만");
@@ -182,6 +253,8 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
   const nx=new Date(now.getFullYear(),now.getMonth()+1,1), nym=nx.getFullYear()+"-"+String(nx.getMonth()+1).padStart(2,"0");
   const today=new Date(Date.now()+9*3600e3).toISOString().slice(0,10), mFrom=ym+"-01", mTo=nym+"-01";
   const dday=d=>Math.round((Date.parse(d)-Date.parse(today))/864e5), md=d=>d?`${+d.slice(5,7)}/${+d.slice(8,10)}`:"";
+  /* 마지막 홈 화면을 먼저 보여 주고(기기 저장), 새 숫자가 오면 바꿈 */
+  try{ const c=JSON.parse(localStorage.getItem("hh-home")||"null"); if(c&&!$("tiles").innerHTML){ $("upnext").innerHTML=c.u; $("tiles").innerHTML=c.t; } }catch(_){}
   const q=(p)=>p.then(r=>r).catch(()=>({data:null}));
   /* 홈 미리보기: 각 앱의 핵심 숫자 한두 개. 앱과 같은 원본(DB)에서 읽기만 함 */
   const [tx,gf,tc,it,st,bl,ac,hd,qt,ct,rw,sub,gup,tr,pp,rc,cg]=await Promise.all([
@@ -262,11 +335,25 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
   if(ms.data&&ms.data.length) todo.unshift([today,`🔔 놓친 결제 의심 ${ms.data.length}건 확인`,"connect"]);
   $("upnext").innerHTML=todo.length?`<div class="grp">다가오는 일</div><div class="up">${todo.slice(0,5).map(([d,t,a])=>`<button type="button" class="upi" data-app="${a}"><b>${dday(d)<=0?"오늘":"D-"+dday(d)}</b><span>${esc(t)}</span><em>${md(d)}</em></button>`).join("")}</div>`:"";
   if(extra.apply&&extra.realestate) extra.realestate+=extra.apply.replace('<div class="num">','<span>📝 ').replace('</div><span>',' · ');
-  const tile=e=>`<button type="button" class="tile" data-app="${e.k}"><div class="ic" aria-hidden="true">${e.ic}</div><b>${esc(titleOf(e.k))}</b><span class="d">${e.d}</span>${extra[e.k]||""}</button>`;
+  const tile=e=>`<button type="button" class="tile" data-app="${e.k}" style="--gc:${e.c}"><div class="ic" aria-hidden="true">${e.ic}</div><b><span class="lf">${esc(titleOf(e.k))}</span><span class="ls">${esc(SHORT[e.k]||titleOf(e.k))}</span></b><span class="d">${e.d}</span>${extra[e.k]||""}</button>`;
   $("tiles").innerHTML=NAV.map(([g,c])=>[g,c,MENU.filter(e=>e.g===g)]).filter(x=>x[2].length)
     .map(([g,c,l])=>`<div class="grp" style="color:${c}">${g}</div><div class="tiles">${l.map(tile).join("")}</div>`).join("");
+  try{ localStorage.setItem("hh-home",JSON.stringify({u:$("upnext").innerHTML,t:$("tiles").innerHTML})); }catch(_){}
 }
-let APPS=[], MEMBERS=[], MENU=[];
+let APPS=[], MEMBERS=[], MENU=[], COMMON=null;
+/* ===== 번들 캐시: 앱 화면(HTML)을 기기에 버전별로 저장 → 두 번째부터는 내려받지 않고 바로 엶. 로그아웃하면 지움 ===== */
+const BCACHE="hh-bundles-v1", bKey=(app,v)=>new Request(location.origin+location.pathname+"__bundle/"+encodeURIComponent(app)+"?v="+v);
+async function bundleCache(){ try{ return "caches" in window? await caches.open(BCACHE) : null; }catch(_){ return null; } }
+async function getBundle(app,meta){ const c=await bundleCache(), v=meta&&meta.version;
+  if(c&&v){ const hit=await c.match(bKey(app,v)); if(hit) return {html:await hit.text(),title:meta.title,cache:"hit"}; }
+  const r=await sb.from("app_bundles").select("html,title,version").eq("app",app).maybeSingle();
+  if(r.error||!r.data) return {error:r.error||new Error("앱 없음")};
+  if(c){ try{ for(const k of await c.keys()) if(new URL(k.url).pathname.endsWith("__bundle/"+encodeURIComponent(app))) await c.delete(k); await c.put(bKey(app,r.data.version),new Response(r.data.html,{headers:{"Content-Type":"text/html; charset=utf-8"}})); }catch(_){} }
+  if(meta) meta.version=r.data.version;
+  return {html:r.data.html,title:r.data.title,cache:"miss"}; }
+/* 자주 쓰는 앱은 한가할 때 미리 받아 둠 */
+function prefetchBundles(){ const go=()=>["ledger","assets","realestate","company"].forEach((k,i)=>setTimeout(()=>{ const m=APPS.find(a=>a.app===k); if(m) getBundle(k,m); },400*i)); ("requestIdleCallback" in window)?requestIdleCallback(go,{timeout:4000}):setTimeout(go,2500); }
+async function clearBundleCache(){ try{ await caches.delete(BCACHE); }catch(_){} }
 const titleOf=k=>(FILES[k]&&FILES[k].t)||((APPS.find(a=>a.app===k)||{}).title)||k;
 const hasApp=k=>!!FILES[k]||APPS.some(a=>a.app===k);
 /* ===== 메뉴의 유일한 정의 =====
@@ -274,36 +361,36 @@ const hasApp=k=>!!FILES[k]||APPS.some(a=>a.app===k);
    메뉴 순서 = 홈 타일·PC 왼쪽 메뉴·휴대폰 '전체'·드롭다운 모두 이 순서. tabs가 있으면 한 메뉴 안에서 위쪽 탭으로 전환. */
 const NAV=[
  ["가계","#0C7480",[
-  {k:"ledger",ic:"🧾",d:"지출·수입 입력, 이번 달 요약과 최근 내역, 고정비·구독",tabs:["ledger","dashboard","settlements"]},
-  {k:"company",ic:"🏢",d:"급여·성과급·의료비 등 회사에서 받은 돈과 급여명세·공제",tabs:["company","payroll"]},
-  {k:"tax",ic:"🧮",d:"연말정산·종합소득세 등 때맞춰 챙겨야 할 일"},
-  {k:"insurance",ic:"🛡️",d:"보험별로 무슨 일에 얼마 받는지, 회사 의료비 지원, 청구"}]],
+  {k:"ledger",ic:"🧾",d:"지출·수입·고정비",kw:"지출 수입 기록 카드 결제 고정비 구독 예산 내역 영수증 검토",tabs:["ledger","dashboard","settlements"]},
+  {k:"company",ic:"🏢",d:"월급·성과급·의료비",kw:"월급 급여 성과급 의료비 명세서 공제 회사 TAI OPI 패밀리넷",tabs:["company","payroll"]},
+  {k:"tax",ic:"🧮",d:"연말정산·챙길 일",kw:"세금 연말정산 공제 종소세 연금 IRP 자동차세"},
+  {k:"insurance",ic:"🛡️",d:"보장·병원비 계산",kw:"보험 실손 암 병원비 의료비 청구 보장"}]],
  ["자산","#1F6FA8",[
-  {k:"assets",ic:"🏦",d:"통장·증권·대출 잔액, 순자산 추이, 앞으로 10년 시뮬레이션",tabs:["assets","investments","sim"]},
-  {k:"realestate",ic:"🏠",d:"전세 계약·후보 단지 시세·청약 일정·주거 전략",tabs:["realestate","apply","housing","houseplan","dongcheon"]}]],
+  {k:"assets",ic:"🏦",d:"잔액·순자산·10년 계산",kw:"잔액 순자산 통장 대출 주식 투자 연금 ISA 시뮬레이터 미래",tabs:["assets","investments","sim"]},
+  {k:"realestate",ic:"🏠",d:"전세·시세·청약",kw:"집 아파트 전세 시세 청약 분양 이사 동천 주거",tabs:["realestate","apply","housing","houseplan","dongcheon"]}]],
  ["생활","#6E5AA6",[
-  {k:"planner",ic:"🗓️",d:"다른 앱에 없는 주요 일정"},
-  {k:"items",ic:"🛋️",d:"가구·가전·장비 목록과 현재가치"},
-  {k:"car",ic:"🚙",d:"싼타페 정비·검사·보험 만기·비용, 교체 계획"},
-  {k:"trips",ic:"✈️",d:"같이 다녀온 여행, 경비, 가고 싶은 곳"},
-  {k:"wishlist",ic:"✨",d:"여행·도전·운동·취미 버킷리스트"},
-  {k:"races",ic:"🏃",d:"관심 마라톤·트레일 대회 — 신청 기간·대회일·완주 기록"}]],
+  {k:"planner",ic:"🗓️",d:"주요 일정",kw:"일정 계획 할일 캘린더"},
+  {k:"items",ic:"🛋️",d:"가구·가전·장비",kw:"살림 물건 가전 가구 카메라 자전거 중고"},
+  {k:"car",ic:"🚙",d:"정비·보험·차량비",kw:"차 자동차 싼타페 정비 주유 검사"},
+  {k:"trips",ic:"✈️",d:"여행 기록·경비",kw:"여행 휴가 해외 경비 항공"},
+  {k:"wishlist",ic:"✨",d:"버킷리스트",kw:"하고싶은것 버킷 목표 도전"},
+  {k:"races",ic:"🏃",d:"마라톤·트레일",kw:"대회 마라톤 달리기 러닝 트레일 신청"}]],
  ["가족","#C06A30",[
-  {k:"gifts",ic:"🎁",d:"결혼식·장례 등 경조사 주고받은 기록, 사람별 정리"},
-  {k:"holidays",ic:"🧧",d:"설·추석, 부모님 용돈·선물, 가족 생일·환갑 일정"},
-  {k:"family",ic:"🌳",d:"양가 가계도, 가족 관계·생년"},
-  {k:"life",ic:"🧭",d:"이지훈·이상아 학교·직장·이사, 나란히 보는 인생 연표"},
-  {k:"wedding",ic:"💍",d:"2023.8.15 결혼식 — 축의금·비용·식순·문서"}]],
+  {k:"gifts",ic:"🎁",d:"경조사 주고받기",kw:"경조사 결혼식 장례 축의금 부의금"},
+  {k:"holidays",ic:"🧧",d:"명절·용돈·생일",kw:"명절 설 추석 용돈 생일 부모님"},
+  {k:"family",ic:"🌳",d:"양가 가계도",kw:"가족 가계도 친척 생년"},
+  {k:"life",ic:"🧭",d:"우리 연표",kw:"타임라인 연표 학교 직장 이사"},
+  {k:"wedding",ic:"💍",d:"2023.8.15 결혼식",kw:"결혼식 웨딩 축의금"}]],
  ["기타","#7A7F2E",[
-  {k:"income",ic:"💰",d:"내 총보상·전문직 분포·SK하이닉스와 10년 비교"}]],
+  {k:"income",ic:"💰",d:"내 연봉 비교",kw:"소득 연봉 비교 하이닉스 전문직"}]],
  ["설정","#5D6A75",[
-  {k:"connect",ic:"🔌",d:"결제 알림 자동 입력·알림 설정·수신 상태",tabs:["connect","notifications","macrodroid"]}]]
+  {k:"connect",ic:"🔌",d:"알림 연결·진단",kw:"설정 연결 알림 문자 MacroDroid 진단 오류 로그",tabs:["connect","notifications","macrodroid","diag"]}]]
 ];
 /* 셸 저장소에 있는 화면(DB 번들 아님) */
 const FILES={houseplan:{t:"주거 시나리오",f:"sim.html",snap:1},wishlist:{t:"해보고 싶은 것들",f:"wishlist.html"},car:{t:"차량 관리",f:"car.html"}};
 /* 탭 이름(메뉴 이름과 다를 때만) */
-const TABT={ledger:"가계부",dashboard:"한눈에",settlements:"검토함",company:"회사 수입",payroll:"급여명세·공제",assets:"자산",investments:"투자",sim:"10년 시뮬레이터",realestate:"부동산",apply:"청약·분양",housing:"주거 전략",houseplan:"시나리오 계산",dongcheon:"동천센트럴자이",connect:"연결",notifications:"알림 설정",macrodroid:"수신 상태"};
-const SHORT={company:"회사",connect:"설정",assets:"자산",realestate:"부동산",holidays:"명절·용돈",life:"타임라인",wedding:"결혼식",wishlist:"버킷리스트"};
+const TABT={ledger:"가계부",dashboard:"한눈에",settlements:"검토함",company:"회사 수입",payroll:"급여명세·공제",assets:"자산",investments:"투자",sim:"10년 시뮬레이터",realestate:"부동산",apply:"청약·분양",housing:"주거 전략",houseplan:"시나리오 계산",dongcheon:"동천센트럴자이",connect:"연결",notifications:"알림 설정",macrodroid:"수신 상태",diag:"진단"};
+const SHORT={company:"회사 수입",tax:"세금",insurance:"보험",connect:"설정",assets:"자산",realestate:"부동산",planner:"일정",items:"살림살이",car:"차량",holidays:"명절·용돈",life:"타임라인",wedding:"결혼식",wishlist:"버킷리스트",income:"소득 비교",family:"가계도"};
 const ENTRIES=NAV.flatMap(([g,c,es])=>es.map(e=>Object.assign({g,c},e)));
 const INFO=Object.fromEntries(ENTRIES.map(e=>[e.k,e]));
 const GCOL=Object.fromEntries(NAV.map(([g,c])=>[g,c]));
@@ -311,7 +398,8 @@ const entryOf=app=>ENTRIES.find(e=>e.k===app||(e.tabs||[]).includes(app));
 window.__hhLocalApps=Object.keys(FILES);
 /* 시뮬레이터 시작값: 자산 앱 계좌별 최신 잔액 + 살림살이 현재 시세 합계 */
 async function simSnapshot(){
-  try{ await sb.functions.invoke("refresh-quotes",{body:{}}); }catch(e){}
+  /* 주가 갱신은 최대 1.2초만 기다림 (느리면 직전 값으로 열고, 갱신은 뒤에서 계속) */
+  try{ await Promise.race([sb.functions.invoke("refresh-quotes",{body:{}}),new Promise(r=>setTimeout(r,1200))]); }catch(e){}
   const [a,b,it,qs,mb,sh,po]=await Promise.all([sb.from("accounts").select("id,name,kind,owner_id,rate,meta").eq("active",true), sb.from("balances").select("account_id,as_of,amount,updated_at").order("as_of"), sb.from("items").select("value_now,status,account_id"), sb.from("quotes").select("symbol,price").eq("symbol","005930").maybeSingle(), sb.from("members").select("id,birth_date"), sb.from("salary_history").select("member_id,effective,contract_salary,prev_grade,cl,base_up,perf_raise,note").order("effective"), sb.from("payouts").select("member_id,paid_on,kind,gross")]);
   const birth=Object.fromEntries((mb.data||[]).map(m=>[m.id,m.birth_date]));
   if(!a.data||!b.data) return null;
@@ -347,36 +435,41 @@ async function openApp(app,fromPop){ const navigation=window.hhBeginNavigation(a
   const ent=entryOf(app); $("pick").value=ent?ent.k:app; renderSub(ent,app); syncTabs();
   curApp=app; $("home").style.display="none"; $("app").style.display="none"; msg("불러오는 중…");
   const file=FILES[app];
-  const [b,st]=await Promise.all([file?fetch("./"+file.f+"?v="+(window.HH_VER||""),{cache:"no-store"}).then(async r=>r.ok?{data:{html:(await r.text()).replace(/\?v=[\w-]+/g,"?v="+(window.HH_VER||"")),title:file.t}}:{error:r.status}).catch(error=>({error})):sb.from("app_bundles").select("html,title").eq("app",app).maybeSingle(), sb.from("app_state").select("data").eq("app",app).eq("key","inputs").maybeSingle()]);
+  const t0=performance.now();
+  const [b,st,cm]=await Promise.all([file?fetch("./"+file.f+"?v="+(window.HH_VER||""),{cache:"no-store"}).then(async r=>r.ok?{data:{html:(await r.text()).replace(/\?v=[\w-]+/g,"?v="+(window.HH_VER||"")),title:file.t}}:{error:r.status}).catch(error=>({error})):getBundle(app,APPS.find(a=>a.app===app)).then(x=>x.error?{error:x.error}:{data:x}), sb.from("app_state").select("data").eq("app",app).eq("key","inputs").maybeSingle(), COMMON?getBundle("_common",COMMON):Promise.resolve(null)]);
   if(!window.hhIsCurrentNavigation(navigation)) return;
-  if(b.error||!b.data){ msg("앱을 불러오지 못했습니다."); return; }
+  if(b.error||!b.data){ msg("앱을 불러오지 못했습니다."); hhLog("error","앱을 불러오지 못함",{err:String(b.error&&b.error.message||b.error)},app); return; }
   const snapshot=(app==="sim"||(file&&file.snap))? await simSnapshot() : null;
   if(!window.hhIsCurrentNavigation(navigation)) return;
   window.__hh.inputs=st.data?st.data.data:null; window.__hh.snapshot=snapshot; document.title=((ent&&ent.k!==app)?titleOf(ent.k)+" › ":"")+b.data.title+" · 상지홈";
-  document.documentElement.classList.add("authed","authed-app"); $("gate").style.display="none"; $("bar").style.display="flex"; $("app").style.display="block"; $("app").srcdoc=b.data.html; msg("");
+  let html=b.data.html; const att=`<script>try{parent.hhAttach&&parent.hhAttach(window,${JSON.stringify(app)})}catch(e){}<\/script>`;
+  html=/<head[^>]*>/i.test(html)?html.replace(/<head[^>]*>/i,m=>m+att):att+html;
+  if(html.includes("<!--hh-common-->")) html=html.replace("<!--hh-common-->",()=>cm&&cm.html||"");
+  $("app").onload=()=>{ if(window.hhIsCurrentNavigation(navigation)) hhLog("perf","앱 열기",{ms:Math.round(performance.now()-t0),cache:b.data.cache||"file",kb:Math.round(html.length/1024)},app); };
+  document.documentElement.classList.add("authed","authed-app"); $("gate").style.display="none"; $("bar").style.display="flex"; $("app").style.display="block"; $("app").srcdoc=html; msg("");
   /* 뒤로가기 → 홈: 앱은 홈 위에 한 칸만 쌓음 */
   if(fromPop||(history.state&&history.state.app)) history.replaceState({app},"","?app="+encodeURIComponent(app)); else { history.replaceState({home:1},"",location.pathname); history.pushState({app},"","?app="+encodeURIComponent(app)); }
 }
 let booted=false, bootPromise=null;
 function boot(){
   if(bootPromise) return bootPromise;
-  bootPromise=bootSession().catch(error=>{ if(!booted) unauth(); msg("로그인 확인 중 오류가 발생했습니다. 다시 시도해 주세요. "+error.message); }).finally(()=>{ bootPromise=null; });
+  bootPromise=bootSession().catch(error=>{ const net=navigator.onLine===false||/fetch|network|load failed/i.test(String(error&&error.message)); hhLog(net?"warn":"error","시작 실패",{err:String(error&&error.message).slice(0,300)}); if(net){ msg("인터넷 연결을 기다리는 중… 연결되면 자동으로 이어져요."); return; } if(!booted) unauth(); msg("로그인 확인 중 오류가 발생했습니다. 다시 시도해 주세요. "+error.message); }).finally(()=>{ bootPromise=null; });
   return bootPromise;
 }
 function unauth(){ window.hhBeginNavigation(null); clearTimeout(timer); window.__hh.inputs=null; window.__hh.snapshot=null; $("app").srcdoc=""; document.documentElement.classList.remove("authed","authed-app"); $("bar").style.display="none"; $("home").style.display="none"; $("app").style.display="none"; $("gate").style.display=""; }
 async function bootSession(){
   await handoff;
-  const {data:{session}}=await sb.auth.getSession(); if(!session){ unauth(); if(!authError&&!/실패/.test($("msg").textContent)) msg(""); return; }
+  const {data:{session}}=await sb.auth.getSession(); if(!session){ unauth(); if(autoLogin()) return; if(!authError&&!/실패/.test($("msg").textContent)) msg(""); return; }
   if(booted) return;
   msg("확인 중…");
   const m=await sb.from("members").select("id,name,github_login"); MEMBERS=m.data||[];
   if(m.error) throw m.error;
   const me=(m.data||[]).find(x=>x.github_login===(session.user.user_metadata||{}).user_name);
   if(!me){ unauth(); msg("이 GitHub 계정은 접근 권한이 없습니다."); await sb.auth.signOut(); return; }
-  msg(""); $("who").textContent=me.name;
-  const apps=await sb.from("app_bundles").select("app,title");
+  ME=me; flushLogs(); try{ localStorage.setItem("hh-auto-login","on"); sessionStorage.removeItem("hh-auto-tried"); }catch(_){} msg(""); $("who").textContent=me.name;
+  const apps=await sb.from("app_bundles").select("app,title,version");
   if(apps.error) throw apps.error;
-  APPS=apps.data||[]; MENU=ENTRIES.filter(e=>hasApp(e.k));
+  APPS=(apps.data||[]).filter(a=>!a.app.startsWith("_")); COMMON=(apps.data||[]).find(a=>a.app==="_common")||null; MENU=ENTRIES.filter(e=>hasApp(e.k));
   $("pick").innerHTML=`<option value="home">🏠 홈</option>`+MENU.map(e=>`<option value="${e.k}">${e.ic} ${esc(titleOf(e.k))}</option>`).join("");
   { /* PC 왼쪽 메뉴: 묶음마다 색 이름표 + 아이콘 */
     let h=`<button type="button" data-app="home" title="홈"><i class="ti">🏠</i><span class="ln">홈</span></button>`, cur=null;
@@ -390,12 +483,75 @@ async function bootSession(){
   const want=new URLSearchParams(location.search).get("app")||"home"; $("pick").value=want; $("pick").onchange=e=>openApp(e.target.value);
   document.documentElement.classList.add("authed");
   await openApp(want);
-  booted=true;
+  if(new URLSearchParams(location.search).has("find")) setTimeout(focusSearch,100);
+  booted=true; prefetchBundles(); if(!window.__homePtr){ window.__homePtr=1; ptr(window,()=>{ if(!curApp) openHome(); }); }
 }
+/* ===== 찾기: 메뉴·탭을 이름·설명·흔히 쓰는 말로 찾아 바로 엶 (PC: Ctrl+K 또는 /) ===== */
+function qsItems(){ const L=[]; MENU.forEach(e=>{ L.push({k:e.k,t:titleOf(e.k),ic:e.ic,s:e.d,txt:[titleOf(e.k),e.d,e.kw,e.g].join(" ")}); (e.tabs||[]).filter(t=>t!==e.k&&hasApp(t)).forEach(t=>L.push({k:t,t:(TABT[t]||titleOf(t)),ic:e.ic,s:titleOf(e.k)+" 안",txt:[TABT[t],titleOf(t),e.kw].join(" ")})); }); return L; }
+function qsRender(){ const q=$("qsIn").value.trim().toLowerCase().replace(/\s+/g,""); const box=$("qsList");
+  if(!q){ box.innerHTML=""; box.classList.remove("on"); return; }
+  const R=qsItems().map(x=>{ const t=x.txt.toLowerCase().replace(/\s+/g,""); const sc=x.t.toLowerCase().replace(/\s+/g,"").startsWith(q)?3:x.t.toLowerCase().includes(q)?2:t.includes(q)?1:0; return [sc,x]; }).filter(x=>x[0]).sort((a,b)=>b[0]-a[0]).slice(0,7).map(x=>x[1]);
+  box.classList.add("on"); box.innerHTML=R.length?R.map((x,i)=>`<button type="button" class="qsi${i?"":" first"}" data-app="${x.k}"><i>${x.ic}</i><b>${esc(x.t)}</b><span>${esc(x.s)}</span></button>`).join(""):`<div class="qsn">'${esc($("qsIn").value)}' 메뉴가 없어요</div>`; }
+$("qsIn").addEventListener("input",qsRender);
+$("qsIn").addEventListener("keydown",e=>{ if(e.key==="Enter"){ const b=$("qsList").querySelector(".qsi"); if(b){ e.preventDefault(); $("qsIn").value=""; qsRender(); goApp(b.dataset.app); } } if(e.key==="Escape"){ $("qsIn").value=""; qsRender(); $("qsIn").blur(); } });
+$("qsList").addEventListener("click",e=>{ const b=e.target.closest(".qsi"); if(!b) return; e.stopPropagation(); $("qsIn").value=""; qsRender(); goApp(b.dataset.app); });
+function focusSearch(){ if(curApp){ openHome(); } setTimeout(()=>{ $("qsIn").focus(); },50); }
+addEventListener("keydown",e=>{ if(!booted) return; const k=e.key.toLowerCase(); if((e.ctrlKey||e.metaKey)&&k==="k"){ e.preventDefault(); focusSearch(); } else if(k==="/"&&!/input|textarea|select/i.test((document.activeElement||{}).tagName||"")){ e.preventDefault(); focusSearch(); } });
+/* ===== 디버그 모드 (?debug=1 또는 진단 화면에서 켜기): 화면 구석 🐞 버튼 → 최근 로그·요청·도구 ===== */
+window.hhSetDebug=on=>{ try{ localStorage.setItem("hh-debug",on?"1":"0"); }catch(_){} window.HH_DEBUG=on; dbgInit(); };
+window.hhClearCaches=async()=>{ await clearBundleCache(); try{ for(const k of await caches.keys()) await caches.delete(k); }catch(_){} try{ const rs=await navigator.serviceWorker.getRegistrations(); for(const r of rs) await r.update(); }catch(_){} location.reload(); };
+function dbgInit(){ let b=$("dbgBtn"); if(!window.HH_DEBUG){ if(b) b.remove(); const p=$("dbgPanel"); if(p) p.remove(); window.hhDebugPanel=null; return; }
+  if(b) return; b=document.createElement("button"); b.id="dbgBtn"; b.type="button"; b.title="디버그"; document.body.appendChild(b);
+  const p=document.createElement("div"); p.id="dbgPanel"; p.hidden=true; document.body.appendChild(p);
+  const ago=t=>Math.round((Date.now()-t)/1000)+"초 전";
+  window.hhDebugPanel=()=>{ const L=window.hhDebugLog, n=L.filter(x=>x.level==="error").length; b.textContent="🐞"+(n?" "+n:""); b.classList.toggle("bad",n>0);
+    if(p.hidden) return;
+    p.innerHTML=`<div class="dh"><b>디버그</b><span>셸 ${esc(window.HH_VER||"")} · ${esc(curApp||"홈")}</span><button data-x="send">로그 보내기</button><button data-x="cache">캐시 비우기</button><button data-x="off">끄기</button><button data-x="close">닫기</button></div>
+      <div class="dc"><h4>로그</h4>${L.slice(-40).reverse().map(x=>`<div class="l ${x.level}"><i>${x.at.slice(11,19)}</i><b>${x.level}</b> ${esc(x.app||"")} ${esc(x.message)}${Object.keys(x.detail||{}).length?`<small>${esc(JSON.stringify(x.detail).slice(0,300))}</small>`:""}</div>`).join("")||"없음"}</div>
+      <div class="dc"><h4>요청</h4>${window.hhReqs.slice(-30).reverse().map(r=>`<div class="l ${r.status>=400?"error":r.ms>1500?"warn":""}"><i>${ago(r.at)}</i><b>${r.status}</b> ${esc(r.name)} <em>${r.ms}ms</em></div>`).join("")||"없음"}</div>`; };
+  b.onclick=()=>{ p.hidden=!p.hidden; window.hhDebugPanel(); };
+  p.onclick=e=>{ const x=e.target.dataset.x; if(x==="close"){ p.hidden=true; } if(x==="off") window.hhSetDebug(false); if(x==="send"){ flushLogs(); e.target.textContent="보냄"; } if(x==="cache") window.hhClearCaches(); };
+  window.hhDebugPanel(); }
+setTimeout(dbgInit,0);
+/* ===== 로그인 유지·자동 로그인·돌아왔을 때 새로고침 =====
+   - 화면이 보일 때만 토큰 자동 갱신(숨기면 멈춤 → 배터리), 돌아오면 만료 5분 전이면 미리 갱신
+   - 10분 넘게 쉬었다 오면: 새 셸이면 그 자리 새로고침, 아니면 앱 목록·지금 화면 데이터를 새로
+   - 자동 로그인: 이 기기에서 로그인한 적 있고 직접 로그아웃하지 않았으면, 세션이 끊겨도 바로 GitHub 로그인으로 (한 번만 시도) */
+let hiddenAt=0;
 async function resumeAuth(){
-  if(document.visibilityState&&document.visibilityState!=="visible") return;
-  if(!booted) await boot();
+  if(document.visibilityState&&document.visibilityState!=="visible"){ if(!hiddenAt) hiddenAt=Date.now(); try{ sb.auth.stopAutoRefresh(); }catch(_){} return; }
+  try{ sb.auth.startAutoRefresh(); }catch(_){}
+  if(!booted){ await boot(); return; }
+  const away=hiddenAt?Date.now()-hiddenAt:0; hiddenAt=0;
+  await ensureFreshToken();
+  if(away>10*60e3){
+    if(shellTag){ const t=await tagOf(); if(t&&t!==shellTag){ location.reload(); return; } }
+    await refreshApps(); refreshView();
+  }
 }
+async function ensureFreshToken(){ try{
+  const {data:{session}}=await sb.auth.getSession(); if(!session||!session.expires_at) return;
+  if(session.expires_at*1000-Date.now()>5*60e3) return;
+  const {error}=await sb.auth.refreshSession(); if(!error) return;
+  hhLog("warn","로그인 갱신 실패",{err:error.message});
+  if(navigator.onLine!==false&&/refresh|invalid|expired|not found/i.test(error.message)){ booted=false; unauth(); autoLogin(); }
+}catch(e){ hhLog("warn","로그인 확인 실패",{err:String(e).slice(0,200)}); } }
+async function refreshApps(){ const r=await sb.from("app_bundles").select("app,title,version"); if(!r.data) return; r.data.forEach(n=>{ const o=APPS.find(a=>a.app===n.app); if(o) o.version=n.version; }); COMMON=r.data.find(a=>a.app==="_common")||COMMON; }
+function refreshView(){ if(curApp) openApp(curApp,true); else openHome(); }
+function autoLogin(){
+  try{ if(localStorage.getItem("hh-auto-login")!=="on"||authError||sessionStorage.getItem("hh-auto-tried")) return false; sessionStorage.setItem("hh-auto-tried","1"); }catch(_){ return false; }
+  if(navigator.onLine===false) return false;
+  msg("자동 로그인 중…"); $("login").click(); return true; }
+window.addEventListener("online",()=>{ try{ sb.auth.startAutoRefresh(); }catch(_){} flushLogs(); if(!booted) boot(); else ensureFreshToken(); });
+/* ===== 당겨서 새로고침 (휴대폰): 화면 맨 위에서 아래로 당기면 지금 화면을 새로 ===== */
+function ptr(w,onRefresh){ try{
+  const d=w.document; d.documentElement.style.overscrollBehaviorY="contain";
+  let y0=null, dy=0; const box=$("ptr");
+  const scrolled=t=>{ for(let n=t;n&&n!==d.documentElement;n=n.parentElement){ if(n.scrollTop>0) return true; } return (w.scrollY||d.documentElement.scrollTop)>0; };
+  w.addEventListener("touchstart",e=>{ y0=e.touches.length===1&&!scrolled(e.target)&&!e.target.closest("input,textarea,select,[contenteditable]")?e.touches[0].clientY:null; dy=0; },{passive:true});
+  w.addEventListener("touchmove",e=>{ if(y0==null) return; dy=e.touches[0].clientY-y0; if(dy>10){ box.classList.add("on"); box.style.transform=`translate(-50%,${Math.min(dy,110)*0.6}px) rotate(${dy*2}deg)`; box.classList.toggle("ready",dy>80); } },{passive:true});
+  w.addEventListener("touchend",()=>{ if(y0!=null&&dy>80){ box.classList.add("spin"); onRefresh(); setTimeout(()=>{ box.className=""; box.style.transform=""; },900); } else { box.className=""; box.style.transform=""; } y0=null; },{passive:true});
+}catch(_){} }
 // Supabase invokes this callback while holding its auth lock. Never call
 // getSession or database APIs synchronously from inside it.
 sb.auth.onAuthStateChange((ev)=>{
