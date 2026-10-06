@@ -1,6 +1,6 @@
-const CACHE='sangjihome-shell-v25';
+const CACHE='sangjihome-shell-v26';
 /* 오프라인 대비 공개 셸 파일 (버전 쿼리는 무시하고 찾음) */
-const SHELL=['./','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./icon-maskable-192.png','./icon-maskable-512.png','./apple-touch-icon.png','./install.js','./mobile-ui.js','./mobile-shell.css','./mobile-app.css','./delight-shell.css','./delight.js','./share.js','./sim.html','./sim-scenarios.css','./sim-scenarios.js','./wishlist.html','./car.html'];
+const SHELL=['./','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./icon-maskable-192.png','./icon-maskable-512.png','./apple-touch-icon.png','./install.js','./mobile-ui.js','./mobile-shell.css','./mobile-app.css','./delight-shell.css','./delight.js','./share.js','./sim.html','./sim-scenarios.css','./sim-scenarios.js','./wishlist.html','./car.html','./pc.html'];
 const shellPaths=new Set(SHELL.map(path=>new URL(path,self.location.href).pathname));
 /* 셸이 쓰는 외부 라이브러리(버전 고정)도 기기에 보관 → 인터넷 없이 다시 열어도 셸이 뜸 */
 const CDN=['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js'];
