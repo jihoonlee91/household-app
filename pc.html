@@ -1,0 +1,57 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PC 관리 · 상지홈</title><style>
+:root{--bg:#f3f5f6;--card:#fff;--ink:#15202a;--muted:#66727c;--line:#d7dde1;--accent:#6e5aa6;color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1419;--card:#161e25;--ink:#e4eaee;--muted:#9aa7b1;--line:#2a3641;--accent:#b8a7ef;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1419;--card:#161e25;--ink:#e4eaee;--muted:#9aa7b1;--line:#2a3641;--accent:#b8a7ef;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}.wrap{max-width:1080px;margin:auto;padding:18px 14px 48px}.top{margin-bottom:14px}.top h1{margin:0 0 6px;font-size:25px}.top p{margin:0;color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}.card{grid-column:span 12;background:var(--card);border:1px solid var(--line);border-radius:15px;padding:16px}.half{grid-column:span 6}@media(max-width:780px){.half{grid-column:span 12}}h2{font-size:17px;margin:0 0 4px}h3{font-size:14px;margin:16px 0 7px}.sub{color:var(--muted);font-size:12.5px;margin-bottom:13px}.spec{display:grid;grid-template-columns:135px 1fr;gap:0}.spec div{padding:8px 0;border-top:1px solid var(--line)}.spec div:nth-child(-n+2){border-top:0}.spec .k{color:var(--muted)}.spec .v{font-weight:600}.tag{display:inline-block;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,var(--accent) 13%,var(--bg));color:var(--accent);font-size:11.5px;font-weight:700;margin-left:5px}.note{padding:11px 12px;border-radius:11px;background:var(--bg);color:var(--muted);line-height:1.55}.history{display:grid;gap:8px}.event{display:grid;grid-template-columns:95px 1fr;gap:10px;border-top:1px solid var(--line);padding-top:9px}.event:first-child{border-top:0;padding-top:0}.event time{color:var(--muted);font-variant-numeric:tabular-nums}.event b{display:block;margin-bottom:2px}.event span{color:var(--muted);font-size:12.5px}.warn{color:#b7791f}
+</style></head><body><div class="wrap">
+<header class="top"><h1>🖥️ PC 관리</h1><p>메인·기존 PC 사양과 부품 이동 이력</p></header>
+<div class="grid">
+<section class="card half"><h2>현재 메인 PC <span class="tag">2026-10-06 구매 · 117만원</span></h2><div class="sub">Lightroom / 일반 작업 / 게임용</div>
+<div class="spec">
+<div class="k">CPU</div><div class="v">Intel Core i5-13600KF · Raptor Lake · 14코어 20스레드</div>
+<div class="k">메인보드</div><div class="v">ASRock B660M-HDV/D5 R2.0 <small>(판매글 표기)</small></div>
+<div class="k">RAM</div><div class="v">Samsung DDR5-4800 16GB × 2 · 총 32GB</div>
+<div class="k">GPU</div><div class="v">EMTEK GeForce RTX 3060 Ti 8GB</div>
+<div class="k">SSD</div><div class="v">WD Blue SN570 NVMe 1TB</div>
+<div class="k">HDD</div><div class="v">Western Digital WD40EZRZ-00GXCB0 4TB · 기존 PC에서 이전</div>
+<div class="k">CPU 쿨러</div><div class="v">듀얼타워 공랭쿨러 <small>(세부 모델 미확인)</small></div>
+<div class="k">파워</div><div class="v">600W <small>(제조사·세부 모델 미확인)</small></div>
+<div class="k">OS</div><div class="v">Windows 11</div>
+</div>
+<h3>현재 상태 메모</h3><div class="note">CPU 쿨러 중앙 팬이 특정 중간 RPM에서 간헐적으로 공진(“뿌웅/달달달”). 최고속에서는 풍절음만 발생. 팬 고정 클립을 풀면 공진·진동이 사라져 팬 클립/히트싱크 체결 공진 가능성이 높음.</div>
+</section>
+
+<section class="card half"><h2>기존 PC <span class="tag">판매 예정</span></h2><div class="sub">HDD와 삼성 16GB ×2 RAM 탈거 후 기준</div>
+<div class="spec">
+<div class="k">CPU</div><div class="v">Intel Core i7-7700K · Kaby Lake · 4코어 8스레드 · 4.2~4.5GHz</div>
+<div class="k">메인보드</div><div class="v">GIGABYTE Z270-Gaming K3</div>
+<div class="k">RAM</div><div class="v">Avexir DDR4-2400 CL16 8GB × 2 · 총 16GB · Micron DRAM</div>
+<div class="k">GPU</div><div class="v">GIGABYTE GeForce GTX 1050 2GB GDDR5 · Micron VRAM</div>
+<div class="k">SSD</div><div class="v">Samsung SSD 850 PRO 1TB · SATA · 약 954GB 인식</div>
+<div class="k">HDD</div><div class="v">없음 · WD 4TB는 새 PC로 이전</div>
+<div class="k">CPU 쿨러</div><div class="v">PCCOOLER 계열 타워형 공랭쿨러 <small>(세부 모델 미확인)</small></div>
+<div class="k">파워</div><div class="v">SuperFlower 650W급 <small>(세부 모델 미확인)</small></div>
+<div class="k">OS</div><div class="v">Windows 10 Pro 설치 상태 · 정품 라이선스 미포함</div>
+</div>
+</section>
+
+<section class="card half"><h2>별도 판매 RAM</h2>
+<div class="spec">
+<div class="k">제조사</div><div class="v">Samsung</div>
+<div class="k">모델</div><div class="v">M378A2K43BB1-CRC</div>
+<div class="k">규격</div><div class="v">DDR4-2400 · PC4-19200 · 1.20V</div>
+<div class="k">용량</div><div class="v">16GB × 2 · 총 32GB</div>
+<div class="k">Rank</div><div class="v">Dual Rank</div>
+<div class="k">상태</div><div class="v">기존 PC에서 8GB ×2와 함께 총 48GB로 정상 인식 후 탈거</div>
+</div>
+</section>
+
+<section class="card half"><h2>부품 이동 이력</h2><div class="history">
+<div class="event"><time>2026-10-06</time><div><b>새 메인 PC 구매</b><span>i5-13600KF / DDR5 32GB / RTX 3060 Ti / SN570 1TB · 117만원</span></div></div>
+<div class="event"><time>2026-10-07</time><div><b>WD 4TB HDD 이전</b><span>WD40EZRZ-00GXCB0을 기존 PC에서 탈거해 새 PC에 장착</span></div></div>
+<div class="event"><time>2026-10-07</time><div><b>Samsung DDR4 32GB 탈거</b><span>M378A2K43BB1-CRC 16GB ×2 · 별도 판매 예정</span></div></div>
+<div class="event"><time>현재</time><div><b>기존 PC 판매 구성</b><span>i7-7700K / DDR4 16GB / GTX 1050 2GB / 850 PRO 1TB</span></div></div>
+</div></section>
+</div></div>
+<script>try{const t=parent&&parent.document&&parent.document.documentElement.dataset.theme;if(t)document.documentElement.dataset.theme=t}catch(_){}</script>
+</body></html>
