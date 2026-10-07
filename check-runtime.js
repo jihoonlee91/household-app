@@ -1,8 +1,9 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 (async()=>{
+  const currentCache=fs.readFileSync(__dirname+'/sw.js','utf8').match(/const CACHE='([^']+)'/)[1];
   const handlers={},deleted=[],stored=[];let networkError=false,status=200,matchedOptions;
   const cache={addAll:async()=>{},put:async(request)=>stored.push(request.url),match:async(request,options)=>{matchedOptions=options;return new Response('cached');}};
-  const context={URL,Response,Set,Promise,self:{location:{href:'https://example.test/household-app/sw.js',origin:'https://example.test'},addEventListener:(type,fn)=>handlers[type]=fn,skipWaiting:async()=>{},clients:{claim:async()=>{}}},caches:{open:async()=>cache,keys:async()=>['other-app','sangjihome-shell-v21','sangjihome-shell-v25'],delete:async key=>deleted.push(key)},fetch:async()=>{if(networkError)throw Error('offline');return new Response('network',{status});}};
+  const context={URL,Response,Set,Promise,self:{location:{href:'https://example.test/household-app/sw.js',origin:'https://example.test'},addEventListener:(type,fn)=>handlers[type]=fn,skipWaiting:async()=>{},clients:{claim:async()=>{}}},caches:{open:async()=>cache,keys:async()=>['other-app','sangjihome-shell-v21',currentCache],delete:async key=>deleted.push(key)},fetch:async()=>{if(networkError)throw Error('offline');return new Response('network',{status});}};
   vm.runInNewContext(fs.readFileSync(__dirname+'/sw.js','utf8'),context);
   let pending;handlers.activate({waitUntil:p=>pending=p});await pending;
   assert.deepEqual(deleted,['sangjihome-shell-v21']);
