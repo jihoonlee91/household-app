@@ -109,6 +109,17 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
  #home .up .upi:nth-child(n+4){display:none}
 }
 @media (min-width:561px) and (max-width:1099px){ #tiles{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))!important;gap:14px 8px!important} #home .tile .ic{width:58px!important;height:58px!important;font-size:28px!important;border-radius:18px} #home .tile b{font-size:13.5px!important} #home .tile .num{font-size:12.5px!important} }
+/* 데스크톱 홈도 컴팩트하게: 작은 타일(아이콘+이름+숫자 한 줄), 설명 숨김, 다가오는 일 4개까지 */
+@media (min-width:1100px){
+ #home h2{font-size:17px;margin:0 0 6px}#home .sub{display:none}#qs{margin-bottom:8px}
+ .tiles{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))!important;gap:8px!important}
+ #home .tile{grid-template-columns:auto minmax(0,1fr);align-items:center;column-gap:8px;row-gap:0;padding:8px 10px!important;border-radius:11px!important;min-height:0!important}
+ #home .tile .ic{grid-row:span 2;width:32px!important;height:32px!important;font-size:17px!important;border-radius:9px}
+ #home .tile b{font-size:13px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#home .tile b .lf{display:none}#home .tile b .ls{display:inline}
+ #home .tile .d,#home .tile .bar{display:none!important}#home .tile .num{font-size:12px!important;color:var(--muted)}
+ #home .grp{margin:10px 0 4px!important;font-size:12px!important}
+ .up{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))!important;gap:6px}.upi{padding:7px 10px!important}#home .up .upi:nth-child(n+5){display:none}
+}
 /* 디버그 */
 #dbgBtn{position:fixed;left:10px;bottom:calc(70px + env(safe-area-inset-bottom,0px));z-index:12;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:5px 10px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.15)}#dbgBtn.bad{border-color:var(--up);color:var(--up);font-weight:700}
 #dbgPanel{position:fixed;left:10px;right:10px;bottom:calc(110px + env(safe-area-inset-bottom,0px));max-height:60vh;overflow:auto;z-index:12;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;font:12px/1.4 ui-monospace,Consolas,monospace;box-shadow:0 6px 24px rgba(0,0,0,.25)}
