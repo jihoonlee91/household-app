@@ -275,7 +275,7 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
   try{ const c=JSON.parse(localStorage.getItem("hh-home")||"null"); if(c&&!$("tiles").innerHTML){ $("upnext").innerHTML=c.u; $("tiles").innerHTML=c.t; } }catch(_){}
   const q=(p)=>p.then(r=>r).catch(()=>({data:null}));
   /* 홈 미리보기: 각 앱의 핵심 숫자 한두 개. 앱과 같은 원본(DB)에서 읽기만 함 */
-  const [tx,gf,tc,it,st,bl,ac,hd,qt,ct,rw,sub,gup,tr,pp,rc,cg]=await Promise.all([
+  const [tx,gf,tc,it,st,bl,ac,hd,qt,ct,rw,sub,gup,tr,pp,rc,cg,ass,nev]=await Promise.all([
     q(sb.from("transactions").select("amount,category_id").gte("occurred_on",mFrom).lt("occurred_on",mTo).lt("amount",0)),
     q(sb.from("gifts").select("cash,goods_value,direction").gte("occurred_on",mFrom).lt("occurred_on",mTo).eq("direction","보냄")),
     q(sb.from("trip_costs").select("amount").gte("spent_on",mFrom).lt("spent_on",mTo)),
@@ -289,8 +289,11 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
     q(sb.from("trips").select("title,start_date,end_date,total_krw,status").order("start_date",{ascending:false})),
     q(sb.from("people").select("id,name,relation")),
     q(sb.from("races").select("name,race_date,reg_open,reg_close,status")),
-    q(sb.from("categories").select("id").eq("kind","transfer"))
+    q(sb.from("categories").select("id").eq("kind","transfer")),
+    q(sb.from("app_state").select("app,key,data").in("app",["company","housing","sim"]).in("key",["summary","baseline"])),
+    q(sb.from("notification_events").select("source_app,title,event_at,url_app").eq("active",true).gte("event_at",today).order("event_at").limit(30))
   ]);
+  /* 다른 앱이 저장해 둔 요약(회사 수입·구매 여력·시뮬레이터 기준선) */ const AS=k=>(((ass.data||[]).find(x=>x.app+"/"+x.key===k)||{}).data)||null, coS=AS("company/summary"), hoS=AS("housing/summary"), siB=AS("sim/baseline");
   const lastB={}; (bl.data||[]).forEach(x=>lastB[x.account_id]=x); const netW=Object.values(lastB).reduce((s,x)=>s+x.amount,0), netAsof=Object.values(lastB).map(x=>x.as_of).sort().pop();
   /* 이번 달 지출 = 가계부와 같은 합산 (직접 기록 + 경조사·명절 보낸 돈 + 여행 경비) */
   const trIds=new Set((cg.data||[]).map(x=>x.id)); /* 이체(내 계좌 사이·카드대금·충전)는 지출 아님 — 가계부 앱과 같은 기준 */
@@ -326,7 +329,9 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
     investments:hs.length?`<div class="num">${fm(invV)}</div><span><em style="color:${col(invDay)};font-style:normal">오늘 ${sgn(invDay)}${abs(invDay)}</em> · 평가손익 ${sgn(invPnl)}${abs(invPnl)}</span>`:"",
     realestate:`<div class="num">${tgt&&tgtP?fm(tgtP):"–"}</div><span>${tgt?esc(String(tgt.name).replace(/\s*\d+㎡.*/,""))+" 실거래":"목표 단지 없음"}${jeon?` · 전세 만기 D-${Math.max(0,dday(jeon.end_date))}`:""}${nCand?` · 후보 ${nCand}곳`:""}</span>`,
     apply:`<div class="num">${open.length}곳 접수 중</div><span>${soon.length?`예정 ${soon.length}곳`:"예정 없음"}${nextSub?` · ${star.length?"★ ":""}${esc(nextSub.name)} ${md(nextSub.receipt_start)}~${md(nextSub.receipt_end)}`:""}</span>`,
-    sim:`<span>자산 앱 최신 잔액에서 시작</span>`,
+    sim:(()=>{ const p=siB&&siB.path, y=+today.slice(0,4)+10, v=p&&(p.find(x=>Math.floor(x[0])===y)||null); return v?`<div class="num">${fm(v[1])}</div><span>${y}년 순자산(계획)</span>`:`<span>자산 앱 최신 잔액에서 시작</span>`; })(),
+    company:coS?`<div class="num">${fm(coS.next12)}</div><span>앞으로 12개월 통장 입금${coS.locked?` · 잠긴 자사주 ${fm(coS.locked)}`:""}</span>`:"",
+    housing:(()=>{ const c=hoS&&hoS.cands&&hoS.cands.find(x=>x.k); return c?`<div class="num">${String(c.k).slice(0,4)}.${String(c.k).slice(4)}</div><span>${esc(String(c.n).replace(/\s*\d+㎡.*/,"").replace("동천센트럴자이","동센자"))} 살 수 있는 때</span>`:""; })(),
     ledger:`<div class="num">${fm(spent)}</div><span>이번 달 지출 · 예산 ${fm(budget)}${spent>0?` (${Math.round(spent/budget*100)}%)`:""}</span><i class="bar"><b style="width:${Math.min(100,spent/budget*100).toFixed(0)}%;background:${spent>budget?"var(--down)":"var(--accent)"}"></b></i>`,
     items:`<div class="num">${fm(itemsV)}</div><span>물건 ${live.length}개${sale?` · 판매 예정 ${sale}개`:""}</span>`,
     gifts:gNext?`<div class="num">D-${dday(gNext.occurred_on)}</div><span>${esc(gName(gNext))} · ${md(gNext.occurred_on)}</span>`:`<span>다가오는 경조사 없음</span>`,
@@ -347,6 +352,8 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
   /* 보험 만기(60일 안) — 우리 것만 (meta.ours=false: 아버지 차 보험 등 참고용) */
   (ct.data||[]).filter(x=>x.kind==="insurance"&&x.end_date&&!(x.meta&&x.meta.ours===false)&&dday(x.end_date)>=0&&dday(x.end_date)<=60).forEach(x=>todo.push([x.end_date,`🛡️ ${x.title} 만기${x.meta&&x.meta.renew?"·갱신":""}`,"insurance"]));
   if(jeon&&dday(jeon.end_date)<=180) todo.push([jeon.end_date,`🏠 전세 만기`,"realestate"]);
+  /* 알림으로 넣어 둔 기한(전세 갱신요구권·연금 납입 등) 60일 안 — 대회·청약·경조사·여행은 위에서 이미 넣음 */
+  (nev.data||[]).filter(x=>!["races","apply","gifts","holidays","trips"].includes(x.source_app)).map(x=>[String(x.event_at).slice(0,10),x]).filter(([d])=>dday(d)>=0&&dday(d)<=60).forEach(([d,x])=>todo.push([d,"⏰ "+x.title,x.url_app||x.source_app]));
   /* 놓친 결제 의심(알림 꺼짐·MacroDroid 멈춤·카드대금 차이) — 있으면 맨 앞에 */
   const ms=await q(sb.from("missed_payment_suspects").select("key"));
   todo.sort((a,b)=>a[0].localeCompare(b[0]));
