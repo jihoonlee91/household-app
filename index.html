@@ -456,9 +456,13 @@ async function openApp(app,fromPop){ const navigation=window.hhBeginNavigation(a
   if(fromPop||(history.state&&history.state.app)) history.replaceState({app},"","?app="+encodeURIComponent(app)); else { history.replaceState({home:1},"",location.pathname); history.pushState({app},"","?app="+encodeURIComponent(app)); }
 }
 let booted=false, bootPromise=null;
+/* 시작 오류(네트워크 말고)면 캐시·서비스워커를 스스로 비우고 한 번 다시 열기 — 5분에 한 번만(무한 새로고침 방지) */
+function selfHeal(){ try{ const t=+sessionStorage.getItem("hh-heal")||0; if(Date.now()-t<5*60e3) return false; sessionStorage.setItem("hh-heal",String(Date.now())); }catch(_){ return false; }
+  msg("오류가 나서 캐시를 비우고 다시 여는 중…");
+  (async()=>{ await clearBundleCache(); try{ for(const k of await caches.keys()) await caches.delete(k); }catch(_){} try{ for(const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); }catch(_){} location.reload(); })(); return true; }
 function boot(){
   if(bootPromise) return bootPromise;
-  bootPromise=bootSession().catch(error=>{ const net=navigator.onLine===false||/fetch|network|load failed/i.test(String(error&&error.message)); hhLog(net?"warn":"error","시작 실패",{err:String(error&&error.message).slice(0,300)}); if(net){ showOffline(); return; } if(!booted) unauth(); msg("로그인 확인 중 오류가 발생했습니다. 다시 시도해 주세요. "+error.message); }).finally(()=>{ bootPromise=null; });
+  bootPromise=bootSession().catch(error=>{ const net=navigator.onLine===false||/fetch|network|load failed/i.test(String(error&&error.message)); hhLog(net?"warn":"error","시작 실패",{err:String(error&&error.message).slice(0,300)}); if(net){ showOffline(); return; } if(selfHeal()) return; if(!booted) unauth(); msg("로그인 확인 중 오류가 발생했습니다. 다시 시도해 주세요. "+error.message); }).finally(()=>{ bootPromise=null; });
   return bootPromise;
 }
 /* 인터넷이 없을 때: 마지막으로 본 홈을 보여 주고, 연결되면 자동으로 이어짐 */
