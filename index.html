@@ -483,7 +483,7 @@ async function bootSession(){
     MENU.forEach(e=>{ if(e.g!==cur){ h+=`<span class="tg" style="--gc:${e.c}">${e.g}</span>`; cur=e.g; } h+=`<button type="button" data-app="${e.k}" style="--gc:${e.c}" title="${esc(titleOf(e.k))}"><i class="ti">${e.ic}</i><span class="ln">${esc(titleOf(e.k))}</span></button>`; });
     $("tabsbar").innerHTML=h;
     /* 휴대폰 아래 탭: 홈·가계부·자산·부동산 + 전체 / 전체 시트: 묶음별 모든 메뉴 */
-    $("btm").innerHTML=[["home","🏠","홈"],...["ledger","assets","realestate"].filter(hasApp).map(k=>[k,INFO[k].ic,SHORT[k]||titleOf(k)])].map(([k,i,l])=>`<button type="button" data-app="${k}"><i>${i}</i>${l}</button>`).join("")+`<button type="button" id="allOpen"><i>☰</i>전체</button>`;
+    $("btm").innerHTML=[["home","🏠","홈"],...["ledger","company","assets","housing"].filter(k=>hasApp(k)&&entryOf(k)).map(k=>[k,entryOf(k).ic,SHORT[k]||TABT[k]||titleOf(k)])].map(([k,i,l])=>`<button type="button" data-app="${k}"><i>${i}</i>${l}</button>`).join("")+`<button type="button" id="allOpen"><i>☰</i>전체</button>`;
     $("allList").innerHTML=NAV.map(([g,c])=>{ const L=MENU.filter(e=>e.g===g); return L.length?`<div class="ag" style="color:${c}">${g}</div><div class="al">${L.map(e=>`<button type="button" data-app="${e.k}"><i>${e.ic}</i>${esc(SHORT[e.k]||titleOf(e.k))}</button>`).join("")}</div>`:""; }).join(""); }
   $("hello").textContent=`${me.name}님, 안녕하세요`; $("hsub").textContent="우리집 가계 앱";
   $("home").onclick=e=>{ const t=e.target.closest(".tile,.upi"); if(t){ $("pick").value=t.dataset.app; openApp(t.dataset.app); } };
