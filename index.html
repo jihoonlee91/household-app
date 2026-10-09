@@ -128,6 +128,8 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 #dbgPanel h4{margin:8px 0 4px;font-size:12px}#dbgPanel .l{padding:2px 0;border-bottom:1px dashed var(--line);word-break:break-all}#dbgPanel .l i{color:var(--muted);font-style:normal;margin-right:4px}#dbgPanel .l.error b{color:var(--up)}#dbgPanel .l.warn b{color:#B7791F}#dbgPanel .l small{display:block;color:var(--muted)}#dbgPanel em{color:var(--muted)}
 /* 당겨서 새로고침 표시 */
 #ptr{position:fixed;left:50%;top:calc(8px + env(safe-area-inset-top,0px));z-index:9;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.15);color:var(--muted);font-size:18px;opacity:0;transform:translate(-50%,-50px);transition:opacity .15s;pointer-events:none}
+#swHint{position:fixed;top:50%;z-index:9;max-width:46vw;padding:8px 13px;border-radius:999px;background:var(--card);border:1px solid var(--accent);color:var(--accent);box-shadow:0 6px 20px rgba(0,0,0,.16);font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;opacity:0;transform:translateY(-50%);transition:opacity .25s ease}
+#swHint.r{right:10px}#swHint.l{left:10px}#swHint.on{opacity:1;transition:none}
 #ptr.on{opacity:1}#ptr.ready{color:var(--accent);border-color:var(--accent)}#ptr.spin{animation:ptrspin .7s linear infinite;opacity:1;transform:translate(-50%,40px)}
 @keyframes ptrspin{to{transform:translate(-50%,40px) rotate(360deg)}}
 html{overscroll-behavior-y:contain}
@@ -149,7 +151,7 @@ html.has-sub.authed #sub{display:flex}
 <div id="allSheet" aria-hidden="true"><div class="sheet"><div class="sh"><b>전체 앱</b><button type="button" id="allClose" aria-label="닫기">닫기</button></div><div id="allList"></div>
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="🔍 찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="upnext"></div><div id="tiles"></div></main>
-<div id="ptr" aria-hidden="true">↻</div><nav id="sub" aria-label="탭"></nav><iframe id="app" title="앱"></iframe>
+<div id="ptr" aria-hidden="true">↻</div><div id="swHint" aria-live="polite"></div><nav id="sub" aria-label="탭"></nav><iframe id="app" title="앱"></iframe>
 <script src="./install.js?v=20261006-1"></script><!-- 셸 버전은 여기 한 곳: install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>/* jsdelivr를 못 받으면(차단·장애) unpkg의 같은 버전 원본으로 한 번 더 (실패할 때만 실행) */
@@ -419,6 +421,16 @@ const INFO=Object.fromEntries(ENTRIES.map(e=>[e.k,e]));
 const GCOL=Object.fromEntries(NAV.map(([g,c])=>[g,c]));
 const entryOf=app=>ENTRIES.find(e=>e.k===app||(e.tabs||[]).includes(app));
 window.__hhLocalApps=Object.keys(FILES);
+/* 좌우 스와이프(앱 공통 레이어가 부름): 같은 메뉴 안 이전/다음 탭으로. 끝에서는 아무것도 안 함(넘어가지 않음) */
+const swipeTo=dir=>{ const ent=entryOf(curApp), tabs=ent&&ent.tabs?ent.tabs.filter(hasApp):[], i=tabs.indexOf(curApp); return i<0?null:(tabs[i+(dir==="next"?1:-1)]||null); };
+let swipeDir=null, swipeT=0;
+window.__hh.swipePeek=dir=>{ const k=swipeTo(dir); return k?(TABT[k]||titleOf(k)):null; };
+window.__hh.swipe=dir=>{ const k=swipeTo(dir); if(!k) return false; const h=$("swHint");
+  h.textContent=dir==="next"?(TABT[k]||titleOf(k))+" ›":"‹ "+(TABT[k]||titleOf(k)); h.className="on "+(dir==="next"?"r":"l");
+  clearTimeout(swipeT); swipeT=setTimeout(()=>h.classList.remove("on"),900);
+  swipeDir={d:dir,at:Date.now()}; openApp(k); return true; };
+$("app").addEventListener("load",()=>{ const s=swipeDir, d=s&&Date.now()-s.at<8000?s.d:null; swipeDir=null; if(!d||!$("app").srcdoc) return;
+  try{ if(!matchMedia("(prefers-reduced-motion: reduce)").matches) $("app").animate([{transform:`translateX(${d==="next"?36:-36}px)`,opacity:.4},{transform:"none",opacity:1}],{duration:220,easing:"cubic-bezier(.2,.8,.2,1)"}); }catch(_){} });
 /* 시뮬레이터 시작값: 자산 앱 계좌별 최신 잔액 + 살림살이 현재 시세 합계 */
 async function simSnapshot(){
   /* 주가 갱신은 최대 1.2초만 기다림 (느리면 직전 값으로 열고, 갱신은 뒤에서 계속) */
@@ -578,10 +590,12 @@ window.addEventListener("online",()=>{ try{ sb.auth.startAutoRefresh(); }catch(_
 /* ===== 당겨서 새로고침 (휴대폰): 화면 맨 위에서 아래로 당기면 지금 화면을 새로 ===== */
 function ptr(w,onRefresh){ try{
   const d=w.document; d.documentElement.style.overscrollBehaviorY="contain";
-  let y0=null, dy=0; const box=$("ptr");
+  let y0=null, x0=0, dy=0; const box=$("ptr");
   const scrolled=t=>{ for(let n=t;n&&n!==d.documentElement;n=n.parentElement){ if(n.scrollTop>0) return true; } return (w.scrollY||d.documentElement.scrollTop)>0; };
-  w.addEventListener("touchstart",e=>{ y0=e.touches.length===1&&!scrolled(e.target)&&!e.target.closest("input,textarea,select,[contenteditable]")?e.touches[0].clientY:null; dy=0; },{passive:true});
-  w.addEventListener("touchmove",e=>{ if(y0==null) return; dy=e.touches[0].clientY-y0; if(dy>10){ box.classList.add("on"); box.style.transform=`translate(-50%,${Math.min(dy,110)*0.6}px) rotate(${dy*2}deg)`; box.classList.toggle("ready",dy>80); } },{passive:true});
+  w.addEventListener("touchstart",e=>{ y0=e.touches.length===1&&!scrolled(e.target)&&!e.target.closest("input,textarea,select,[contenteditable]")?e.touches[0].clientY:null; x0=e.touches.length===1?e.touches[0].clientX:0; dy=0; },{passive:true});
+  w.addEventListener("touchmove",e=>{ if(y0==null) return; dy=e.touches[0].clientY-y0;
+    /* 옆으로 미는 중(좌우 스와이프)이면 당겨서 새로고침은 취소 */ if(Math.abs(e.touches[0].clientX-x0)>Math.max(dy,10)){ y0=null; dy=0; box.className=""; box.style.transform=""; return; }
+    if(dy>10){ box.classList.add("on"); box.style.transform=`translate(-50%,${Math.min(dy,110)*0.6}px) rotate(${dy*2}deg)`; box.classList.toggle("ready",dy>80); } },{passive:true});
   w.addEventListener("touchend",()=>{ if(y0!=null&&dy>80){ box.classList.add("spin"); onRefresh(); setTimeout(()=>{ box.className=""; box.style.transform=""; },900); } else { box.className=""; box.style.transform=""; } y0=null; },{passive:true});
 }catch(_){} }
 // Supabase invokes this callback while holding its auth lock. Never call
