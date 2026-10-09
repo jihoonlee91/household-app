@@ -377,12 +377,13 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
   $("must").innerHTML=must.length?`<div class="grp">꼭 챙길 것</div><div class="must">${must.map(x=>{const d=String(x.event_at).slice(0,10),n=dday(d),m=x.meta||{},ic=m.kind==="gain"?"💰":m.kind==="loss"?"⚠️":"⏰";return `<div class="mu ${n<0?"late":n<=3?"soon":""}"><button type="button" class="upi" data-app="${esc(x.url_app||x.source_app)}"><b>${n<0?"지남":n===0?"오늘":"D-"+n}</b><span>${ic} ${esc(x.title)}${m.amount?` <i>${esc(m.amount)}</i>`:""}</span><em>${md(d)}</em></button><button type="button" class="mdone" data-id="${x.id}" aria-label="${esc(x.title)} 했어요">했어요</button></div>`}).join("")}</div>`:"";
   document.querySelectorAll("#must .mdone").forEach(b=>b.onclick=async e=>{ e.stopPropagation(); b.disabled=true; const r=await sb.from("notification_events").update({active:false,meta:Object.assign({},((nev.data||[]).find(x=>String(x.id)===b.dataset.id)||{}).meta,{done_at:new Date().toISOString()})}).eq("id",+b.dataset.id); if(r&&r.error){ b.disabled=false; b.textContent="다시"; } else b.closest(".mu").remove(); });
   /* ===== 새로 확인할 것: 각 앱·탭이 '지금 볼 이유'가 생기면 여기로 올라옴. 본 것(기기 저장)은 점이 사라짐 ===== */
-  { const [rv,ln,hl,bf,sy]=await Promise.all([
+  { const [rv,ln,hl,bf,sy,ca]=await Promise.all([
       q(sb.from("ledger_review_queue").select("reason").eq("status","pending").in("reason",["unusual","refund_candidate","import_check","mail_only"])),
       q(sb.from("accounts").select("id,name,meta").eq("kind","loan").eq("active",true)),
       q(sb.from("app_state").select("data").eq("app","health").eq("key","main").maybeSingle()),
       q(sb.from("app_state").select("data,updated_at").eq("app","briefing").eq("key","latest").maybeSingle()),
-      q(sb.from("app_state").select("updated_at").eq("app","sim").eq("key","years").maybeSingle())]);
+      q(sb.from("app_state").select("updated_at").eq("app","sim").eq("key","years").maybeSingle()),
+      q(sb.from("app_state").select("data").eq("app","cart").eq("key","main").maybeSingle())]);
     const N=[]; /* [키, 서명(바뀌면 다시 새것), 문구, 앱] */
     const rvU=(rv.data||[]).filter(x=>x.reason==="unusual").length, rvR=(rv.data||[]).filter(x=>x.reason==="refund_candidate").length; if(rvU) N.push(["rv",String(rvU),`🧾 가계부 특이 거래 ${rvU}건 — 맞는지 확인`,"settlements"]); if(rvR) N.push(["rf",String(rvR),`↩️ 환불 짝 못 찾은 거래 ${rvR}건`,"settlements"]);
     (ln.data||[]).forEach(a=>{ const m=(a.meta||{}).maturity; if(m&&dday(m)>=0&&dday(m)<=180) N.push(["loan"+a.id,m,`🏦 ${a.name} 만기 D-${dday(m)}`,"assets"]); });
@@ -390,6 +391,7 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
     const B=bf.data&&bf.data.data; if(B&&String(bf.data.updated_at||"").slice(0,10)>=new Date(Date.now()-864e5).toISOString().slice(0,10)){ const h=(Array.isArray(B.headline)?B.headline:[B.headline]).filter(Boolean)[0]; if(h) N.push(["brief",String(B.asof||bf.data.updated_at),"📰 "+h,"briefing"]); }
     if(hs.length&&invV&&Math.abs(invDay)/invV>=0.015) N.push(["inv",today,`📈 투자 오늘 ${sgn(invDay)}${abs(invDay)} (${(invDay/invV*100).toFixed(1)}%)`,"investments"]);
     { const c=hoS&&hoS.cands&&hoS.cands.find(x=>x.k); if(c) N.push(["house",String(c.k),`🏠 ${String(c.n).replace(/\s*\d+㎡.*/,"").replace("동천센트럴자이","동센자")} 살 수 있는 때 ${String(c.k).slice(0,4)}.${String(c.k).slice(4)}`,"housing"]); }
+    { const ci=((ca.data&&ca.data.data&&ca.data.data.items)||[]).filter(x=>!x.done); if(ci.length) N.push(["cart",String(ci.length),`🛒 살 것 ${ci.length}개 — ${ci.slice(0,3).map(x=>x.name.replace(/\s*\(.*\)$/,"")).join(", ")}${ci.length>3?" 외":""}`,"cart"]); }
     if(!sy.data||dday(String(sy.data.updated_at).slice(0,10))<-14) N.push(["simy",today.slice(0,7),"📊 시뮬레이터를 한 번 열면 은퇴·집 계산이 최신이 돼요","sim"]);
     let seen={}; try{ seen=JSON.parse(localStorage.getItem("hh-seen")||"{}"); }catch(_){}
     const fresh=N.filter(([k,sg])=>seen[k]!==sg); window.__hhNews=N; NEWS_APPS=new Set(fresh.map(x=>x[3])); paintBadges();
@@ -440,7 +442,7 @@ const NAV=[
   {k:"trips",ic:"✈️",d:"여행 기록·경비",kw:"여행 휴가 해외 경비 항공"},
   {k:"wishlist",ic:"✨",d:"버킷리스트",kw:"하고싶은것 버킷 목표 도전"},
   {k:"races",ic:"🏃",d:"마라톤·트레일",kw:"대회 마라톤 달리기 러닝 트레일 신청"},
-  {k:"health",ic:"💊",d:"영양제·검사 이력",kw:"건강 영양제 비타민 복용 병원 검사 MRI 지병"}]],
+  {k:"health",ic:"💊",d:"영양제·검사 이력",kw:"건강 영양제 비타민 복용 병원 검사 MRI 지병"},{k:"cart",ic:"🛒",d:"사야 할 것 · 곧 떨어지는 영양제",kw:"장바구니 쇼핑 살것 구매 영양제 재주문 생필품"}]],
  ["가족","#C06A30",[
   {k:"gifts",ic:"🎁",d:"경조사 주고받기",kw:"경조사 결혼식 장례 축의금 부의금"},
   {k:"holidays",ic:"🧧",d:"명절·용돈·생일",kw:"명절 설 추석 용돈 생일 부모님"},
@@ -453,7 +455,7 @@ const NAV=[
 /* 셸 저장소에 있는 화면(DB 번들 아님) */
 const FILES={houseplan:{t:"주거 시나리오",f:"sim.html",snap:1},wishlist:{t:"해보고 싶은 것들",f:"wishlist.html"},car:{t:"차량 관리",f:"car.html"}};
 /* 탭 이름(메뉴 이름과 다를 때만) */
-const TABT={ledger:"가계부",dashboard:"한눈에",settlements:"검토함",company:"회사 수입",tax:"세금·연말정산",income:"소득·번 돈",insurance:"보험",assets:"자산",investments:"투자",sim:"10년 시뮬레이터",realestate:"부동산",apply:"청약·분양",housing:"구매 여력",houseplan:"시나리오 계산",dongcheon:"동천센트럴자이",connect:"연결",notifications:"알림 설정",macrodroid:"수신 상태",diag:"진단"};
+const TABT={cart:"장바구니",ledger:"가계부",dashboard:"한눈에",settlements:"검토함",company:"회사 수입",tax:"세금·연말정산",income:"소득·번 돈",insurance:"보험",assets:"자산",investments:"투자",sim:"10년 시뮬레이터",realestate:"부동산",apply:"청약·분양",housing:"구매 여력",houseplan:"시나리오 계산",dongcheon:"동천센트럴자이",connect:"연결",notifications:"알림 설정",macrodroid:"수신 상태",diag:"진단"};
 const SHORT={company:"회사 수입",tax:"세금",insurance:"보험",connect:"설정",assets:"자산",realestate:"부동산",planner:"일정",items:"살림살이",pc:"PC",car:"차량",holidays:"명절·용돈",life:"타임라인",wedding:"결혼식",wishlist:"버킷리스트",income:"번 돈",family:"가계도"};
 const ENTRIES=NAV.flatMap(([g,c,es])=>es.map(e=>Object.assign({g,c},e)));
 const INFO=Object.fromEntries(ENTRIES.map(e=>[e.k,e]));
