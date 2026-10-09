@@ -40,7 +40,9 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 .grp{margin:22px 0 10px;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:10px}.grp:first-of-type{margin-top:6px}.grp::after{content:"";flex:1;height:1px;background:var(--line)}
 @media (max-width:560px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.tile{padding:12px;gap:4px;border-radius:12px}.tile b{font-size:15px}.tile .d{display:none}.tile .num{font-size:16px}.tile span{font-size:11.5px}.tile .ic{width:30px;height:30px;font-size:16px}}
 .tile .bar{display:block;height:5px;border-radius:5px;background:var(--bg);overflow:hidden;margin-top:2px}.tile .bar b{display:block;height:100%;border-radius:5px}
-.up{display:grid;gap:6px}.must{display:grid;gap:6px;margin-bottom:6px}.mu{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}.mu .upi{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));background:color-mix(in srgb,var(--accent) 7%,var(--card))}.mu.soon .upi,.mu.late .upi{border-color:#c2472f;background:color-mix(in srgb,#c2472f 8%,var(--card))}.mu.late .upi b,.mu.soon .upi b{color:#c2472f}.mu .upi i{font-style:normal;font-weight:700;color:var(--accent)}.mdone{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:12px;padding:0 12px;font:inherit;font-size:12.5px;min-height:44px;cursor:pointer}.upi{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);font:inherit;cursor:pointer}
+.up{display:grid;gap:6px}.grp small{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;font-weight:800;vertical-align:1px}.news .upi:not(.new){opacity:.62}.news .upi b{font:700 11px/1 inherit;font-family:inherit;text-align:center;border-radius:6px;padding:4px 0}.news .upi.new b{color:#fff;background:#e5484d}.news .upi:not(.new) b{color:var(--muted)}.news .upi em{font-size:11.5px}
+.hasnew{position:relative}.hasnew::before{content:"";position:absolute;top:5px;right:4px;width:7px;height:7px;border-radius:50%;background:#e5484d;box-shadow:0 0 0 2px var(--card)}
+#home .up.news .upi:nth-child(n+4):nth-child(-n+6){display:grid}.must{display:grid;gap:6px;margin-bottom:6px}.mu{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}.mu .upi{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));background:color-mix(in srgb,var(--accent) 7%,var(--card))}.mu.soon .upi,.mu.late .upi{border-color:#c2472f;background:color-mix(in srgb,#c2472f 8%,var(--card))}.mu.late .upi b,.mu.soon .upi b{color:#c2472f}.mu .upi i{font-style:normal;font-weight:700;color:var(--accent)}.mdone{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:12px;padding:0 12px;font:inherit;font-size:12.5px;min-height:44px;cursor:pointer}.upi{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);font:inherit;cursor:pointer}
 .upi b{font:600 13px "IBM Plex Mono",ui-monospace,Consolas,Menlo,monospace;color:var(--accent);min-width:3.2em}.upi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}.upi em{font-style:normal;color:var(--muted);font-size:12.5px}
 .tile span{overflow-wrap:anywhere}
 #app{display:none;position:fixed;left:0;right:0;bottom:0;top:calc(39px + env(safe-area-inset-top,0px));width:100%;height:calc(100% - 39px - env(safe-area-inset-top,0px));border:0}
@@ -153,7 +155,7 @@ html.view-phone body{background:color-mix(in srgb,var(--bg) 70%,#000)}
 <nav id="btm" aria-label="자주 쓰는 앱"></nav>
 <div id="allSheet" aria-hidden="true"><div class="sheet"><div class="sh"><b>전체 앱</b><button type="button" id="allClose" aria-label="닫기">닫기</button></div><div id="allList"></div>
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="viewBtn2" class="viewBtn"></button><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
-<main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="🔍 찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="upnext"></div><div id="tiles"></div></main>
+<main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="🔍 찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="news"></div><div id="upnext"></div><div id="tiles"></div></main>
 <div id="ptr" aria-hidden="true">↻</div><div id="swHint" aria-live="polite"></div><nav id="sub" aria-label="탭"></nav><iframe id="app" title="앱"></iframe>
 <script src="./install.js?v=20261006-1"></script><!-- 셸 버전은 여기 한 곳: install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
@@ -374,6 +376,27 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
   const must=(nev.data||[]).filter(x=>x.importance==="critical"&&dday(String(x.event_at).slice(0,10))<=45).slice(0,6);
   $("must").innerHTML=must.length?`<div class="grp">꼭 챙길 것</div><div class="must">${must.map(x=>{const d=String(x.event_at).slice(0,10),n=dday(d),m=x.meta||{},ic=m.kind==="gain"?"💰":m.kind==="loss"?"⚠️":"⏰";return `<div class="mu ${n<0?"late":n<=3?"soon":""}"><button type="button" class="upi" data-app="${esc(x.url_app||x.source_app)}"><b>${n<0?"지남":n===0?"오늘":"D-"+n}</b><span>${ic} ${esc(x.title)}${m.amount?` <i>${esc(m.amount)}</i>`:""}</span><em>${md(d)}</em></button><button type="button" class="mdone" data-id="${x.id}" aria-label="${esc(x.title)} 했어요">했어요</button></div>`}).join("")}</div>`:"";
   document.querySelectorAll("#must .mdone").forEach(b=>b.onclick=async e=>{ e.stopPropagation(); b.disabled=true; const r=await sb.from("notification_events").update({active:false,meta:Object.assign({},((nev.data||[]).find(x=>String(x.id)===b.dataset.id)||{}).meta,{done_at:new Date().toISOString()})}).eq("id",+b.dataset.id); if(r&&r.error){ b.disabled=false; b.textContent="다시"; } else b.closest(".mu").remove(); });
+  /* ===== 새로 확인할 것: 각 앱·탭이 '지금 볼 이유'가 생기면 여기로 올라옴. 본 것(기기 저장)은 점이 사라짐 ===== */
+  { const [rv,ln,hl,bf,sy]=await Promise.all([
+      q(sb.from("ledger_review_queue").select("reason").eq("status","pending").in("reason",["unusual","refund_candidate","import_check","mail_only"])),
+      q(sb.from("accounts").select("id,name,meta").eq("kind","loan").eq("active",true)),
+      q(sb.from("app_state").select("data").eq("app","health").eq("key","main").maybeSingle()),
+      q(sb.from("app_state").select("data,updated_at").eq("app","briefing").eq("key","latest").maybeSingle()),
+      q(sb.from("app_state").select("updated_at").eq("app","sim").eq("key","years").maybeSingle())]);
+    const N=[]; /* [키, 서명(바뀌면 다시 새것), 문구, 앱] */
+    const rvU=(rv.data||[]).filter(x=>x.reason==="unusual").length, rvR=(rv.data||[]).filter(x=>x.reason==="refund_candidate").length; if(rvU) N.push(["rv",String(rvU),`🧾 가계부 특이 거래 ${rvU}건 — 맞는지 확인`,"settlements"]); if(rvR) N.push(["rf",String(rvR),`↩️ 환불 짝 못 찾은 거래 ${rvR}건`,"settlements"]);
+    (ln.data||[]).forEach(a=>{ const m=(a.meta||{}).maturity; if(m&&dday(m)>=0&&dday(m)<=180) N.push(["loan"+a.id,m,`🏦 ${a.name} 만기 D-${dday(m)}`,"assets"]); });
+    ((hl.data&&hl.data.data&&hl.data.data.supplements)||[]).forEach(x=>{ const st=(x.stock||[]).filter(s=>+s.qty>0&&s.date).sort((a,b)=>a.date.localeCompare(b.date)), per=+((st.find(s=>+s.perDay>0)||{}).perDay)||0; if(!st.length||!per) return; let left=0,from=null; st.forEach(s=>{ const d=Date.parse(s.date); if(from) left=Math.max(0,left-Math.round((d-from)/864e5)*per); left+=+s.qty; from=d; }); const out=new Date(from+left/per*864e5).toISOString().slice(0,10), n=dday(out); if(n<=14) N.push(["sup:"+x.name,out,`💊 ${String(x.name).replace(/\s*\(.*\)$/,"")} ${n<0?"다 떨어짐":"D-"+n+" 떨어짐"}${x.who&&x.who!=="함께"?" · "+x.who:""}`,"health"]); });
+    const B=bf.data&&bf.data.data; if(B&&String(bf.data.updated_at||"").slice(0,10)>=new Date(Date.now()-864e5).toISOString().slice(0,10)){ const h=(Array.isArray(B.headline)?B.headline:[B.headline]).filter(Boolean)[0]; if(h) N.push(["brief",String(B.asof||bf.data.updated_at),"📰 "+h,"briefing"]); }
+    if(hs.length&&invV&&Math.abs(invDay)/invV>=0.015) N.push(["inv",today,`📈 투자 오늘 ${sgn(invDay)}${abs(invDay)} (${(invDay/invV*100).toFixed(1)}%)`,"investments"]);
+    { const c=hoS&&hoS.cands&&hoS.cands.find(x=>x.k); if(c) N.push(["house",String(c.k),`🏠 ${String(c.n).replace(/\s*\d+㎡.*/,"").replace("동천센트럴자이","동센자")} 살 수 있는 때 ${String(c.k).slice(0,4)}.${String(c.k).slice(4)}`,"housing"]); }
+    if(!sy.data||dday(String(sy.data.updated_at).slice(0,10))<-14) N.push(["simy",today.slice(0,7),"📊 시뮬레이터를 한 번 열면 은퇴·집 계산이 최신이 돼요","sim"]);
+    let seen={}; try{ seen=JSON.parse(localStorage.getItem("hh-seen")||"{}"); }catch(_){}
+    const fresh=N.filter(([k,sg])=>seen[k]!==sg); window.__hhNews=N; NEWS_APPS=new Set(fresh.map(x=>x[3])); paintBadges();
+    /* 처음 보는 것 먼저, 본 것은 아래(흐리게) — 다 본 상태면 3개만 */
+    const L=[...fresh,...N.filter(x=>!fresh.includes(x))].slice(0,Math.max(3,fresh.length));
+    $("news").innerHTML=L.length?`<div class="grp">새로 확인할 것${fresh.length?` <small>${fresh.length}</small>`:""}</div><div class="up news">${L.map(([k,sg,t,a])=>`<button type="button" class="upi${fresh.some(x=>x[0]===k)?" new":""}" data-app="${a}" data-nk="${esc(k)}"><b>${fresh.some(x=>x[0]===k)?"새":"본 것"}</b><span>${esc(t)}</span><em>${esc(TABT[a]||titleOf(a))}</em></button>`).join("")}</div>`:"";
+  }
   $("upnext").innerHTML=todo.length?`<div class="grp">다가오는 일</div><div class="up">${todo.slice(0,5).map(([d,t,a])=>`<button type="button" class="upi" data-app="${a}"><b>${dday(d)<=0?"오늘":"D-"+dday(d)}</b><span>${esc(t)}</span><em>${md(d)}</em></button>`).join("")}</div>`:"";
   if(extra.apply&&extra.realestate) extra.realestate+=extra.apply.replace('<div class="num">','<span>📝 ').replace('</div><span>',' · ');
   const tile=e=>`<button type="button" class="tile" data-app="${e.k}" style="--gc:${e.c}"><div class="ic" aria-hidden="true">${e.ic}</div><b><span class="lf">${esc(titleOf(e.k))}</span><span class="ls">${esc(SHORT[e.k]||titleOf(e.k))}</span></b><span class="d">${e.d}</span>${extra[e.k]||""}</button>`;
@@ -474,16 +497,22 @@ async function simSnapshot(){
   return {asof,updatedAt,birth,list,params,vals,debts,ssPrice:qs&&qs.data?Number(qs.data.price):null,salHist:sh&&sh.data||null,payouts:po&&po.data||null};
 }
 /* 한 메뉴 안의 탭(예: 자산 › 투자 › 10년 시뮬레이터) */
+/* 새 소식 점(●): 홈 '새로 확인할 것'에 아직 안 본 항목이 있는 앱. 그 앱을 열면 본 것으로 기억(기기 저장) */
+let NEWS_APPS=new Set();
+window.__hhTitle=k=>TABT[k]||titleOf(k); /* delight.js '최근' 칩 등에서 탭 이름 쓰기 */
+function paintBadges(){ document.querySelectorAll("#sub button[data-app],#tabsbar button[data-app],#btm button[data-app],#allList button[data-app]").forEach(b=>b.classList.toggle("hasnew",NEWS_APPS.has(b.dataset.app)));
+  /* 휴대폰 아래 탭: 메뉴 안 탭 중 하나라도 새것이면 그 메뉴에 점 */ document.querySelectorAll("#btm button[data-app]").forEach(b=>{ const e=entryOf(b.dataset.app); if(e&&e.tabs&&e.tabs.some(k=>NEWS_APPS.has(k))) b.classList.add("hasnew"); }); }
+function markSeen(app){ const N=window.__hhNews||[]; if(!N.some(x=>x[3]===app)) return; let seen={}; try{ seen=JSON.parse(localStorage.getItem("hh-seen")||"{}"); }catch(_){} N.filter(x=>x[3]===app).forEach(x=>{ seen[x[0]]=x[1]; }); try{ localStorage.setItem("hh-seen",JSON.stringify(seen)); }catch(_){} NEWS_APPS.delete(app); paintBadges(); }
 function renderSub(ent,app){ const tabs=ent&&ent.tabs?ent.tabs.filter(hasApp):[]; const on=tabs.length>1;
   document.documentElement.classList.toggle("has-sub",on);
   $("sub").innerHTML=on?tabs.map(k=>`<button type="button" data-app="${k}" aria-current="${k===app?"page":"false"}" style="--gc:${ent.c}">${esc(TABT[k]||titleOf(k))}</button>`).join(""):"";
-  if(on) requestAnimationFrame(()=>{ const sb=$("sub"), cur=sb.querySelector('[aria-current="page"]'); if(cur) cur.scrollIntoView({inline:"center",block:"nearest"}); subFade(); }); }
+  paintBadges(); if(on) requestAnimationFrame(()=>{ const sb=$("sub"), cur=sb.querySelector('[aria-current="page"]'); if(cur) cur.scrollIntoView({inline:"center",block:"nearest"}); subFade(); }); }
 /* 탭이 화면보다 길면 오른쪽(또는 왼쪽)을 흐리게 → 더 있다는 표시 */
 function subFade(){ const sb=$("sub"); sb.classList.toggle("fr",sb.scrollLeft+sb.clientWidth<sb.scrollWidth-4); sb.classList.toggle("fl",sb.scrollLeft>4); }
 /* 셸이 새 버전으로 배포됐으면 앱을 열 때 새로고침 (열어 둔 탭이 예전 셸로 새 앱을 여는 문제 방지) */
 let shellTag=null; const tagOf=async()=>{ try{ const r=await fetch(location.pathname,{method:"HEAD",cache:"no-store"}); return r.headers.get("etag")||r.headers.get("last-modified"); }catch(e){ return null; } };
 tagOf().then(t=>shellTag=t);
-async function openApp(app,fromPop){ const navigation=window.hhBeginNavigation(app); setTimeout(syncTabs);
+async function openApp(app,fromPop){ const navigation=window.hhBeginNavigation(app); setTimeout(syncTabs); markSeen(app);
   if(app!=="home"&&shellTag){ const t=await tagOf(); if(!window.hhIsCurrentNavigation(navigation)) return; if(t&&t!==shellTag){ location.href=location.pathname+"?app="+encodeURIComponent(app); return; } }
   if(app==="home"){ openHome(); return; }
   const ent=entryOf(app); $("pick").value=ent?ent.k:app; renderSub(ent,app); syncTabs();

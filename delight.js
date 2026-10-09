@@ -16,11 +16,11 @@
     ensureBase();const t=$('#hh-shell-toast'),m=t.querySelector('.hh-toast-msg'),b=t.querySelector('button');m.textContent=message;b.hidden=!actionLabel;b.textContent=actionLabel||'';b.onclick=()=>{try{action&&action()}finally{t.classList.remove('on')}};clearTimeout(toastTimer);requestAnimationFrame(()=>t.classList.add('on'));toastTimer=setTimeout(()=>t.classList.remove('on'),actionLabel?6500:2600);
   }
   window.hhToast=toast;
-  function setBusy(on){ensureBase();clearTimeout(busyTimer);clearTimeout(slowTimer);if(on){document.documentElement.classList.add('hh-busy');busyTimer=setTimeout(()=>document.documentElement.classList.remove('hh-busy'),12000);slowTimer=setTimeout(()=>{if(document.documentElement.classList.contains('hh-busy')){const app=$('#pick')?.value;toast('앱을 불러오는 데 평소보다 오래 걸리고 있어요.','다시 열기',()=>{if(app&&app!=='home')window.openApp?.(app)})}},4500)}else document.documentElement.classList.remove('hh-busy')}
+  function setBusy(on){ensureBase();clearTimeout(busyTimer);clearTimeout(slowTimer);if(on){document.documentElement.classList.add('hh-busy');busyTimer=setTimeout(()=>document.documentElement.classList.remove('hh-busy'),12000);slowTimer=setTimeout(()=>{const fr=$('#app'),shown=fr&&fr.style.display!=='none'&&(fr.srcdoc||'').length>0;if(shown&&$('#pick')?.value!=='home'){document.documentElement.classList.remove('hh-busy');return}/* 앱이 이미 화면에 떠 있으면 '오래 걸림' 안내 안 함 */if(document.documentElement.classList.contains('hh-busy')){const app=$('#pick')?.value;toast('앱을 불러오는 데 평소보다 오래 걸리고 있어요.','다시 열기',()=>{if(app&&app!=='home')window.openApp?.(app)})}},4500)}else document.documentElement.classList.remove('hh-busy')}
 
   function appTitle(app){
     const b=$(`#tabsbar [data-app="${CSS.escape(app)}"]`)||$(`#allList [data-app="${CSS.escape(app)}"]`)||$(`#tiles [data-app="${CSS.escape(app)}"]`);
-    if(!b)return app;return (b.querySelector('.ln,b')?.textContent||b.textContent||app).replace(/\s+/g,' ').trim();
+    if(!b){try{const t=window.__hhTitle&&window.__hhTitle(app);if(t&&t!==app)return t}catch(_){}return app}return (b.querySelector('.ln,b')?.textContent||b.textContent||app).replace(/\s+/g,' ').trim();
   }
   function appDesc(app){const t=$(`#tiles .tile[data-app="${CSS.escape(app)}"] .d`);return t?.textContent?.replace(/\s+/g,' ').trim()||''}
   function getRecent(){try{return JSON.parse(localStorage.getItem(recentKey)||'[]').filter(x=>typeof x==='string')}catch(_){return[]}}
