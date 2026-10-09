@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>상지홈</title><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0C7480" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0E1419" media="(prefers-color-scheme: dark)"><meta name="color-scheme" content="light dark"><meta name="format-detection" content="telephone=no"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="상지홈"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg"><link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"><link rel="preconnect" href="https://jdidzokxoaxqcnraowyu.supabase.co">
+<link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><!-- 웹폰트는 첫 화면을 막지 않게 (느린·끊기는 망에서도 시스템 글꼴로 먼저 그림) --><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"></noscript><link rel="preconnect" href="https://jdidzokxoaxqcnraowyu.supabase.co">
 <script>/* 저장된 로그인이 있으면 첫 화면부터 로그인 창 없이 (새로고침 깜빡임 방지). 실제 확인은 아래 boot()가 하고, 로그인이 없으면 되돌림 */
 try{ const v=JSON.parse(localStorage.getItem("sb-jdidzokxoaxqcnraowyu-auth-token")||"null"), h=location.hash;
   if((v&&v.refresh_token)||/access_token=/.test(h)){ document.documentElement.classList.add("authed"); if(new URLSearchParams(location.search).get("app")) document.documentElement.classList.add("authed-app"); } }catch(e){}</script>
@@ -97,7 +97,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 /* 휴대폰·태블릿 홈: 앱을 아이콘 격자로 한 화면에 (짧은 이름 + 숫자 하나) */
 @media (max-width:1099px){
  #home .tile b .lf{display:none}#home .tile b .ls{display:inline}
- #home{padding-top:calc(14px + env(safe-area-inset-top,0px))!important}#home h2{font-size:17px!important;margin:2px 0 8px!important}#home .sub{display:none}#qs{margin-bottom:8px}#qsIn{padding:9px 12px;font-size:14px}
+ #home{padding-top:calc(14px + env(safe-area-inset-top,0px))!important}#home h2{font-size:17px!important;margin:2px 0 8px!important}#home .sub{display:none}#qs{margin-bottom:8px}#qsIn{padding:9px 12px;font-size:16px;min-height:44px}/* 16px 미만이면 iOS Safari가 누를 때 화면을 확대함 */
  #tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:6px 4px;margin-top:6px}#tiles .grp{display:none}#tiles .tiles{display:contents!important}
  #home .tile{justify-items:center;align-content:start;text-align:center;padding:7px 1px 6px!important;gap:2px!important;border-radius:12px!important;min-height:0!important;border-left-width:1px!important;box-shadow:none!important}
  #home .tile{background:none!important;border:0!important}#home .tile::after{display:none}
@@ -152,6 +152,10 @@ html.has-sub.authed #sub{display:flex}
 <div id="ptr" aria-hidden="true">↻</div><nav id="sub" aria-label="탭"></nav><iframe id="app" title="앱"></iframe>
 <script src="./install.js?v=20261006-1"></script><!-- 셸 버전은 여기 한 곳: install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
+<script>/* jsdelivr를 못 받으면(차단·장애) unpkg의 같은 버전 원본으로 한 번 더 (실패할 때만 실행) */
+if(!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.js" integrity="sha384-sLWJsCmP+Z4Qn+HgF7Hi64Djta4fZMu0fcgi3uUL3GFV/ubx2G86LPOuMf7+ZIyX" crossorigin="anonymous"><\/script>');</script>
+<script>/* 둘 다 실패: 저장된 로그인이 있어도 빈 화면(↻만) 대신 로그인 카드에 안내, 연결되면 자동으로 다시 열기 */
+if(!window.supabase){ document.documentElement.classList.remove("authed","authed-app"); const m=document.getElementById("msg"); if(m) m.textContent="서버 연결 도구를 불러오지 못했어요. 인터넷 연결을 확인한 뒤 새로고침해 주세요."; addEventListener("online",()=>location.reload(),{once:true}); }</script>
 <script>
 /* 로그인 안정화
    - lock: supabase 기본 잠금(navigator.locks)은 같은 사이트의 모든 탭·설치 앱 창이 같이 씀. 예전 창 하나가 잠금을 쥐고 멈추면
