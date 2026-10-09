@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 const CACHE='sangjihome-shell-v37-cdnfallback';
 =======
 const CACHE='sangjihome-shell-v37-hometiles';
@@ -7,6 +8,9 @@ const CACHE='sangjihome-shell-v37-hometiles';
 =======
 const CACHE='sangjihome-shell-v38-swipe';
 >>>>>>> 34b3228 (셸: 스와이프로 같은 메뉴 옆 탭 이동(__hh.swipe), 이동 안내·슬라이드, 당겨서 새로고침과 충돌 방지 (sw v38))
+=======
+const CACHE='sangjihome-shell-v39-swipe-all';
+>>>>>>> dd2b1e2 (셸 화면(시나리오 계산·버킷리스트·차량)에도 좌우 스와이프로 같은 메뉴 옆 탭 이동 (sw v39))
 /* 오프라인 대비 공개 셸 파일 (버전 쿼리는 무시하고 찾음) */
 const SHELL=['./','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./icon-maskable-192.png','./icon-maskable-512.png','./apple-touch-icon.png','./install.js','./mobile-ui.js','./mobile-shell.css','./mobile-app.css','./delight-shell.css','./delight.js','./share.js','./sim.html','./sim-scenarios.css','./sim-scenarios.js','./wishlist.html','./car.html'];
 const shellPaths=new Set(SHELL.map(path=>new URL(path,self.location.href).pathname));

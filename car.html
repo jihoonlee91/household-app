@@ -72,4 +72,7 @@ $('addRecord').onclick=async()=>{const title=$('rTitle').value.trim();if(!title)
 $('records').onclick=async e=>{const b=e.target.closest('[data-del]');if(!b)return;state.records=(state.records||[]).filter(r=>r.id!==b.dataset.del);await save()};
 $('save').onclick=save;document.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('change',render));load();
 })();
-</script></body></html>
+</script><script>/* 좌우 스와이프: 같은 메뉴의 옆 탭으로(셸 __hh.swipe) — 가로 스크롤 영역·입력칸·화면 가장자리에서는 무시 */(()=>{let x0,y0,t0,ok=false;const hs=el=>{for(;el&&el!==document.body;el=el.parentElement){const s=getComputedStyle(el);if(/(auto|scroll)/.test(s.overflowX)&&el.scrollWidth>el.clientWidth+2)return true}return false};
+addEventListener("touchstart",e=>{if(e.touches.length!==1){ok=false;return}const t=e.touches[0];ok=t.clientX>16&&t.clientX<innerWidth-16&&!e.target.closest("input,textarea,select,[data-no-swipe],.sheet,dialog[open]")&&!hs(e.target);x0=t.clientX;y0=t.clientY;t0=Date.now()},{passive:true});
+addEventListener("touchend",e=>{if(!ok)return;ok=false;const t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;if(Math.abs(dx)<60||Math.abs(dy)>Math.abs(dx)*0.7||Date.now()-t0>700)return;try{const h=parent.__hh;if(h&&h.swipe)h.swipe(dx<0?"next":"prev")}catch(_){}},{passive:true})})();</script>
+</body></html>
