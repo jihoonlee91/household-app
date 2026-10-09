@@ -40,7 +40,7 @@ button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lin
 .grp{margin:22px 0 10px;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:10px}.grp:first-of-type{margin-top:6px}.grp::after{content:"";flex:1;height:1px;background:var(--line)}
 @media (max-width:560px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.tile{padding:12px;gap:4px;border-radius:12px}.tile b{font-size:15px}.tile .d{display:none}.tile .num{font-size:16px}.tile span{font-size:11.5px}.tile .ic{width:30px;height:30px;font-size:16px}}
 .tile .bar{display:block;height:5px;border-radius:5px;background:var(--bg);overflow:hidden;margin-top:2px}.tile .bar b{display:block;height:100%;border-radius:5px}
-.up{display:grid;gap:6px}.upi{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);font:inherit;cursor:pointer}
+.up{display:grid;gap:6px}.must{display:grid;gap:6px;margin-bottom:6px}.mu{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}.mu .upi{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));background:color-mix(in srgb,var(--accent) 7%,var(--card))}.mu.soon .upi,.mu.late .upi{border-color:#c2472f;background:color-mix(in srgb,#c2472f 8%,var(--card))}.mu.late .upi b,.mu.soon .upi b{color:#c2472f}.mu .upi i{font-style:normal;font-weight:700;color:var(--accent)}.mdone{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:12px;padding:0 12px;font:inherit;font-size:12.5px;min-height:44px;cursor:pointer}.upi{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);font:inherit;cursor:pointer}
 .upi b{font:600 13px "IBM Plex Mono",ui-monospace,Consolas,Menlo,monospace;color:var(--accent);min-width:3.2em}.upi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}.upi em{font-style:normal;color:var(--muted);font-size:12.5px}
 .tile span{overflow-wrap:anywhere}
 #app{display:none;position:fixed;left:0;right:0;bottom:0;top:calc(39px + env(safe-area-inset-top,0px));width:100%;height:calc(100% - 39px - env(safe-area-inset-top,0px));border:0}
@@ -150,7 +150,7 @@ html.has-sub.authed #sub{display:flex}
 <nav id="btm" aria-label="자주 쓰는 앱"></nav>
 <div id="allSheet" aria-hidden="true"><div class="sheet"><div class="sh"><b>전체 앱</b><button type="button" id="allClose" aria-label="닫기">닫기</button></div><div id="allList"></div>
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
-<main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="🔍 찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="upnext"></div><div id="tiles"></div></main>
+<main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="🔍 찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="upnext"></div><div id="tiles"></div></main>
 <div id="ptr" aria-hidden="true">↻</div><div id="swHint" aria-live="polite"></div><nav id="sub" aria-label="탭"></nav><iframe id="app" title="앱"></iframe>
 <script src="./install.js?v=20261006-1"></script><!-- 셸 버전은 여기 한 곳: install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
@@ -293,7 +293,7 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
     q(sb.from("races").select("name,race_date,reg_open,reg_close,status")),
     q(sb.from("categories").select("id").eq("kind","transfer")),
     q(sb.from("app_state").select("app,key,data").in("app",["company","housing","sim"]).in("key",["summary","baseline"])),
-    q(sb.from("notification_events").select("source_app,title,event_at,url_app").eq("active",true).gte("event_at",today).order("event_at").limit(30))
+    q(sb.from("notification_events").select("id,source_app,title,body,event_at,url_app,importance,meta").eq("active",true).gte("event_at",new Date(Date.now()-14*864e5).toISOString().slice(0,10)).order("event_at").limit(60))
   ]);
   /* 다른 앱이 저장해 둔 요약(회사 수입·구매 여력·시뮬레이터 기준선) */ const AS=k=>(((ass.data||[]).find(x=>x.app+"/"+x.key===k)||{}).data)||null, coS=AS("company/summary"), hoS=AS("housing/summary"), siB=AS("sim/baseline");
   const lastB={}; (bl.data||[]).forEach(x=>lastB[x.account_id]=x); const netW=Object.values(lastB).reduce((s,x)=>s+x.amount,0), netAsof=Object.values(lastB).map(x=>x.as_of).sort().pop();
@@ -355,11 +355,15 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
   (ct.data||[]).filter(x=>x.kind==="insurance"&&x.end_date&&!(x.meta&&x.meta.ours===false)&&dday(x.end_date)>=0&&dday(x.end_date)<=60).forEach(x=>todo.push([x.end_date,`🛡️ ${x.title} 만기${x.meta&&x.meta.renew?"·갱신":""}`,"insurance"]));
   if(jeon&&dday(jeon.end_date)<=180) todo.push([jeon.end_date,`🏠 전세 만기`,"realestate"]);
   /* 알림으로 넣어 둔 기한(전세 갱신요구권·연금 납입 등) 60일 안 — 대회·청약·경조사·여행은 위에서 이미 넣음 */
-  (nev.data||[]).filter(x=>!["races","apply","gifts","holidays","trips"].includes(x.source_app)).map(x=>[String(x.event_at).slice(0,10),x]).filter(([d])=>dday(d)>=0&&dday(d)<=60).forEach(([d,x])=>todo.push([d,"⏰ "+x.title,x.url_app||x.source_app]));
+  (nev.data||[]).filter(x=>x.importance!=="critical"&&!["races","apply","gifts","holidays","trips"].includes(x.source_app)).map(x=>[String(x.event_at).slice(0,10),x]).filter(([d])=>dday(d)>=0&&dday(d)<=60).forEach(([d,x])=>todo.push([d,"⏰ "+x.title,x.url_app||x.source_app]));
   /* 놓친 결제 의심(알림 꺼짐·MacroDroid 멈춤·카드대금 차이) — 있으면 맨 앞에 */
   const ms=await q(sb.from("missed_payment_suspects").select("key"));
   todo.sort((a,b)=>a[0].localeCompare(b[0]));
   if(ms.data&&ms.data.length) todo.unshift([today,`🔔 놓친 결제 의심 ${ms.data.length}건 확인`,"connect"]);
+  /* 맨 위 '꼭 챙길 것': 놓치면 손해·챙기면 이득(중요도 critical). 지난 것도 2주 동안은 남김, '했어요'로 지움 */
+  const must=(nev.data||[]).filter(x=>x.importance==="critical"&&dday(String(x.event_at).slice(0,10))<=45).slice(0,6);
+  $("must").innerHTML=must.length?`<div class="grp">꼭 챙길 것</div><div class="must">${must.map(x=>{const d=String(x.event_at).slice(0,10),n=dday(d),m=x.meta||{},ic=m.kind==="gain"?"💰":m.kind==="loss"?"⚠️":"⏰";return `<div class="mu ${n<0?"late":n<=3?"soon":""}"><button type="button" class="upi" data-app="${esc(x.url_app||x.source_app)}"><b>${n<0?"지남":n===0?"오늘":"D-"+n}</b><span>${ic} ${esc(x.title)}${m.amount?` <i>${esc(m.amount)}</i>`:""}</span><em>${md(d)}</em></button><button type="button" class="mdone" data-id="${x.id}" aria-label="${esc(x.title)} 했어요">했어요</button></div>`}).join("")}</div>`:"";
+  document.querySelectorAll("#must .mdone").forEach(b=>b.onclick=async e=>{ e.stopPropagation(); b.disabled=true; const r=await sb.from("notification_events").update({active:false,meta:Object.assign({},((nev.data||[]).find(x=>String(x.id)===b.dataset.id)||{}).meta,{done_at:new Date().toISOString()})}).eq("id",+b.dataset.id); if(r&&r.error){ b.disabled=false; b.textContent="다시"; } else b.closest(".mu").remove(); });
   $("upnext").innerHTML=todo.length?`<div class="grp">다가오는 일</div><div class="up">${todo.slice(0,5).map(([d,t,a])=>`<button type="button" class="upi" data-app="${a}"><b>${dday(d)<=0?"오늘":"D-"+dday(d)}</b><span>${esc(t)}</span><em>${md(d)}</em></button>`).join("")}</div>`:"";
   if(extra.apply&&extra.realestate) extra.realestate+=extra.apply.replace('<div class="num">','<span>📝 ').replace('</div><span>',' · ');
   const tile=e=>`<button type="button" class="tile" data-app="${e.k}" style="--gc:${e.c}"><div class="ic" aria-hidden="true">${e.ic}</div><b><span class="lf">${esc(titleOf(e.k))}</span><span class="ls">${esc(SHORT[e.k]||titleOf(e.k))}</span></b><span class="d">${e.d}</span>${extra[e.k]||""}</button>`;
@@ -395,13 +399,15 @@ const NAV=[
   {k:"housing",ic:"🏠",d:"구매 여력·시세·청약",kw:"집 아파트 전세 시세 청약 분양 이사 동천 주거 대출 구매",tabs:["housing","realestate","apply","dongcheon","houseplan"]},
   {k:"sim",ic:"📈",d:"앞으로 자산 흐름",kw:"시뮬레이터 미래 10년 은퇴 순자산 계획"}]],
  ["생활","#6E5AA6",[
+  {k:"briefing",ic:"📰",d:"오늘 꼭 알아둘 소식",kw:"브리핑 뉴스 삼성전자 반도체 메모리 AI 에이전트 코딩 LLM 부동산 집값 대출 정책 금리 환율 세금 연금"},
   {k:"commute",ic:"🚌",d:"셔틀·자차·자전거",kw:"출퇴근 셔틀 버스 기술동 평택 H3 P1 P3 헬스장 수영장 나루마을"},
   {k:"items",ic:"🛋️",d:"가구·가전·장비",kw:"살림 물건 가전 가구 카메라 자전거 중고"},
   {k:"pc",ic:"🖥️",d:"PC 사양·부품 이력",kw:"컴퓨터 데스크탑 PC 부품 CPU GPU 램 메모리 SSD HDD 업그레이드"},
   {k:"car",ic:"🚙",d:"정비·보험·차량비",kw:"차 자동차 싼타페 정비 주유 검사"},
   {k:"trips",ic:"✈️",d:"여행 기록·경비",kw:"여행 휴가 해외 경비 항공"},
   {k:"wishlist",ic:"✨",d:"버킷리스트",kw:"하고싶은것 버킷 목표 도전"},
-  {k:"races",ic:"🏃",d:"마라톤·트레일",kw:"대회 마라톤 달리기 러닝 트레일 신청"}]],
+  {k:"races",ic:"🏃",d:"마라톤·트레일",kw:"대회 마라톤 달리기 러닝 트레일 신청"},
+  {k:"health",ic:"💊",d:"영양제·검사 이력",kw:"건강 영양제 비타민 복용 병원 검사 MRI 지병"}]],
  ["가족","#C06A30",[
   {k:"gifts",ic:"🎁",d:"경조사 주고받기",kw:"경조사 결혼식 장례 축의금 부의금"},
   {k:"holidays",ic:"🧧",d:"명절·용돈·생일",kw:"명절 설 추석 용돈 생일 부모님"},
