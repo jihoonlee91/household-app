@@ -383,7 +383,7 @@ async function getBundle(app,meta){ const c=await bundleCache(), v=meta&&meta.ve
   if(meta) meta.version=r.data.version;
   return {html:r.data.html,title:r.data.title,cache:"miss"}; }
 /* 자주 쓰는 앱은 한가할 때 미리 받아 둠 */
-function prefetchBundles(){ const go=()=>["ledger","assets","realestate","company"].forEach((k,i)=>setTimeout(()=>{ const m=APPS.find(a=>a.app===k); if(m) getBundle(k,m); },400*i)); ("requestIdleCallback" in window)?requestIdleCallback(go,{timeout:4000}):setTimeout(go,2500); }
+function prefetchBundles(){ const go=()=>["ledger","assets","housing","company","briefing","investments","realestate","income","sim","commute","health"].forEach((k,i)=>setTimeout(()=>{ const m=APPS.find(a=>a.app===k); if(m) getBundle(k,m); },300*i)); ("requestIdleCallback" in window)?requestIdleCallback(go,{timeout:4000}):setTimeout(go,2500); }
 async function clearBundleCache(){ try{ await caches.delete(BCACHE); }catch(_){} }
 const titleOf=k=>(FILES[k]&&FILES[k].t)||((APPS.find(a=>a.app===k)||{}).title)||k;
 const hasApp=k=>!!FILES[k]||APPS.some(a=>a.app===k);
@@ -586,7 +586,7 @@ async function ensureFreshToken(){ try{
   hhLog("warn","로그인 갱신 실패",{err:error.message});
   if(navigator.onLine!==false&&/refresh|invalid|expired|not found/i.test(error.message)){ booted=false; unauth(); autoLogin(); }
 }catch(e){ hhLog("warn","로그인 확인 실패",{err:String(e).slice(0,200)}); } }
-async function refreshApps(){ const r=await sb.from("app_bundles").select("app,title,version"); if(!r.data) return; r.data.forEach(n=>{ const o=APPS.find(a=>a.app===n.app); if(o) o.version=n.version; }); COMMON=r.data.find(a=>a.app==="_common")||COMMON; }
+async function refreshApps(){ const r=await sb.from("app_bundles").select("app,title,version"); if(!r.data) return; let added=false; r.data.forEach(n=>{ const o=APPS.find(a=>a.app===n.app); if(o){ o.version=n.version; if(n.title) o.title=n.title; } else if(n.app!=="_common"){ APPS.push(n); added=true; } }); if(added){ location.reload(); return; } COMMON=r.data.find(a=>a.app==="_common")||COMMON; }
 function refreshView(){ if(curApp) openApp(curApp,true); else openHome(); }
 function autoLogin(){
   try{ if(localStorage.getItem("hh-auto-login")!=="on"||authError||sessionStorage.getItem("hh-auto-tried")) return false; sessionStorage.setItem("hh-auto-tried","1"); }catch(_){ return false; }
