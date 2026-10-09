@@ -390,7 +390,7 @@ const NAV=[
  /* 돈은 다섯 묶음: 가계부 · 회사 수입 · 자산 · 집 · 시뮬레이터 (+ 한눈에) */
  ["돈","#0C7480",[
   {k:"ledger",ic:"🧾",d:"지출·수입·검토",kw:"지출 수입 기록 카드 결제 고정비 구독 예산 내역 영수증 검토 대시보드 한눈에",tabs:["ledger","dashboard","settlements"]},
-  {k:"company",ic:"🏢",d:"월급·성과급·세금",kw:"월급 급여 성과급 의료비 명세서 공제 회사 TAI OPI 특별성과급 자사주 세금 연말정산 종소세 연봉 비교",tabs:["company","tax","income"]},
+  {k:"company",ic:"🏢",d:"월급·성과급·세금",kw:"월급 급여 성과급 의료비 명세서 공제 회사 TAI OPI 특별성과급 자사주 세금 연말정산 종소세 연봉 비교 번 돈 금융소득 은퇴 절세",tabs:["company","tax","income"]},
   {k:"assets",ic:"🏦",d:"잔액·투자·보험",kw:"잔액 순자산 통장 대출 주식 투자 연금 ISA 보험 실손 보장",tabs:["assets","investments","insurance"]},
   {k:"housing",ic:"🏠",d:"구매 여력·시세·청약",kw:"집 아파트 전세 시세 청약 분양 이사 동천 주거 대출 구매",tabs:["housing","realestate","apply","dongcheon","houseplan"]},
   {k:"sim",ic:"📈",d:"앞으로 자산 흐름",kw:"시뮬레이터 미래 10년 은퇴 순자산 계획"}]],
@@ -414,8 +414,8 @@ const NAV=[
 /* 셸 저장소에 있는 화면(DB 번들 아님) */
 const FILES={houseplan:{t:"주거 시나리오",f:"sim.html",snap:1},wishlist:{t:"해보고 싶은 것들",f:"wishlist.html"},car:{t:"차량 관리",f:"car.html"}};
 /* 탭 이름(메뉴 이름과 다를 때만) */
-const TABT={ledger:"가계부",dashboard:"한눈에",settlements:"검토함",company:"회사 수입",tax:"세금·연말정산",income:"연봉 비교",insurance:"보험",assets:"자산",investments:"투자",sim:"10년 시뮬레이터",realestate:"부동산",apply:"청약·분양",housing:"구매 여력",houseplan:"시나리오 계산",dongcheon:"동천센트럴자이",connect:"연결",notifications:"알림 설정",macrodroid:"수신 상태",diag:"진단"};
-const SHORT={company:"회사 수입",tax:"세금",insurance:"보험",connect:"설정",assets:"자산",realestate:"부동산",planner:"일정",items:"살림살이",pc:"PC",car:"차량",holidays:"명절·용돈",life:"타임라인",wedding:"결혼식",wishlist:"버킷리스트",income:"소득 비교",family:"가계도"};
+const TABT={ledger:"가계부",dashboard:"한눈에",settlements:"검토함",company:"회사 수입",tax:"세금·연말정산",income:"소득·번 돈",insurance:"보험",assets:"자산",investments:"투자",sim:"10년 시뮬레이터",realestate:"부동산",apply:"청약·분양",housing:"구매 여력",houseplan:"시나리오 계산",dongcheon:"동천센트럴자이",connect:"연결",notifications:"알림 설정",macrodroid:"수신 상태",diag:"진단"};
+const SHORT={company:"회사 수입",tax:"세금",insurance:"보험",connect:"설정",assets:"자산",realestate:"부동산",planner:"일정",items:"살림살이",pc:"PC",car:"차량",holidays:"명절·용돈",life:"타임라인",wedding:"결혼식",wishlist:"버킷리스트",income:"번 돈",family:"가계도"};
 const ENTRIES=NAV.flatMap(([g,c,es])=>es.map(e=>Object.assign({g,c},e)));
 const INFO=Object.fromEntries(ENTRIES.map(e=>[e.k,e]));
 const GCOL=Object.fromEntries(NAV.map(([g,c])=>[g,c]));
