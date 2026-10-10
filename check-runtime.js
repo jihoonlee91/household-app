@@ -22,8 +22,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
   const opened=[],hint={textContent:'',className:'',classList:{remove(){}}};
   const sw={window:{__hh:{}},opened,curApp:'ledger',$:()=>hint,openApp:k=>opened.push(k),hasApp:()=>true,titleOf:k=>k,setTimeout:()=>0,clearTimeout:()=>{}};
   vm.runInNewContext('var curApp;'+nav+';this.setCur=a=>{curApp=a};',sw);sw.setCur('ledger');
-  assert.equal(sw.window.__hh.swipePeek('next'),'한눈에');assert.equal(sw.window.__hh.swipePeek('prev'),null);
-  assert.equal(sw.window.__hh.swipe('next'),true);assert.deepEqual(opened,['dashboard']);assert.match(hint.textContent,/한눈에 ›/);
+  assert.equal(sw.window.__hh.swipePeek('next'),'분석');assert.equal(sw.window.__hh.swipePeek('prev'),null);
+  assert.equal(sw.window.__hh.swipe('next'),true);assert.deepEqual(opened,['dashboard']);assert.match(hint.textContent,/분석 ›/);
   sw.setCur('settlements');assert.equal(sw.window.__hh.swipe('next'),false,'마지막 탭에서 다음 없음');assert.equal(sw.window.__hh.swipe('prev'),true);assert.deepEqual(opened,['dashboard','dashboard']);
   sw.setCur('commute');assert.equal(sw.window.__hh.swipe('next'),false,'탭 없는 메뉴');sw.setCur('investments');assert.equal(sw.window.__hh.swipePeek('prev'),'자산');
   console.log('runtime OK: navigation ordering, cache isolation, HTTP errors, offline version fallback, swipe tabs');
