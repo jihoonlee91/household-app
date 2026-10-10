@@ -394,8 +394,8 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
     { const c=hoS&&hoS.cands&&hoS.cands.find(x=>x.k); if(c) N.push(["house",String(c.k),`🏠 ${String(c.n).replace(/\s*\d+㎡.*/,"").replace("동천센트럴자이","동센자")} 살 수 있는 때 ${String(c.k).slice(0,4)}.${String(c.k).slice(4)}`,"housing"]); }
     { const ci=((ca.data&&ca.data.data&&ca.data.data.items)||[]).filter(x=>!x.done); if(ci.length) N.push(["cart",String(ci.length),`🛒 살 것 ${ci.length}개 — ${ci.slice(0,3).map(x=>x.name.replace(/\s*\(.*\)$/,"")).join(", ")}${ci.length>3?" 외":""}`,"cart"]); }
     if(!sy.data||dday(String(sy.data.updated_at).slice(0,10))<-14) N.push(["simy",today.slice(0,7),"📊 시뮬레이터를 한 번 열면 은퇴·집 계산이 최신이 돼요","sim"]);
-    let seen={}; try{ seen=JSON.parse(localStorage.getItem("hh-seen")||"{}"); }catch(_){}
-    const fresh=N.filter(([k,sg])=>seen[k]!==sg); window.__hhNews=N; NEWS_APPS=new Set(fresh.map(x=>x[3])); paintBadges();
+    SEEN_CACHE=null; const seen=await seenGet(); /* 홈을 그릴 때마다 다른 기기에서 본 것도 다시 읽음 */
+    const fresh=N.filter(([k,sg])=>!isSeen(seen,k,sg)); window.__hhNews=N; NEWS_APPS=new Set(fresh.map(x=>x[3])); paintBadges();
     /* 본 것(그 앱을 열어 본 것)은 홈에서 치움 — 내용이 바뀌면(서명 변경) 다시 '새'로 올라옴 */
     $("news").innerHTML=fresh.length?`<div class="grp">새로 확인할 것 <small>${fresh.length}</small></div><div class="up news">${fresh.map(([k,sg,t,a])=>`<button type="button" class="upi new" data-app="${a}" data-nk="${esc(k)}"><b>새</b><span>${esc(t)}</span><em>${esc(TABT[a]||titleOf(a))}</em></button>`).join("")}</div>`:"";
   }
@@ -504,7 +504,18 @@ let NEWS_APPS=new Set();
 window.__hhTitle=k=>TABT[k]||titleOf(k); /* delight.js '최근' 칩 등에서 탭 이름 쓰기 */
 function paintBadges(){ document.querySelectorAll("#sub button[data-app],#tabsbar button[data-app],#btm button[data-app],#allList button[data-app]").forEach(b=>b.classList.toggle("hasnew",NEWS_APPS.has(b.dataset.app)));
   /* 휴대폰 아래 탭: 메뉴 안 탭 중 하나라도 새것이면 그 메뉴에 점 */ document.querySelectorAll("#btm button[data-app]").forEach(b=>{ const e=entryOf(b.dataset.app); if(e&&e.tabs&&e.tabs.some(k=>NEWS_APPS.has(k))) b.classList.add("hasnew"); }); }
-function markSeen(app){ const N=window.__hhNews||[]; if(!N.some(x=>x[3]===app)) return; let seen={}; try{ seen=JSON.parse(localStorage.getItem("hh-seen")||"{}"); }catch(_){} N.filter(x=>x[3]===app).forEach(x=>{ seen[x[0]]=x[1]; }); try{ localStorage.setItem("hh-seen",JSON.stringify(seen)); }catch(_){} NEWS_APPS.delete(app); paintBadges();
+/* '본 것' 기록: 이 기기(localStorage) + 내 계정(app_state home/seen-<사용자>)에 같이 저장 → 휴대폰에서 본 건 PC 홈에서도 사라짐.
+   항목은 "키|서명"(내용이 바뀌면 서명이 바뀌어 다시 '새'). 두 곳을 합쳐서(합집합) 씀, 최근 400개만 유지 */
+let SEEN_KEY=null,SEEN_CACHE=null,seenT=0;
+const isSeen=(s,k,sg)=>!!(s[k+"|"+sg]||s[k]===sg);
+function seenLocal(){ try{ return JSON.parse(localStorage.getItem("hh-seen")||"{}")||{}; }catch(_){ return {}; } }
+async function seenGet(){ if(SEEN_CACHE) return SEEN_CACHE; const loc=seenLocal(); let rem={};
+  try{ const s=(await sb.auth.getSession()).data.session; if(s){ SEEN_KEY="seen-"+s.user.id; const r=await sb.from("app_state").select("data").eq("app","home").eq("key",SEEN_KEY).maybeSingle(); rem=(r.data&&r.data.data&&r.data.data.items)||{}; } }catch(_){}
+  SEEN_CACHE=Object.assign({},rem,loc); return SEEN_CACHE; }
+function seenSave(){ const keys=Object.keys(SEEN_CACHE||{}); if(keys.length>400){ keys.sort((a,b)=>(+SEEN_CACHE[a]||0)-(+SEEN_CACHE[b]||0)).slice(0,keys.length-400).forEach(k=>delete SEEN_CACHE[k]); }
+  try{ localStorage.setItem("hh-seen",JSON.stringify(SEEN_CACHE)); }catch(_){}
+  clearTimeout(seenT); seenT=setTimeout(async()=>{ if(!SEEN_KEY) return; try{ await sb.from("app_state").upsert({app:"home",key:SEEN_KEY,data:{items:SEEN_CACHE},updated_at:new Date().toISOString()},{onConflict:"app,key"}); }catch(_){} },600); }
+function markSeen(app){ const N=window.__hhNews||[]; if(!N.some(x=>x[3]===app)) return; if(!SEEN_CACHE) SEEN_CACHE=seenLocal(); N.filter(x=>x[3]===app).forEach(x=>{ SEEN_CACHE[x[0]+"|"+x[1]]=Date.now(); }); seenSave(); NEWS_APPS.delete(app); paintBadges();
   /* 홈 '새로 확인할 것'에서도 바로 치움 */ const nw=$("news"); if(nw){ nw.querySelectorAll(`.news .upi[data-app="${app}"]`).forEach(b=>b.remove()); const left=nw.querySelectorAll(".news .upi").length; if(!left) nw.innerHTML=""; else { const s=nw.querySelector(".grp small"); if(s) s.textContent=left; } } }
 function renderSub(ent,app){ const tabs=ent&&ent.tabs?ent.tabs.filter(hasApp):[]; const on=tabs.length>1;
   document.documentElement.classList.toggle("has-sub",on);
