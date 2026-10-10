@@ -418,7 +418,7 @@ async function getBundle(app,meta){ const c=await bundleCache(), v=meta&&meta.ve
   if(meta) meta.version=r.data.version;
   return {html:r.data.html,title:r.data.title,cache:"miss"}; }
 /* 자주 쓰는 앱은 한가할 때 미리 받아 둠 */
-function prefetchBundles(){ const go=()=>["ledger","assets","housing","company","briefing","investments","realestate","income","sim","commute","health"].forEach((k,i)=>setTimeout(()=>{ const m=APPS.find(a=>a.app===k); if(m) getBundle(k,m); },300*i)); ("requestIdleCallback" in window)?requestIdleCallback(go,{timeout:4000}):setTimeout(go,2500); }
+function prefetchBundles(){ const go=()=>["ledger","assets","health","housing","company","briefing","investments","realestate","income","sim","commute","cart"].forEach((k,i)=>setTimeout(()=>{ const m=APPS.find(a=>a.app===k); if(m) getBundle(k,m); },300*i)); ("requestIdleCallback" in window)?requestIdleCallback(go,{timeout:4000}):setTimeout(go,2500); }
 async function clearBundleCache(){ try{ await caches.delete(BCACHE); }catch(_){} }
 const titleOf=k=>(FILES[k]&&FILES[k].t)||((APPS.find(a=>a.app===k)||{}).title)||k;
 const hasApp=k=>!!FILES[k]||APPS.some(a=>a.app===k);
