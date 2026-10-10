@@ -395,9 +395,8 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
     if(!sy.data||dday(String(sy.data.updated_at).slice(0,10))<-14) N.push(["simy",today.slice(0,7),"📊 시뮬레이터를 한 번 열면 은퇴·집 계산이 최신이 돼요","sim"]);
     let seen={}; try{ seen=JSON.parse(localStorage.getItem("hh-seen")||"{}"); }catch(_){}
     const fresh=N.filter(([k,sg])=>seen[k]!==sg); window.__hhNews=N; NEWS_APPS=new Set(fresh.map(x=>x[3])); paintBadges();
-    /* 처음 보는 것 먼저, 본 것은 아래(흐리게) — 다 본 상태면 3개만 */
-    const L=[...fresh,...N.filter(x=>!fresh.includes(x))].slice(0,Math.max(3,fresh.length));
-    $("news").innerHTML=L.length?`<div class="grp">새로 확인할 것${fresh.length?` <small>${fresh.length}</small>`:""}</div><div class="up news">${L.map(([k,sg,t,a])=>`<button type="button" class="upi${fresh.some(x=>x[0]===k)?" new":""}" data-app="${a}" data-nk="${esc(k)}"><b>${fresh.some(x=>x[0]===k)?"새":"본 것"}</b><span>${esc(t)}</span><em>${esc(TABT[a]||titleOf(a))}</em></button>`).join("")}</div>`:"";
+    /* 본 것(그 앱을 열어 본 것)은 홈에서 치움 — 내용이 바뀌면(서명 변경) 다시 '새'로 올라옴 */
+    $("news").innerHTML=fresh.length?`<div class="grp">새로 확인할 것 <small>${fresh.length}</small></div><div class="up news">${fresh.map(([k,sg,t,a])=>`<button type="button" class="upi new" data-app="${a}" data-nk="${esc(k)}"><b>새</b><span>${esc(t)}</span><em>${esc(TABT[a]||titleOf(a))}</em></button>`).join("")}</div>`:"";
   }
   $("upnext").innerHTML=todo.length?`<div class="grp">다가오는 일</div><div class="up">${todo.slice(0,5).map(([d,t,a])=>`<button type="button" class="upi" data-app="${a}"><b>${dday(d)<=0?"오늘":"D-"+dday(d)}</b><span>${esc(t)}</span><em>${md(d)}</em></button>`).join("")}</div>`:"";
   if(extra.apply&&extra.realestate) extra.realestate+=extra.apply.replace('<div class="num">','<span>📝 ').replace('</div><span>',' · ');
@@ -504,7 +503,8 @@ let NEWS_APPS=new Set();
 window.__hhTitle=k=>TABT[k]||titleOf(k); /* delight.js '최근' 칩 등에서 탭 이름 쓰기 */
 function paintBadges(){ document.querySelectorAll("#sub button[data-app],#tabsbar button[data-app],#btm button[data-app],#allList button[data-app]").forEach(b=>b.classList.toggle("hasnew",NEWS_APPS.has(b.dataset.app)));
   /* 휴대폰 아래 탭: 메뉴 안 탭 중 하나라도 새것이면 그 메뉴에 점 */ document.querySelectorAll("#btm button[data-app]").forEach(b=>{ const e=entryOf(b.dataset.app); if(e&&e.tabs&&e.tabs.some(k=>NEWS_APPS.has(k))) b.classList.add("hasnew"); }); }
-function markSeen(app){ const N=window.__hhNews||[]; if(!N.some(x=>x[3]===app)) return; let seen={}; try{ seen=JSON.parse(localStorage.getItem("hh-seen")||"{}"); }catch(_){} N.filter(x=>x[3]===app).forEach(x=>{ seen[x[0]]=x[1]; }); try{ localStorage.setItem("hh-seen",JSON.stringify(seen)); }catch(_){} NEWS_APPS.delete(app); paintBadges(); }
+function markSeen(app){ const N=window.__hhNews||[]; if(!N.some(x=>x[3]===app)) return; let seen={}; try{ seen=JSON.parse(localStorage.getItem("hh-seen")||"{}"); }catch(_){} N.filter(x=>x[3]===app).forEach(x=>{ seen[x[0]]=x[1]; }); try{ localStorage.setItem("hh-seen",JSON.stringify(seen)); }catch(_){} NEWS_APPS.delete(app); paintBadges();
+  /* 홈 '새로 확인할 것'에서도 바로 치움 */ const nw=$("news"); if(nw){ nw.querySelectorAll(`.news .upi[data-app="${app}"]`).forEach(b=>b.remove()); const left=nw.querySelectorAll(".news .upi").length; if(!left) nw.innerHTML=""; else { const s=nw.querySelector(".grp small"); if(s) s.textContent=left; } } }
 function renderSub(ent,app){ const tabs=ent&&ent.tabs?ent.tabs.filter(hasApp):[]; const on=tabs.length>1;
   document.documentElement.classList.toggle("has-sub",on);
   $("sub").innerHTML=on?tabs.map(k=>`<button type="button" data-app="${k}" aria-current="${k===app?"page":"false"}" style="--gc:${ent.c}">${esc(TABT[k]||titleOf(k))}</button>`).join(""):"";
