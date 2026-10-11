@@ -13,6 +13,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
   status=500;await get('install.js?v=bad');assert.equal(stored.length,1);
   networkError=true;assert.equal(await (await get('install.js?v=missing')).text(),'cached');assert.equal(matchedOptions.ignoreSearch,true);
   const html=fs.readFileSync(__dirname+'/index.html','utf8');
+  /* 셸 버전(install.js?v, 오류 로그 ver)은 sw.js CACHE 번호와 같아야 함 — 예전엔 안 올려서 로그가 늘 옛 버전으로 보였음 */
+  assert.equal((html.match(/install\.js\?v=([\w-]+)/)||[])[1],(currentCache.match(/-(v\d+)/)||[])[1],'index.html install.js?v= 를 sw.js CACHE 번호(vNN)와 같게');
   const bridge=html.match(/let timer=null, curApp=null, navigationId=0;([\s\S]*?)window.hhIsCurrentNavigation=id=>id===navigationId;/)[0];
   const shell={window:{}};vm.runInNewContext(bridge,shell);const first=shell.window.hhBeginNavigation('assets'),second=shell.window.hhBeginNavigation('ledger');
   assert.equal(shell.window.hhIsCurrentNavigation(first),false);assert.equal(shell.window.hhIsCurrentNavigation(second),true);
