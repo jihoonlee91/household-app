@@ -150,6 +150,21 @@ html.view-phone body{background:color-mix(in srgb,var(--bg) 70%,#000)}
 #sub button[aria-current="page"]{color:var(--ink);font-weight:800}#sub button[aria-current="page"]::after{background:var(--gc,var(--accent))}#sub button:not([aria-current="page"]):hover{color:var(--ink)}
 @media (max-width:1099px){html.has-sub .appf{top:calc(40px + env(safe-area-inset-top,0px))!important;height:calc(100% - 98px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px))!important}}
 @media (min-width:1100px){#sub{left:var(--sw);top:0;padding-inline:20px}html.has-sub .appf{top:40px!important;height:calc(100% - 40px)!important}}
+
+#qsIn{padding-left:40px!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%238D98A2' stroke-width='2' stroke-linecap='round' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:14px center}
+/* ===== 다듬기(2026-10-11): 고정폭 숫자 글꼴·이모지·빨간 배지·진한 테두리 → 차분하게 ===== */
+.tile .num,.upi b,#home .num{font-family:inherit!important;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.upi b{font-weight:700!important;font-size:12.5px!important;letter-spacing:0}
+.tile .ic{background:color-mix(in srgb,var(--gc,var(--accent)) 11%,var(--card))!important;color:var(--gc,var(--accent));border:0!important;box-shadow:none!important;border-radius:11px!important}
+.tile .ic .si{width:19px;height:19px}.tile::after{display:none}
+#btm button i .si{width:22px;height:22px;display:block;margin:0 auto 1px}#btm button i{line-height:0}
+#allList .al button i .si,.qsi i .si,#tabsbar .ti .si,.hh-cmd-item .ic .si{width:18px;height:18px;display:block}
+#allList .al button i{display:grid;place-items:center;color:var(--accent)}#tabsbar .ti{display:inline-grid;place-items:center;vertical-align:-3px}
+.news .upi.new b{background:color-mix(in srgb,var(--accent) 12%,transparent)!important;color:var(--accent)!important;font-size:11px!important}
+.mu .upi,.mu.soon .upi,.mu.late .upi{background:var(--card)!important;border-color:var(--line)!important;box-shadow:inset 3px 0 0 var(--accent)}
+.mu.soon .upi,.mu.late .upi{box-shadow:inset 3px 0 0 #c2472f}
+.upi,.mdone,.tile{border-color:color-mix(in srgb,var(--line) 75%,transparent)!important}
+.upi{box-shadow:0 1px 2px rgba(16,24,32,.04)}
 </style></head><body>
 <div id="gate"><div class="card"><h1>상지홈</h1><p>가족 전용입니다.<br>GitHub 계정으로 로그인하세요.</p>
 <button class="gh" id="login"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub로 로그인</button>
@@ -159,7 +174,7 @@ html.view-phone body{background:color-mix(in srgb,var(--bg) 70%,#000)}
 <nav id="btm" aria-label="자주 쓰는 앱"></nav>
 <div id="allSheet" aria-hidden="true"><div class="sheet"><div class="sh"><b>전체 앱</b><button type="button" id="allClose" aria-label="닫기">닫기</button></div><div id="allList"></div>
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="viewBtn2" class="viewBtn"></button><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
-<main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="🔍 찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="news"></div><div id="upnext"></div><div id="tiles"></div></main>
+<main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="news"></div><div id="upnext"></div><div id="tiles"></div></main>
 <div id="ptr" aria-hidden="true">↻</div><div id="swHint" aria-live="polite"></div><nav id="sub" aria-label="탭"></nav><iframe id="app" class="appf" title="앱"></iframe>
 <script src="./install.js?v=20261006-1"></script><!-- 셸 버전은 여기 한 곳: install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
@@ -378,7 +393,7 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
   if(ms.data&&ms.data.length) todo.unshift([today,`🔔 놓친 결제 의심 ${ms.data.length}건 확인`,"connect"]);
   /* 맨 위 '꼭 챙길 것': 놓치면 손해·챙기면 이득(중요도 critical). 지난 것도 2주 동안은 남김, '했어요'로 지움 */
   const must=(nev.data||[]).filter(x=>x.importance==="critical"&&dday(String(x.event_at).slice(0,10))<=45).slice(0,6);
-  $("must").innerHTML=must.length?`<div class="grp">꼭 챙길 것</div><div class="must">${must.map(x=>{const d=String(x.event_at).slice(0,10),n=dday(d),m=x.meta||{},ic=m.kind==="gain"?"💰":m.kind==="loss"?"⚠️":"⏰";return `<div class="mu ${n<0?"late":n<=3?"soon":""}"><button type="button" class="upi" data-app="${esc(x.url_app||x.source_app)}"><b>${n<0?"지남":n===0?"오늘":"D-"+n}</b><span>${ic} ${esc(x.title)}${m.amount?` <i>${esc(m.amount)}</i>`:""}</span><em>${md(d)}</em></button><button type="button" class="mdone" data-id="${x.id}" aria-label="${esc(x.title)} 했어요">했어요</button></div>`}).join("")}</div>`:"";
+  $("must").innerHTML=must.length?`<div class="grp">꼭 챙길 것</div><div class="must">${must.map(x=>{const d=String(x.event_at).slice(0,10),n=dday(d),m=x.meta||{},ic=m.kind==="gain"?"💰":m.kind==="loss"?"⚠️":"⏰";return `<div class="mu ${n<0?"late":n<=3?"soon":""}"><button type="button" class="upi" data-app="${esc(x.url_app||x.source_app)}"><b>${n<0?"지남":n===0?"오늘":"D-"+n}</b><span>${esc(noEmo(x.title))}${m.amount?` <i>${esc(m.amount)}</i>`:""}</span><em>${md(d)}</em></button><button type="button" class="mdone" data-id="${x.id}" aria-label="${esc(x.title)} 했어요">했어요</button></div>`}).join("")}</div>`:"";
   document.querySelectorAll("#must .mdone").forEach(b=>b.onclick=async e=>{ e.stopPropagation(); b.disabled=true; const r=await sb.from("notification_events").update({active:false,meta:Object.assign({},((nev.data||[]).find(x=>String(x.id)===b.dataset.id)||{}).meta,{done_at:new Date().toISOString()})}).eq("id",+b.dataset.id); if(r&&r.error){ b.disabled=false; b.textContent="다시"; } else b.closest(".mu").remove(); });
   /* ===== 새로 확인할 것: 각 앱·탭이 '지금 볼 이유'가 생기면 여기로 올라옴. 본 것(기기 저장)은 점이 사라짐 ===== */
   { const [rv,ln,hl,bf,sy,ca]=await Promise.all([
@@ -400,10 +415,10 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
     SEEN_CACHE=null; const seen=await seenGet(); /* 홈을 그릴 때마다 다른 기기에서 본 것도 다시 읽음 */
     const fresh=N.filter(([k,sg])=>!isSeen(seen,k,sg)); window.__hhNews=N; NEWS_APPS=new Set(fresh.map(x=>x[3])); paintBadges();
     /* 본 것(그 앱을 열어 본 것)은 홈에서 치움 — 내용이 바뀌면(서명 변경) 다시 '새'로 올라옴 */
-    $("news").innerHTML=fresh.length?`<div class="grp">새로 확인할 것 <small>${fresh.length}</small></div><div class="up news">${fresh.map(([k,sg,t,a])=>`<button type="button" class="upi new" data-app="${a}" data-nk="${esc(k)}"><b>새</b><span>${esc(t)}</span><em>${esc(TABT[a]||titleOf(a))}</em></button>`).join("")}</div>`:"";
+    $("news").innerHTML=fresh.length?`<div class="grp">새로 확인할 것 <small>${fresh.length}</small></div><div class="up news">${fresh.map(([k,sg,t,a])=>`<button type="button" class="upi new" data-app="${a}" data-nk="${esc(k)}"><b>새</b><span>${esc(noEmo(t))}</span><em>${esc(TABT[a]||titleOf(a))}</em></button>`).join("")}</div>`:"";
   }
-  $("upnext").innerHTML=todo.length?`<div class="grp">다가오는 일</div><div class="up">${todo.slice(0,5).map(([d,t,a])=>`<button type="button" class="upi" data-app="${a}"><b>${dday(d)<=0?"오늘":"D-"+dday(d)}</b><span>${esc(t)}</span><em>${md(d)}</em></button>`).join("")}</div>`:"";
-  if(extra.apply&&extra.realestate) extra.realestate+=extra.apply.replace('<div class="num">','<span>📝 ').replace('</div><span>',' · ');
+  $("upnext").innerHTML=todo.length?`<div class="grp">다가오는 일</div><div class="up">${todo.slice(0,5).map(([d,t,a])=>`<button type="button" class="upi" data-app="${a}"><b>${dday(d)<=0?"오늘":"D-"+dday(d)}</b><span>${esc(noEmo(t))}</span><em>${md(d)}</em></button>`).join("")}</div>`:"";
+  if(extra.apply&&extra.realestate) extra.realestate+=extra.apply.replace('<div class="num">','<span>').replace('</div><span>',' · ');
   const tile=e=>`<button type="button" class="tile" data-app="${e.k}" style="--gc:${e.c}"><div class="ic" aria-hidden="true">${e.ic}</div><b><span class="lf">${esc(titleOf(e.k))}</span><span class="ls">${esc(SHORT[e.k]||titleOf(e.k))}</span></b><span class="d">${e.d}</span>${extra[e.k]||""}</button>`;
   $("tiles").innerHTML=NAV.map(([g,c])=>[g,c,MENU.filter(e=>e.g===g)]).filter(x=>x[2].length)
     .map(([g,c,l])=>`<div class="grp" style="color:${c}">${g}</div><div class="tiles">${l.map(tile).join("")}</div>`).join("");
@@ -459,6 +474,12 @@ const NAV=[
  ["설정","#5D6A75",[
   {k:"connect",ic:"🔌",d:"알림 연결·진단",kw:"설정 연결 알림 문자 MacroDroid 진단 오류 로그",tabs:["connect","notifications","macrodroid","diag"]}]]
 ];
+/* 메뉴 아이콘: 이모지 대신 한 가지 선 굵기의 단색 아이콘 (묶음 색을 따라감) */
+const ICO={"home":"<path d=\"M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z\"/>","menu":"<path d=\"M4 7h16\"/><path d=\"M4 12h16\"/><path d=\"M4 17h16\"/>","ledger":"<path d=\"M6 3h12v18l-3-2-3 2-3-2-3 2z\"/><path d=\"M9 8h6\"/><path d=\"M9 12h6\"/><path d=\"M9 16h3\"/>","company":"<path d=\"M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16\"/><path d=\"M16 9h2a2 2 0 0 1 2 2v10\"/><path d=\"M3 21h18\"/><path d=\"M8 7h4\"/><path d=\"M8 11h4\"/><path d=\"M8 15h4\"/>","assets":"<path d=\"M3 10 12 4l9 6\"/><path d=\"M5 10v8\"/><path d=\"M9.7 10v8\"/><path d=\"M14.3 10v8\"/><path d=\"M19 10v8\"/><path d=\"M3 21h18\"/>","housing":"<path d=\"M4 11 12 5l8 6\"/><path d=\"M6 9.8V20h12V9.8\"/><path d=\"M10 20v-5h4v5\"/>","sim":"<path d=\"M3 17l6-6 4 4 8-8\"/><path d=\"M15 7h6v6\"/>","planner":"<path d=\"M5 5h14a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1z\"/><path d=\"M4 10h16\"/><path d=\"M8 3v4\"/><path d=\"M16 3v4\"/>","briefing":"<path d=\"M4 5h12v14a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z\"/><path d=\"M16 9h4v10a2 2 0 0 1-2 2\"/><path d=\"M7.5 9h5\"/><path d=\"M7.5 13h5\"/><path d=\"M7.5 17h3\"/>","commute":"<path d=\"M6 3h12a2 2 0 0 1 2 2v12H4V5a2 2 0 0 1 2-2z\"/><path d=\"M4 11h16\"/><path d=\"M7 17v3\"/><path d=\"M17 17v3\"/><path d=\"M8 14h.01\"/><path d=\"M16 14h.01\"/>","trips":"<path d=\"M21 3 10 14\"/><path d=\"M21 3l-7 18-4-7-7-4z\"/>","wishlist":"<path d=\"M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z\"/>","races":"<path d=\"M5 21V4\"/><path d=\"M5 4h12l-2.5 4L17 12H5\"/>","health":"<path d=\"M20.5 8.8A4.8 4.8 0 0 0 12 6a4.8 4.8 0 0 0-8.5 2.8C3.5 14 12 20 12 20s8.5-6 8.5-11.2z\"/><path d=\"M7 12h3l1.5-2.5 2 4.5 1.5-2H17\"/>","cart":"<path d=\"M3 4h2l2.3 11h10.4L20 7H6.4\"/><path d=\"M9 20h.01\"/><path d=\"M17 20h.01\"/>","car":"<path d=\"M5 16v-4l2-5h10l2 5v4z\"/><path d=\"M4 12h16\"/><path d=\"M7 16v3\"/><path d=\"M17 16v3\"/><path d=\"M8 13.5h.01\"/><path d=\"M16 13.5h.01\"/>","items":"<path d=\"M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3\"/><path d=\"M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3z\"/><path d=\"M5 18v2\"/><path d=\"M19 18v2\"/>","pc":"<path d=\"M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z\"/><path d=\"M8 20h8\"/><path d=\"M12 16v4\"/>","gifts":"<path d=\"M3 9h18v4H3z\"/><path d=\"M5 13v8h14v-8\"/><path d=\"M12 9v12\"/><path d=\"M12 9c-1.5-3-4.5-4-5.5-2.5S8 9 12 9zm0 0c1.5-3 4.5-4 5.5-2.5S16 9 12 9\"/>","holidays":"<path d=\"M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z\"/><path d=\"M3 8l9 6 9-6\"/>","family":"<path d=\"M9 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z\"/><path d=\"M2.5 20a6.5 6.5 0 0 1 13 0\"/><path d=\"M16.5 11a2.5 2.5 0 1 0 0-5\"/><path d=\"M17 14.5a5 5 0 0 1 4.5 5.5\"/>","life":"<path d=\"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z\"/><path d=\"M15.5 8.5l-2 5-5 2 2-5z\"/>","wedding":"<path d=\"M12 20a6 6 0 1 0 0-12 6 6 0 0 0 0 12z\"/><path d=\"M9 4h6l-3 4z\"/>","connect":"<path d=\"M9 2v5\"/><path d=\"M15 2v5\"/><path d=\"M6 7h12v4a6 6 0 0 1-12 0z\"/><path d=\"M12 17v5\"/>"};
+const svgI=k=>ICO[k]?`<svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[k]}</svg>`:"";
+NAV.forEach(([,,L])=>L.forEach(e=>{ if(ICO[e.k]) e.ic=svgI(e.k); }));
+/* 알림 문구 앞 이모지는 빼고 글만 */
+const noEmo=t=>String(t??"").replace(/^[\s\p{Extended_Pictographic}\u{FE0F}\u{200D}\u{1F3FB}-\u{1F3FF}\u{2190}-\u{21FF}]+/u,"");
 /* 셸 저장소에 있는 화면(DB 번들 아님) */
 const FILES={houseplan:{t:"주거 시나리오",f:"sim.html",snap:1},wishlist:{t:"해보고 싶은 것들",f:"wishlist.html"},car:{t:"차량 관리",f:"car.html"}};
 /* 탭 이름(메뉴 이름과 다를 때만) */
@@ -554,8 +575,10 @@ async function buildFrame(app,o){ const t0=performance.now(), file=FILES[app], s
   if(b.error||!b.data) return {error:b.error||"앱 없음"};
   if(stateful){ const snapshot=(app==="sim"||(file&&file.snap))? await simSnapshot() : null; if(o.nav&&!window.hhIsCurrentNavigation(o.nav)) return null; window.__hh.inputs=st&&st.data?st.data.data:null; window.__hh.snapshot=snapshot; }
   let html=b.data.html; const att=`<script>try{parent.hhAttach&&parent.hhAttach(window,${JSON.stringify(app)})}catch(e){}<\/script>`;
-  html=/<head[^>]*>/i.test(html)?html.replace(/<head[^>]*>/i,m=>m+att):att+html;
-  if(html.includes("<!--hh-common-->")) html=html.replace("<!--hh-common-->",()=>cm&&cm.html||"");
+  /* 공통 차트(hhChart)는 앱 코드보다 먼저 있어야 함 — 공통 레이어는 body 끝에 붙어서, 앱이 먼저 그리면 차트가 비던 문제 → 차트 부분만 head로 */
+  let ch="", com=cm&&cm.html||""; { const m=com.match(/<style id="hh-chart-css">[\s\S]*?<\/style>\s*<script id="hh-chart-js">[\s\S]*?<\/script>/); if(m){ ch=m[0]; com=com.replace(ch,""); } }
+  html=/<head[^>]*>/i.test(html)?html.replace(/<head[^>]*>/i,m=>m+att+ch):att+ch+html;
+  if(html.includes("<!--hh-common-->")) html=html.replace("<!--hh-common-->",()=>com);
   const m=APPS.find(a=>a.app===app), f=newFrame(); f.title=b.data.title;
   const p={f,app,at:Date.now(),used:Date.now(),v:m&&m.version,cv:COMMON&&COMMON.version,ready:false,title:b.data.title};
   const loaded=new Promise(r=>f.addEventListener("load",r,{once:true})); f.srcdoc=html; await loaded;
@@ -619,13 +642,13 @@ async function bootSession(){
   const apps=await sb.from("app_bundles").select("app,title,version");
   if(apps.error) throw apps.error;
   APPS=(apps.data||[]).filter(a=>!a.app.startsWith("_")); COMMON=(apps.data||[]).find(a=>a.app==="_common")||null; MENU=ENTRIES.filter(e=>hasApp(e.k));
-  $("pick").innerHTML=`<option value="home">🏠 홈</option>`+MENU.map(e=>`<option value="${e.k}">${e.ic} ${esc(titleOf(e.k))}</option>`).join("");
+  $("pick").innerHTML=`<option value="home">홈</option>`+MENU.map(e=>`<option value="${e.k}">${esc(titleOf(e.k))}</option>`).join("");
   { /* PC 왼쪽 메뉴: 묶음마다 색 이름표 + 아이콘 */
-    let h=`<button type="button" data-app="home" title="홈"><i class="ti">🏠</i><span class="ln">홈</span></button>`, cur=null;
+    let h=`<button type="button" data-app="home" title="홈"><i class="ti">${svgI("home")}</i><span class="ln">홈</span></button>`, cur=null;
     MENU.forEach(e=>{ if(e.g!==cur){ h+=`<span class="tg" style="--gc:${e.c}">${e.g}</span>`; cur=e.g; } h+=`<button type="button" data-app="${e.k}" style="--gc:${e.c}" title="${esc(titleOf(e.k))}"><i class="ti">${e.ic}</i><span class="ln">${esc(titleOf(e.k))}</span></button>`; });
     $("tabsbar").innerHTML=h;
     /* 휴대폰 아래 탭: 홈·가계부·자산·부동산 + 전체 / 전체 시트: 묶음별 모든 메뉴 */
-    $("btm").innerHTML=[["home","🏠","홈"],...["ledger","company","assets","housing"].filter(k=>hasApp(k)&&entryOf(k)).map(k=>[k,entryOf(k).ic,SHORT[k]||TABT[k]||titleOf(k)])].map(([k,i,l])=>`<button type="button" data-app="${k}"><i>${i}</i>${l}</button>`).join("")+`<button type="button" id="allOpen"><i>☰</i>전체</button>`;
+    $("btm").innerHTML=[["home",svgI("home"),"홈"],...["ledger","company","assets","housing"].filter(k=>hasApp(k)&&entryOf(k)).map(k=>[k,entryOf(k).ic,SHORT[k]||TABT[k]||titleOf(k)])].map(([k,i,l])=>`<button type="button" data-app="${k}"><i>${i}</i>${l}</button>`).join("")+`<button type="button" id="allOpen"><i>${svgI("menu")}</i>전체</button>`;
     $("allList").innerHTML=NAV.map(([g,c])=>{ const L=MENU.filter(e=>e.g===g); return L.length?`<div class="ag" style="color:${c}">${g}</div><div class="al">${L.map(e=>`<button type="button" data-app="${e.k}"><i>${e.ic}</i>${esc(SHORT[e.k]||titleOf(e.k))}</button>`).join("")}</div>`:""; }).join(""); }
   $("hello").textContent=`${me.name}님, 안녕하세요`; $("hsub").textContent="우리집 가계 앱";
   $("home").onclick=e=>{ const t=e.target.closest(".tile,.upi"); if(t){ $("pick").value=t.dataset.app; openApp(t.dataset.app); } };
