@@ -184,7 +184,7 @@ html.view-phone body{background:color-mix(in srgb,var(--bg) 70%,#000)}
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="viewBtn2" class="viewBtn"></button><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="news"></div><div id="upnext"></div><div id="tiles"></div></main>
 <div id="ptr" aria-hidden="true">↻</div><div id="swHint" aria-live="polite"></div><nav id="sub" aria-label="탭"></nav><iframe id="app" class="appf" title="앱"></iframe>
-<script src="./install.js?v=v67"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
+<script src="./install.js?v=v68"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>/* jsdelivr를 못 받으면(차단·장애) unpkg의 같은 버전 원본으로 한 번 더 (실패할 때만 실행) */
 if(!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.js" integrity="sha384-sLWJsCmP+Z4Qn+HgF7Hi64Djta4fZMu0fcgi3uUL3GFV/ubx2G86LPOuMf7+ZIyX" crossorigin="anonymous"><\/script>');</script>
@@ -579,9 +579,11 @@ function settled(f,max){ return new Promise(res=>{ const t0=Date.now(); let last
     if(sig&&sig===last&&!busy) same++; else same=0; last=sig; if(same>=3||Date.now()-t0>max) res(); else setTimeout(tick,90); }; tick(); }); }
 const fetchApp=app=>{ const file=FILES[app]; return file?fetch("./"+file.f+"?v="+(window.HH_VER||""),{cache:"no-store"}).then(async r=>r.ok?{data:{html:(await r.text()).replace(/\?v=[\w-]+/g,"?v="+(window.HH_VER||"")),title:file.t,cache:"file"}}:{error:r.status}).catch(error=>({error})):getBundle(app,APPS.find(a=>a.app===app)).then(x=>x.error?{error:x.error}:{data:x}); };
 async function buildFrame(app,o){ const t0=performance.now(), file=FILES[app], stateful=!poolOK(app);
+  /* 시뮬레이터 시작값(잔액·주가)은 화면 받기와 동시에 — 예전엔 받은 뒤에 차례로 기다려 1초쯤 더 걸림 */
+  const snapP=stateful&&(app==="sim"||(file&&file.snap))? simSnapshot().catch(()=>null) : null;
   const [b,st,cm]=await Promise.all([fetchApp(app), stateful?takeInputs(app):Promise.resolve(null), COMMON?getBundle("_common",COMMON):Promise.resolve(null)]);
   if(b.error||!b.data) return {error:b.error||"앱 없음"};
-  if(stateful){ const snapshot=(app==="sim"||(file&&file.snap))? await simSnapshot() : null; if(o.nav&&!window.hhIsCurrentNavigation(o.nav)) return null; window.__hh.inputs=st&&st.data?st.data.data:null; window.__hh.snapshot=snapshot; }
+  if(stateful){ const snapshot=snapP? await snapP : null; if(o.nav&&!window.hhIsCurrentNavigation(o.nav)) return null; window.__hh.inputs=st&&st.data?st.data.data:null; window.__hh.snapshot=snapshot; }
   let html=b.data.html; const att=`<script>try{parent.hhAttach&&parent.hhAttach(window,${JSON.stringify(app)})}catch(e){}<\/script>`;
   /* 공통 차트(hhChart)는 앱 코드보다 먼저 있어야 함 — 공통 레이어는 body 끝에 붙어서, 앱이 먼저 그리면 차트가 비던 문제 → 차트 부분만 head로 */
   let ch="", com=cm&&cm.html||""; { const m=com.match(/<style id="hh-chart-css">[\s\S]*?<\/style>\s*<script id="hh-chart-js">[\s\S]*?<\/script>/); if(m){ ch=m[0]; com=com.replace(ch,""); } }
