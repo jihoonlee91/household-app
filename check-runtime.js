@@ -18,7 +18,9 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
   assert.equal(shell.window.hhIsCurrentNavigation(first),false);assert.equal(shell.window.hhIsCurrentNavigation(second),true);
   shell.window.hhBeginNavigation(null);assert.equal(shell.window.hhIsCurrentNavigation(second),false);
   /* 좌우 스와이프: 같은 메뉴 안 이전/다음 탭, 끝·탭 없는 메뉴는 그대로 */
-  const nav=html.match(/const NAV=\[[\s\S]*?\nconst swipeTo=[\s\S]*?\n\$\("app"\)\.addEventListener\("load",\(\)=>\{ const s=swipeDir/)[0].replace(/\n\$\("app"\)\.addEventListener[\s\S]*$/,'');
+  const nav=html.replace(/\r\n/g,'\n').match(/const NAV=\[[\s\S]*?\nconst swipeTo=[\s\S]*?\n\/\* 시뮬레이터 시작값/)[0].replace(/\n\/\* 시뮬레이터 시작값$/,'');
+  /* 앱 화면 유지: 전환은 띄워 둔 화면을 보이기만, 슬라이드 애니메이션 없음 */
+  assert.match(html,/if\(!force&&poolOK\(app\)&&poolFresh\(app\)\)\{ done\(POOL\.get\(app\)\); return; \}/);assert.doesNotMatch(html,/translateX\(\$\{d===/);
   const opened=[],hint={textContent:'',className:'',classList:{remove(){}}};
   const sw={window:{__hh:{}},opened,curApp:'ledger',$:()=>hint,openApp:k=>opened.push(k),hasApp:()=>true,titleOf:k=>k,setTimeout:()=>0,clearTimeout:()=>{}};
   vm.runInNewContext('var curApp;'+nav+';this.setCur=a=>{curApp=a};',sw);sw.setCur('ledger');
