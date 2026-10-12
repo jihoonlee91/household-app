@@ -186,7 +186,7 @@ html.view-phone body{background:color-mix(in srgb,var(--bg) 70%,#000)}
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="viewBtn2" class="viewBtn"></button><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="news"></div><div id="upnext"></div><div id="tiles"></div></main>
 <div id="ptr" aria-hidden="true">↻</div><div id="swHint" aria-live="polite"></div><nav id="sub" aria-label="탭"></nav><iframe id="app" class="appf" title="앱"></iframe>
-<script src="./install.js?v=v79"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
+<script src="./install.js?v=v80"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>/* jsdelivr를 못 받으면(차단·장애) unpkg의 같은 버전 원본으로 한 번 더 (실패할 때만 실행) */
 if(!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.js" integrity="sha384-sLWJsCmP+Z4Qn+HgF7Hi64Djta4fZMu0fcgi3uUL3GFV/ubx2G86LPOuMf7+ZIyX" crossorigin="anonymous"><\/script>');</script>
@@ -646,11 +646,13 @@ const loadInputs=app=>sb.from("app_state").select("data").eq("app",app).eq("key"
 const takeInputs=app=>{ const p=PRE_IN.get(app); PRE_IN.delete(app); return (p&&Date.now()-p.at<120e3)?p.q:loadInputs(app); };
 function warmNeighbors(app){ setTimeout(()=>{ ["next","prev"].forEach(d=>{ const k=swipeTo(d); if(!k||k===app) return;
   if(poolOK(k)){ if(!poolFresh(k)) buildPooled(k); } else { if(!FILES[k]){ const m=APPS.find(a=>a.app===k); if(m) getBundle(k,m); } if(!PRE_IN.has(k)) PRE_IN.set(k,{at:Date.now(),q:loadInputs(k)}); } }); },250); }
-let shellTag=null; const tagOf=async()=>{ try{ const r=await fetch(location.pathname,{method:"HEAD",cache:"no-store"}); return r.headers.get("etag")||r.headers.get("last-modified"); }catch(e){ return null; } };
-tagOf().then(t=>shellTag=t);
-async function openApp(app,fromPop,force){ const T0=performance.now(), navigation=window.hhBeginNavigation(app); setTimeout(syncTabs); markSeen(app);
+/* 셸 새 버전 확인: 서버 sw.js의 버전 번호(vNN)를 지금 셸 번호와 비교. 예전엔 시작할 때 받은 ETag와 비교했는데,
+   시작 순간 요청이 실패하면(LTE 전환 등) 비교 기준이 없어 영영 확인을 안 해서 휴대폰이 며칠째 옛 셸에 머물렀음. 1분에 한 번만 */
+let verAt=0; const shellVer=async()=>{ try{ const t=await (await fetch("./sw.js",{cache:"no-store"})).text(); return (t.match(/sangjihome-shell-(v\d+)/)||[])[1]||null; }catch(_){ return null; } };
+function checkShell(app){ if(Date.now()-verAt<60e3||!/^v\d+$/.test(window.HH_VER||"")) return; verAt=Date.now();
+  shellVer().then(v=>{ if(v&&v!==window.HH_VER&&curApp===app) location.href=location.pathname+(app&&app!=="home"?"?app="+encodeURIComponent(app):""); }); }async function openApp(app,fromPop,force){ const T0=performance.now(), navigation=window.hhBeginNavigation(app); setTimeout(syncTabs); markSeen(app);
   /* 셸 새 버전 확인은 기다리지 않고 뒤에서 (바뀌었으면 그때 새로 엶) */
-  if(app!=="home"&&shellTag) tagOf().then(t=>{ if(t&&t!==shellTag&&curApp===app) location.href=location.pathname+"?app="+encodeURIComponent(app); });
+  checkShell(app);
   if(app==="home"){ openHome(); return; }
   const ent=entryOf(app); $("pick").value=ent?ent.k:app; renderSub(ent,app); syncTabs(); curApp=app;
   const H=document.documentElement;
@@ -751,7 +753,7 @@ async function resumeAuth(){
   const away=hiddenAt?Date.now()-hiddenAt:0; hiddenAt=0;
   await ensureFreshToken();
   if(away>10*60e3){
-    if(shellTag){ const t=await tagOf(); if(t&&t!==shellTag){ location.reload(); return; } }
+    verAt=Date.now(); const v=await shellVer(); if(v&&/^v\d+$/.test(window.HH_VER||"")&&v!==window.HH_VER){ location.reload(); return; }
     await refreshApps(); refreshView();
   }
 }
