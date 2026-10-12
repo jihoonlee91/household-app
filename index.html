@@ -186,7 +186,7 @@ html.view-phone body{background:color-mix(in srgb,var(--bg) 70%,#000)}
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="viewBtn2" class="viewBtn"></button><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="news"></div><div id="upnext"></div><div id="tiles"></div></main>
 <div id="ptr" aria-hidden="true">↻</div><div id="swHint" aria-live="polite"></div><nav id="sub" aria-label="탭"></nav><iframe id="app" class="appf" title="앱"></iframe>
-<script src="./install.js?v=v72"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
+<script src="./install.js?v=v73"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>/* jsdelivr를 못 받으면(차단·장애) unpkg의 같은 버전 원본으로 한 번 더 (실패할 때만 실행) */
 if(!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.js" integrity="sha384-sLWJsCmP+Z4Qn+HgF7Hi64Djta4fZMu0fcgi3uUL3GFV/ubx2G86LPOuMf7+ZIyX" crossorigin="anonymous"><\/script>');</script>
@@ -263,6 +263,21 @@ const handoff=(async()=>{
 let theme=""; try{ theme=localStorage.getItem("hh-theme")||""; }catch(e){}
 function applyTheme(){ const set=el=>{ if(!el) return; if(theme) el.setAttribute("data-theme",theme); else el.removeAttribute("data-theme"); };
   set(document.documentElement); document.querySelectorAll("iframe.appf").forEach(f=>{ try{ set(f.contentDocument&&f.contentDocument.documentElement); }catch(e){} }); }
+/* 실시간 구독(Disk IO): 앱들은 DB가 바뀌면 전부 다시 읽음 → 뒤에 숨겨 둔 앱·화면 꺼짐 중엔 바로 안 읽고 다시 보일 때 한 번만.
+   닫히거나 새로 고친 앱 프레임의 구독은 지움(공용 클라이언트에 쌓이지 않게) */
+const RT=[];
+const rtWin=fn=>{ for(const f of document.querySelectorAll("iframe.appf")){ try{ const w=f.contentWindow; if(w&&fn instanceof w.Function) return [f,w]; }catch(_){} } return null; };
+const rtLive=r=>r.f.isConnected&&r.f.contentWindow===r.w;
+const rtShown=r=>r.f.id==="app"&&!r.f.classList.contains("bg")&&r.f.style.display!=="none"&&!document.hidden;
+function rtSweep(){ for(let i=RT.length-1;i>=0;i--) if(!rtLive(RT[i])){ try{ sb.removeChannel(RT[i].ch); }catch(_){} RT.splice(i,1); } }
+function rtFlush(){ rtSweep(); for(const r of RT) if(r.pend&&rtShown(r)){ const p=r.pend; r.pend=null; p.forEach((a,cb)=>{ try{ cb(a); }catch(e){ console.warn(e); } }); } }
+{ const ch0=sb.channel.bind(sb);
+  sb.channel=(...a)=>{ const ch=ch0(...a), on0=ch.on.bind(ch); let r=null;
+    ch.on=(type,filter,cb)=>{ const fw=typeof cb==="function"&&rtWin(cb); if(!fw) return on0(type,filter,cb);
+      if(!r){ r={ch,f:fw[0],w:fw[1],pend:null}; RT.push(r); }
+      return on0(type,filter,p=>{ if(!rtLive(r)){ rtSweep(); return; } if(rtShown(r)) return cb(p); (r.pend||(r.pend=new Map())).set(cb,p); }); };
+    return ch; }; }
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) rtFlush(); });
 /* 앱(iframe) 쪽에서 쓰는 다리: 입력값을 부부 공용 DB(app_state)에 저장 */
 window.__hh={sb,inputs:null,open:app=>{ $("pick").value=app; openApp(app); },saveInputs(d){ const app=curApp; if(!app) return; clearTimeout(timer); timer=setTimeout(async()=>{ const {error}=await sb.from("app_state").upsert({app,key:"inputs",data:d,updated_at:new Date().toISOString()}); if(error) console.warn(error); },700); }};
 const setTheme=t=>{ theme=t; $("theme").value=t; try{localStorage.setItem("hh-theme",t);}catch(_){} applyTheme(); syncSeg(); };
@@ -575,7 +590,7 @@ function poolEvict(){ if(POOL.size<=POOL_MAX) return; const act=$("app"); [...PO
 function chanTrim(){ try{ if(sb.getChannels&&sb.getChannels().length>60){ sb.removeAllChannels(); poolStaleAll(); } }catch(_){} }
 function newFrame(){ const f=document.createElement("iframe"); f.className="appf bg"; f.title="앱"; f.addEventListener("load",applyTheme); FANCHOR.before(f); return f; }
 function showFrame(f){ const cur=$("app"); if(cur&&cur!==f){ cur.removeAttribute("id"); cur.style.display=""; if([...POOL.values()].some(p=>p.f===cur)) cur.classList.add("bg"); else cur.remove(); }
-  f.classList.remove("bg"); f.id="app"; f.style.display="block"; applyTheme(); }
+  f.classList.remove("bg"); f.id="app"; f.style.display="block"; applyTheme(); setTimeout(rtFlush); }
 /* 다 그려졌나: 화면 높이·요소 수가 몇 번 연속 그대로이고 '불러오는 중' 글자가 없으면 */
 function loadingText(b){ const w=b.ownerDocument.createTreeWalker(b,NodeFilter.SHOW_TEXT,{acceptNode:n=>/^(SCRIPT|STYLE|TEMPLATE)$/.test(n.parentNode&&n.parentNode.nodeName)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}); let n; while((n=w.nextNode())) if(n.nodeValue.includes("불러오는 중")) return true; return false; }
 function settled(f,max){ return new Promise(res=>{ const t0=Date.now(); let last="",same=0; const tick=()=>{ let sig="",busy=false; try{ const b=f.contentDocument&&f.contentDocument.body; if(b){ busy=loadingText(b); sig=b.scrollHeight+":"+b.getElementsByTagName("*").length; } }catch(_){}
