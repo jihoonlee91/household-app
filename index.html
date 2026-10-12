@@ -184,7 +184,7 @@ html.view-phone body{background:color-mix(in srgb,var(--bg) 70%,#000)}
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="viewBtn2" class="viewBtn"></button><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="news"></div><div id="upnext"></div><div id="tiles"></div></main>
 <div id="ptr" aria-hidden="true">↻</div><div id="swHint" aria-live="polite"></div><nav id="sub" aria-label="탭"></nav><iframe id="app" class="appf" title="앱"></iframe>
-<script src="./install.js?v=v68"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
+<script src="./install.js?v=v69"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>/* jsdelivr를 못 받으면(차단·장애) unpkg의 같은 버전 원본으로 한 번 더 (실패할 때만 실행) */
 if(!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.js" integrity="sha384-sLWJsCmP+Z4Qn+HgF7Hi64Djta4fZMu0fcgi3uUL3GFV/ubx2G86LPOuMf7+ZIyX" crossorigin="anonymous"><\/script>');</script>
@@ -493,7 +493,7 @@ const FILES={houseplan:{t:"주거 시나리오",f:"sim.html",snap:1},wishlist:{t
 /* 탭 이름(메뉴 이름과 다를 때만) */
 const TABT={sim:"시뮬레이터",assets:"자산",ledger:"가계부",settlements:"검토함",company:"회사 수입",payroll:"급여명세서",tax:"세금",income:"소득 흐름",insurance:"보험",investments:"투자",housing:"살 수 있나",realestate:"시세",ranking:"순위",apply:"청약",dongcheon:"동천센트럴자이",houseplan:"시나리오",dashboard:"분석",connect:"연결",notifications:"알림",macrodroid:"휴대폰 수신",diag:"오류 진단"};
 const nameOf=k=>SHORT[k]||titleOf(k);
-const SHORT={company:"회사 수입",tax:"세금",insurance:"보험",connect:"설정",assets:"자산",realestate:"부동산",items:"살림살이",pc:"PC",car:"차량",holidays:"명절·용돈",life:"타임라인",wedding:"결혼식",wishlist:"버킷리스트",income:"소득 흐름",family:"가계도",planner:"일정",housing:"집"};
+const SHORT={commute:"셔틀",company:"회사 수입",tax:"세금",insurance:"보험",connect:"설정",assets:"자산",realestate:"부동산",items:"살림살이",pc:"PC",car:"차량",holidays:"명절·용돈",life:"타임라인",wedding:"결혼식",wishlist:"버킷리스트",income:"소득 흐름",family:"가계도",planner:"일정",housing:"집"};
 const ENTRIES=NAV.flatMap(([g,c,es])=>es.map(e=>Object.assign({g,c},e)));
 const INFO=Object.fromEntries(ENTRIES.map(e=>[e.k,e]));
 const GCOL=Object.fromEntries(NAV.map(([g,c])=>[g,c]));
@@ -658,8 +658,8 @@ async function bootSession(){
     let h=`<button type="button" data-app="home" title="홈"><i class="ti">${svgI("home")}</i><span class="ln">홈</span></button>`, cur=null;
     MENU.forEach(e=>{ if(e.g!==cur){ h+=`<span class="tg" style="--gc:${e.c}">${e.g}</span>`; cur=e.g; } h+=`<button type="button" data-app="${e.k}" style="--gc:${e.c}" title="${esc(nameOf(e.k))}"><i class="ti">${e.ic}</i><span class="ln">${esc(nameOf(e.k))}</span></button>`; });
     $("tabsbar").innerHTML=h;
-    /* 휴대폰 아래 탭: 홈·가계부·자산·부동산 + 전체 / 전체 시트: 묶음별 모든 메뉴 */
-    $("btm").innerHTML=[["home",svgI("home"),"홈"],...["ledger","company","assets","housing"].filter(k=>hasApp(k)&&entryOf(k)).map(k=>[k,entryOf(k).ic,nameOf(k)])].map(([k,i,l])=>`<button type="button" data-app="${k}"><i>${i}</i>${l}</button>`).join("")+`<button type="button" id="allOpen"><i>${svgI("menu")}</i>전체</button>`;
+    /* 휴대폰 아래 탭(빠른 실행): 홈·자산·가계부·집·셔틀 + 전체 / 전체 시트: 묶음별 모든 메뉴 */
+    $("btm").innerHTML=[["home",svgI("home"),"홈"],...["assets","ledger","housing","commute"].filter(k=>hasApp(k)&&entryOf(k)).map(k=>[k,entryOf(k).ic,nameOf(k)])].map(([k,i,l])=>`<button type="button" data-app="${k}"><i>${i}</i>${l}</button>`).join("")+`<button type="button" id="allOpen"><i>${svgI("menu")}</i>전체</button>`;
     $("allList").innerHTML=NAV.map(([g,c])=>{ const L=MENU.filter(e=>e.g===g); return L.length?`<div class="ag" style="color:${c}">${g}</div><div class="al">${L.map(e=>`<button type="button" data-app="${e.k}"><i>${e.ic}</i>${esc(nameOf(e.k))}</button>`).join("")}</div>`:""; }).join(""); }
   $("hello").textContent=`${me.name}님, 안녕하세요`; $("hsub").textContent="우리집 가계 앱";
   $("home").onclick=e=>{ const t=e.target.closest(".tile,.upi"); if(t){ $("pick").value=t.dataset.app; openApp(t.dataset.app); } };
