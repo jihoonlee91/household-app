@@ -333,7 +333,7 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
   try{ const c=JSON.parse(localStorage.getItem("hh-home")||"null"); if(c&&!$("tiles").innerHTML){ $("upnext").innerHTML=c.u; $("tiles").innerHTML=c.t; } }catch(_){}
   const q=(p)=>p.then(r=>r).catch(()=>({data:null}));
   /* 홈 미리보기: 각 앱의 핵심 숫자 한두 개. 앱과 같은 원본(DB)에서 읽기만 함 */
-  const [tx,gf,tc,it,st,bl,ac,hd,qt,ct,rw,sub,gup,tr,pp,rc,cg,ass,nev]=await Promise.all([
+  const [tx,gf,tc,it,st,bl,ac,hd,qt,ct,rw,sub,gup,tr,pp,rc,cg,ass,nev,hm]=await Promise.all([
     q(sb.from("transactions").select("amount,category_id").gte("occurred_on",mFrom).lt("occurred_on",mTo).lt("amount",0)),
     q(sb.from("gifts").select("cash,goods_value,direction").gte("occurred_on",mFrom).lt("occurred_on",mTo).eq("direction","보냄")),
     q(sb.from("trip_costs").select("amount").gte("spent_on",mFrom).lt("spent_on",mTo)),
@@ -349,7 +349,8 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
     q(sb.from("races").select("name,race_date,reg_open,reg_close,status")),
     q(sb.from("categories").select("id").eq("kind","transfer")),
     q(sb.from("app_state").select("app,key,data").in("app",["company","housing","sim"]).in("key",["summary","baseline"])),
-    q(sb.from("notification_events").select("id,source_app,title,body,event_at,url_app,importance,meta").eq("active",true).gte("event_at",new Date(Date.now()-14*864e5).toISOString().slice(0,10)).order("event_at").limit(60))
+    q(sb.from("notification_events").select("id,source_app,title,body,event_at,url_app,importance,meta").eq("active",true).gte("event_at",new Date(Date.now()-14*864e5).toISOString().slice(0,10)).order("event_at").limit(60)),
+    q(sb.from("home_devices").select("kind,online,protected,state"))
   ]);
   /* 다른 앱이 저장해 둔 요약(회사 수입·구매 여력·시뮬레이터 기준선) */ const AS=k=>(((ass.data||[]).find(x=>x.app+"/"+x.key===k)||{}).data)||null, coS=AS("company/summary"), hoS=AS("housing/summary"), siB=AS("sim/baseline");
   const lastB={}; (bl.data||[]).forEach(x=>lastB[x.account_id]=x); const netW=Object.values(lastB).reduce((s,x)=>s+x.amount,0), netAsof=Object.values(lastB).map(x=>x.as_of).sort().pop();
@@ -382,6 +383,8 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
   const pn=Object.fromEntries((pp.data||[]).map(x=>[x.id,x.name])), gName=x=>[pn[x.person_id],x.occasion&&x.occasion!=="기타"?x.occasion:(x.label||"")].filter(Boolean).join(" ")||"경조사";
   const shorts=(MEMBERS||[]).map(m=>String(m.name||"").slice(-2)).filter(Boolean), fam=(pp.data||[]).filter(x=>shorts.some(n=>String(x.relation||"").startsWith(n))).length; /* 관계 앞 글자 = 구성원 이름(뒤 두 글자) */
   const wedDays=dday("2023-08-15")*-1;
+  /* 집 제어: 켜진 조명·에어컨·플러그·TV 수(보호된 PC 전원 제외), PC 소비전력 */
+  const hd2=(hm.data||[]).filter(d=>d.online), hOn=hd2.filter(d=>["light","ac","plug","tv"].includes(d.kind)&&!d.protected&&d.state&&d.state.on).length, hPc=hd2.find(d=>d.protected&&d.state&&d.state.power_w!=null);
   const extra={
     assets:`<div class="num">${fm(netW)}</div><span>순자산 · ${netAsof?md(netAsof)+" 기준":"잔액 입력 전"}</span>`,
     investments:hs.length?`<div class="num">${fm(invV)}</div><span><em style="color:${col(invDay)};font-style:normal">오늘 ${sgn(invDay)}${abs(invDay)}</em> · 평가손익 ${sgn(invPnl)}${abs(invPnl)}</span>`:"",
@@ -397,7 +400,8 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
     races:rMine?`<div class="num">D-${dday(rMine.race_date)}</div><span>${esc(rMine.name)} · ${md(rMine.race_date)}</span>`:rNext?`<div class="num">신청 D-${dday(rNext.reg_open)}</div><span>${esc(rNext.name)} · ${md(rNext.reg_open)}</span>`:`<div class="num">${races.length}개</div><span>관심 대회</span>`,
     trips:upTrip?`<div class="num">D-${dday(upTrip.start_date)}</div><span>${esc(upTrip.title)} · ${md(upTrip.start_date)}</span>`:`<div class="num">${yTrips.length}번</div><span>${yr}년 여행${yCost?` · ${fm(yCost)}`:""}</span>`,
     wedding:`<div class="num">${wedDays.toLocaleString("ko-KR")}일</div><span>함께한 날 · 2023.8.15</span>`,
-    family:fam?`<div class="num">${fam}명</div><span>양가 가족</span>`:""
+    family:fam?`<div class="num">${fam}명</div><span>양가 가족</span>`:"",
+    smarthome:hd2.length?`<div class="num">${hOn?hOn+"개 켜짐":"모두 꺼짐"}</div><span>${hPc?`PC ${Math.round(hPc.state.power_w)}W`:"조명·에어컨·TV"}</span>`:""
   };
   /* 맨 위 '다가오는 일': 날짜가 가까운 것만 모아서 */
   const todo=[];
