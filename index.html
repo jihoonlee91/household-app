@@ -186,7 +186,7 @@ html.view-phone body{background:color-mix(in srgb,var(--bg) 70%,#000)}
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="viewBtn2" class="viewBtn"></button><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="news"></div><div id="upnext"></div><div id="tiles"></div></main>
 <div id="ptr" aria-hidden="true">↻</div><div id="swHint" aria-live="polite"></div><nav id="sub" aria-label="탭"></nav><iframe id="app" class="appf" title="앱"></iframe>
-<script src="./install.js?v=v77"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
+<script src="./install.js?v=v78"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>/* jsdelivr를 못 받으면(차단·장애) unpkg의 같은 버전 원본으로 한 번 더 (실패할 때만 실행) */
 if(!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.js" integrity="sha384-sLWJsCmP+Z4Qn+HgF7Hi64Djta4fZMu0fcgi3uUL3GFV/ubx2G86LPOuMf7+ZIyX" crossorigin="anonymous"><\/script>');</script>
@@ -232,13 +232,17 @@ window.hhAttach=(w,app)=>{ try{
 /* DB 요청 감시: 실패(4xx·5xx)·네트워크 오류·2.5초 넘는 요청. 값(필터)은 빼고 표 이름만 남김 */
 const reqName=u=>{ try{ const x=new URL(u); return x.pathname.replace(/^\/(rest|functions|auth)\/v1\//,"$1:").slice(0,60); }catch(_){ return String(u).slice(0,60); } };
 window.hhReqs=[];
+/* 휴대폰 LTE 전환·화면 켜짐 순간의 'Failed to fetch'는 한 번 더 시도(읽기와 함수 호출만, 화면이 보일 때). 그래도 실패하면 기록 */
+const isRead=(url,init)=>{ const m=String((init&&init.method)||(typeof Request!=="undefined"&&url instanceof Request&&url.method)||"GET").toUpperCase(); return m==="GET"||m==="HEAD"||/\/functions\/v1\//.test(String(url&&url.url||url)); };
+const whenVisible=()=>document.hidden?new Promise(r=>{ const f=()=>{ if(!document.hidden){ document.removeEventListener("visibilitychange",f); r(); } }; document.addEventListener("visibilitychange",f); setTimeout(r,30000); }):Promise.resolve();
+async function rawFetchRetry(input,init){ try{ return await rawFetch(input,init); }catch(e){ if(e&&e.name==="AbortError"||!isRead(input,init)||(init&&init.body&&typeof init.body!=="string")) throw e; await whenVisible(); await new Promise(r=>setTimeout(r,700)); return await rawFetch(input,init); } }
 async function hhFetch(input,init){ const url=String(input&&input.url||input), t0=performance.now(), name=reqName(url), quiet=/app_logs/.test(url);
-  try{ const r=await rawFetch(input,init), ms=Math.round(performance.now()-t0);
+  try{ const r=await rawFetchRetry(input,init), ms=Math.round(performance.now()-t0);
     if(!quiet){ window.hhReqs.push({name,status:r.status,ms,at:Date.now()}); if(window.hhReqs.length>100) window.hhReqs.shift();
       if(!r.ok&&r.status!==406){ let body=""; try{ body=(await r.clone().text()).slice(0,300); }catch(_){} hhLog(r.status>=500?"error":"warn",`요청 실패 ${r.status} ${name}`,{source:"shell",status:r.status,ms,method:(init&&init.method)||"GET",body},curApp); }
       else if(ms>2500) hhLog("perf",`느린 요청 ${name}`,{source:"shell",ms},curApp); }
     return r;
-  }catch(e){ if(!quiet&&!(e&&e.name==="AbortError")) hhLog(navigator.onLine===false?"warn":"error",`${navigator.onLine===false?"오프라인":"네트워크 오류"} ${name}`,{source:"shell",err:String(e).slice(0,200)},curApp); throw e; } }
+  }catch(e){ if(!quiet&&!(e&&e.name==="AbortError")) hhLog(navigator.onLine===false||document.hidden?"warn":"error",`${navigator.onLine===false?"오프라인":"네트워크 오류"} ${name}`,{source:"shell",err:String(e).slice(0,200)},curApp); throw e; } }
 const sb=supabase.createClient(SB_URL,SB_KEY,{global:{fetch:hhFetch},auth:{flowType:"implicit",persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:AUTH_KEY,lock:async(_n,_t,fn)=>await fn()}});
 const $=id=>document.getElementById(id), msg=t=>{ $("msg").textContent=t; $("status").textContent=t; };
 let timer=null, curApp=null, navigationId=0;
@@ -454,6 +458,7 @@ async function openHome(){ window.hhBeginNavigation(null); renderSub(null); setT
   const tile=e=>`<button type="button" class="tile" data-app="${e.k}" style="--gc:${e.c}"><div class="ic" aria-hidden="true">${e.ic}</div><b>${esc(nameOf(e.k))}</b><span class="d">${e.d}</span>${extra[e.k]||""}</button>`;
   $("tiles").innerHTML=NAV.map(([g,c])=>[g,c,MENU.filter(e=>e.g===g)]).filter(x=>x[2].length)
     .map(([g,c,l])=>`<div class="grp" style="color:${c}">${g}</div><div class="tiles">${l.map(tile).join("")}</div>`).join("");
+  paintTraining();
   try{ localStorage.setItem("hh-home",JSON.stringify({u:$("upnext").innerHTML,t:$("tiles").innerHTML})); }catch(_){}
 }
 let APPS=[], MEMBERS=[], MENU=[], COMMON=null;
@@ -527,6 +532,19 @@ window.__hh.swipe=dir=>{ const k=swipeTo(dir); if(!k) return false; const h=$("s
   h.textContent=dir==="next"?(TABT[k]||titleOf(k))+" ›":"‹ "+(TABT[k]||titleOf(k)); h.className="on "+(dir==="next"?"r":"l");
   clearTimeout(swipeT); swipeT=setTimeout(()=>h.classList.remove("on"),900);
   swipeDir={d:dir,at:Date.now()}; openApp(k); return true; };
+/* 홈 '운동' 타일: 로그인한 사람의 오늘 운동(운동 앱 틀과 같은 규칙: 계절·회복 주·그날 일정) */
+async function paintTraining(){ try{ const el=document.querySelector('#tiles .tile[data-app="training"]'); if(!el) return;
+  const [r,ss]=await Promise.all([sb.from("app_state").select("data").eq("app","training").eq("key","main").maybeSingle(),sb.auth.getSession()]); const D=r.data&&r.data.data; if(!D||!D.people) return;
+  const login=((ss.data&&ss.data.session&&ss.data.session.user.user_metadata)||{}).user_name, me=(MEMBERS||[]).find(m=>m.github_login&&m.github_login===login), nm=me?String(me.name).slice(-2):"지훈";
+  const key=Object.keys(D.people).find(k=>D.people[k].name===nm)||"jihoon", p=D.people[key];
+  const z=new Date(Date.now()+9*3600e3), s=z.toISOString().slice(0,10), mo=z.getUTCMonth()+1, dw=(z.getUTCDay()+6)%7+1;
+  const SM=p.seasonMonths||{spring:[3,4],season:[5,6,7,8,9],fall:[10,11],winter:[12,1,2]}, sk=Object.keys(SM).find(k=>(SM[k]||[]).includes(mo))||"season";
+  const wk=p.cycleStart&&s>=p.cycleStart?Math.floor((Date.parse(s)-Date.parse(p.cycleStart))/864e5/7)%4+1:0, done=((D.logs||{})[key]||{})[s]||{};
+  const L=[...(p.week||[]).filter(x=>x.dow===dw&&((x.seasons||["all"]).includes("all")||(x.seasons||[]).includes(sk))),...(p.events||[]).filter(e=>e.date===s)].filter(x=>+x.min>0).sort((a,b)=>String(a.t).localeCompare(String(b.t)));
+  const left=L.filter(x=>!done[x.id]), nx=left[0], tit=x=>String(x.title).replace(/\s*\(.*?\)/,"");
+  const html=L.length?`<div class="num">${left.length?`${esc(nx.t)} ${esc(tit(nx))}`:"오늘 다 했어요"}</div><span>${esc(p.name)} · 오늘 ${L.length}개${left.length>1?` · 그다음 ${esc(tit(left[1]))}`:""}${wk===4?" · 회복 주":""}</span>`:`<div class="num">쉬는 날</div><span>${esc(p.name)}${wk===4?" · 회복 주":""}</span>`;
+  el.querySelectorAll(".num,.tile>span:not(.d)").forEach(x=>x.remove()); el.insertAdjacentHTML("beforeend",html);
+ }catch(e){ console.warn("운동 타일",e); } }
 /* 시뮬레이터 시작값: 자산 앱 계좌별 최신 잔액 + 살림살이 현재 시세 합계 */
 async function simSnapshot(){
   /* 주가 갱신은 최대 1.2초만 기다림 (느리면 직전 값으로 열고, 갱신은 뒤에서 계속) */
