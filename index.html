@@ -186,7 +186,7 @@ html.view-phone body{background:color-mix(in srgb,var(--bg) 70%,#000)}
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="viewBtn2" class="viewBtn"></button><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="news"></div><div id="upnext"></div><div id="tiles"></div></main>
 <div id="ptr" aria-hidden="true">↻</div><div id="swHint" aria-live="polite"></div><nav id="sub" aria-label="탭"></nav><iframe id="app" class="appf" title="앱"></iframe>
-<script src="./install.js?v=v81"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
+<script src="./install.js?v=v82"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>/* jsdelivr를 못 받으면(차단·장애) unpkg의 같은 버전 원본으로 한 번 더 (실패할 때만 실행) */
 if(!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.js" integrity="sha384-sLWJsCmP+Z4Qn+HgF7Hi64Djta4fZMu0fcgi3uUL3GFV/ubx2G86LPOuMf7+ZIyX" crossorigin="anonymous"><\/script>');</script>
@@ -547,8 +547,7 @@ async function paintTraining(){ try{ const el=document.querySelector('#tiles .ti
  }catch(e){ console.warn("운동 타일",e); } }
 /* 시뮬레이터 시작값: 자산 앱 계좌별 최신 잔액 + 살림살이 현재 시세 합계 */
 async function simSnapshot(){
-  /* 주가 갱신은 최대 1.2초만 기다림 (느리면 직전 값으로 열고, 갱신은 뒤에서 계속) */
-  try{ await Promise.race([sb.functions.invoke("refresh-quotes",{body:{}}),new Promise(r=>setTimeout(r,1200))]); }catch(e){}
+  /* 주가는 서버 크론이 장중 5분마다·마감 후 한 번 갱신(refresh-quotes-intraday/close) → 열 때 갱신을 기다리지 않음(예전엔 최대 1.2초 기다려 시뮬레이터가 늘 1.6초 걸렸음) */
   const [a,b,it,qs,mb,sh,po]=await Promise.all([sb.from("accounts").select("id,name,kind,owner_id,rate,meta").eq("active",true), sb.from("balances").select("account_id,as_of,amount,updated_at").order("as_of"), sb.from("items").select("value_now,status,account_id"), sb.from("quotes").select("symbol,price").eq("symbol","005930").maybeSingle(), sb.from("members").select("id,birth_date"), sb.from("salary_history").select("member_id,effective,contract_salary,prev_grade,cl,base_up,perf_raise,note").order("effective"), sb.from("payouts").select("member_id,paid_on,kind,gross")]);
   const birth=Object.fromEntries((mb.data||[]).map(m=>[m.id,m.birth_date]));
   if(!a.data||!b.data) return null;
@@ -611,7 +610,9 @@ function poolEvict(){ if(POOL.size<=POOL_MAX) return; const act=$("app"); [...PO
 function chanTrim(){ try{ if(sb.getChannels&&sb.getChannels().length>60){ sb.removeAllChannels(); poolStaleAll(); } }catch(_){} }
 function newFrame(){ const f=document.createElement("iframe"); f.className="appf bg"; f.title="앱"; f.addEventListener("load",applyTheme); FANCHOR.before(f); return f; }
 function showFrame(f){ const cur=$("app"); if(cur&&cur!==f){ cur.removeAttribute("id"); cur.style.display=""; if([...POOL.values()].some(p=>p.f===cur)) cur.classList.add("bg"); else cur.remove(); }
-  f.classList.remove("bg"); f.id="app"; f.style.display="block"; applyTheme(); setTimeout(rtFlush); }
+  f.classList.remove("bg"); f.id="app"; f.style.display="block"; applyTheme(); setTimeout(rtFlush);
+  /* 띄워 둔 앱 화면을 다시 보일 때 알림 → 안 보는 동안 새로고침을 멈춘 앱(스마트홈 등)이 바로 새로 읽음 */
+  try{ f.contentWindow.dispatchEvent(new Event("hh-show")); }catch(_){} }
 /* 다 그려졌나: 화면 높이·요소 수가 몇 번 연속 그대로이고 '불러오는 중' 글자가 없으면 */
 function loadingText(b){ const w=b.ownerDocument.createTreeWalker(b,NodeFilter.SHOW_TEXT,{acceptNode:n=>/^(SCRIPT|STYLE|TEMPLATE)$/.test(n.parentNode&&n.parentNode.nodeName)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}); let n; while((n=w.nextNode())) if(n.nodeValue.includes("불러오는 중")) return true; return false; }
 /* 앱이 window.__hhReady=true 로 '보여 줄 만함'을 알리면 바로 끝(랭킹: 지난 화면을 10ms에 그려 놓고도, 뒤이은 계산이 같은 스레드를 붙잡아 다 그려졌나 확인이 3초 밀렸음) */
