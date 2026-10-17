@@ -39,4 +39,16 @@
   window.hhInstallApp=install;
   window.addEventListener('DOMContentLoaded',()=>{refreshMetadata();addShareButtons();buttons().forEach(b=>b.addEventListener('click',install));refresh();});
   window.addEventListener('load',async()=>{addShareButtons();if('serviceWorker' in navigator){try{const r=await navigator.serviceWorker.register('./sw.js?v='+META_VER,{updateViaCache:'none'});await r.update();}catch(e){console.warn(e);}}});
+  /* 폰에서 며칠 켜 둔 창이 옛 셸로 남지 않게(10/16 아침 v67로 쓰던 창): 10분 넘게 가려졌다 다시 보일 때 새 버전이 나와 있으면 새로 고침.
+     버전 = sw.js 캐시 이름(셸 배포 때 install.js?v=와 같이 올림). 입력 중이면(셸·앱 화면 모두) 건드리지 않음 */
+  let hiddenAt=0;
+  document.addEventListener('visibilitychange',async()=>{
+    if(document.hidden){hiddenAt=Date.now();return;}
+    if(!hiddenAt||Date.now()-hiddenAt<10*60e3||META_VER==='dev')return; hiddenAt=0;
+    try{
+      const t=await (await fetch('./sw.js?check='+Date.now(),{cache:'no-store'})).text(), m=t.match(/sangjihome-shell-(v\d+)/);
+      const typing=d=>{const a=d&&d.activeElement;if(!a)return false;if(a.tagName==='IFRAME'){try{return typing(a.contentDocument);}catch(_){return false;}}return /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)||a.isContentEditable;};
+      if(m&&m[1]!==META_VER&&!typing(document))location.reload();
+    }catch(_){}
+  });
 })();
