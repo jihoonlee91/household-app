@@ -187,7 +187,7 @@ html.view-phone body{background:color-mix(in srgb,var(--bg) 70%,#000)}
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="viewBtn2" class="viewBtn"></button><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="pushHint" class="phint" hidden></div><div id="news"></div><div id="upnext"></div><div id="tiles"></div></main>
 <div id="ptr" aria-hidden="true">↻</div><div id="swHint" aria-live="polite"></div><nav id="sub" aria-label="탭"></nav><iframe id="app" class="appf" title="앱"></iframe>
-<script src="./install.js?v=v90"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
+<script src="./install.js?v=v91"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>/* jsdelivr를 못 받으면(차단·장애) unpkg의 같은 버전 원본으로 한 번 더 (실패할 때만 실행) */
 if(!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.js" integrity="sha384-sLWJsCmP+Z4Qn+HgF7Hi64Djta4fZMu0fcgi3uUL3GFV/ubx2G86LPOuMf7+ZIyX" crossorigin="anonymous"><\/script>');</script>
@@ -508,7 +508,7 @@ const NAV=[
   {k:"assets",ic:"🏦",d:"잔액·투자·보험·시뮬레이터",kw:"잔액 순자산 통장 대출 주식 투자 연금 ISA 보험 실손 보장 시뮬레이터 미래 10년 은퇴 계획",tabs:["assets","investments","insurance","sim"]},
   {k:"housing",ic:"🏠",d:"구매 여력·시세·청약",kw:"집 아파트 전세 시세 청약 분양 이사 동천 성복 옥수 고덕 아크메르 리포트 주거 대출 구매 랭킹 순위 점수 비교",tabs:["housing","homereport","acmer","realestate","ranking","apply","dongcheon"]}]],
  ["생활","#6E5AA6",[
-  {k:"planner",ic:"🗓️",d:"중요 일정·할일",kw:"일정 계획 할일 성과급 공지 출근 이사 마감 캘린더 플래너"},
+  {k:"planner",ic:"🗓️",d:"중요 일정·할일·캘린더",kw:"일정 계획 할일 성과급 공지 출근 이사 마감 캘린더 플래너 달력 공휴일 패밀리데이 연휴 징검다리",tabs:["planner","calendar"]},
   {k:"briefing",ic:"📰",d:"오늘 꼭 알아둘 소식",kw:"브리핑 뉴스 삼성전자 반도체 메모리 AI 에이전트 코딩 LLM 부동산 집값 대출 정책 금리 환율 세금 연금"},
   {k:"commute",ic:"🚌",d:"셔틀·자차·자전거",kw:"출퇴근 셔틀 버스 기술동 평택 H3 P1 P3 헬스장 수영장 나루마을"},
   {k:"training",ic:"🏋️",d:"연·월·주·일 운동 계획",kw:"운동 계획 훈련 러닝 마라톤 트레일 수영 헬스 조정 에르고 자전거 즈위프트 로라 등산 MTB 철인 트라이애슬론 페이스 지훈 상아"},
