@@ -48,7 +48,7 @@ function writeForm(){const d=itemDefaults();fields.forEach(k=>$(k).value=(state.
  if(ok){$('photoImg').src=p.url;$('photoImg').alt=p.note||'차량 사진';const by=[p.author,p.license,p.source].filter(Boolean).map(escapeHtml).join(' · ');$('photoCap').innerHTML=(/^https:\/\//.test(p.page||'')?`<a href="${escapeHtml(p.page)}" target="_blank" rel="noopener">사진: ${by}</a>`:`사진: ${by}`);$('photoCap').title=p.note||''}}
 /* 주유: 가계부 '교통·차량' 중 주유소 결제. 같은 날 같은 금액의 취소(+)·가승인은 상쇄 */
 function fuelRows(){const L=DBV.fuel.slice(),neg=L.filter(x=>x.amount<0),pos=L.filter(x=>x.amount>0);const used=new Set();pos.forEach(p=>{const i=neg.findIndex((n,j)=>!used.has(j)&&n.amount===-p.amount&&Math.abs(new Date(n.occurred_on)-new Date(p.occurred_on))<=3*864e5);if(i>=0)used.add(i)});return neg.filter((n,j)=>!used.has(j)&&!/가승인|\(취소/.test(n.memo||'')).sort((a,b)=>b.occurred_on.localeCompare(a.occurred_on))}
-function renderFuel(){const R=fuelRows(),t=new Date(),y1=new Date(t.getFullYear()-1,t.getMonth(),t.getDate()).toISOString().slice(0,10),yr=String(t.getFullYear());
+function renderFuel(){const R=fuelRows(),t=new Date(),y1=ymd(new Date(t.getFullYear()-1,t.getMonth(),t.getDate())),yr=String(t.getFullYear());
  const last12=R.filter(r=>r.occurred_on>=y1),sum=a=>-a.reduce((s,r)=>s+r.amount,0),months={};R.forEach(r=>{const m=r.occurred_on.slice(0,7);months[m]=(months[m]||0)-r.amount});
  $('fuelSum').innerHTML=[['최근 12개월',won(sum(last12)),last12.length+'회'],['월평균',won(sum(last12)/12),'12개월 기준'],['올해',won(sum(R.filter(r=>r.occurred_on.startsWith(yr)))),R.filter(r=>r.occurred_on.startsWith(yr)).length+'회'],['최근 주유',R[0]?R[0].occurred_on:'–',R[0]?won(-R[0].amount):'']].map(([k,v,d])=>`<div class="metric"><small>${k}</small><b>${v}</b><div class="muted" style="font-size:12px">${d}</div></div>`).join('');
  $('fuelMonths').innerHTML=Object.entries(months).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,12).map(([m,v])=>`<span class="pill">${m.slice(2).replace('-','.')} ${Math.round(v/1e4)}만</span>`).join('');
@@ -114,7 +114,7 @@ function renderP5(){const el=$('p5');if(!el)return;const v=state.vehicle||{},m=S
   el.innerHTML='<div style="font-size:15px;font-weight:700;color:'+(hit(today)?'var(--down,#c0392b)':'inherit')+'">오늘 '+(hit(today)?'화성 주차장 못 씀 (끝번호 '+p+')':td?'주차 가능 · 오늘 제한 끝번호 '+td.join('·'):'5부제 없음')+'</div><div class="muted" style="margin-top:4px;font-size:12.5px">내 차(끝번호 '+p+') 다음 제한일: '+next.map(fmt).join(' · ')+' · 공휴일·패밀리데이는 미운영</div>'}
 function renderGas(){const el=$('gas');if(!el)return;if(!GAS){el.textContent=gasErr?(/OPINET_API_KEY/.test(gasErr)?'오피넷 키 등록 전이에요.':'기름값을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.'):'불러오는 중…';return}
  const fuelTxt=String(((DBV.item&&DBV.item.specs)||{}).fuel||''),codes=/경유|디젤|diesel/i.test(fuelTxt)?['D047']:/휘발유|가솔린|gasoline/i.test(fuelTxt)?['B027']:['D047','B027'];
- const R=fuelRows(),t=new Date(),y1=new Date(t.getFullYear()-1,t.getMonth(),t.getDate()).toISOString().slice(0,10),monthly=-R.filter(r=>r.occurred_on>=y1).reduce((a,r)=>a+r.amount,0)/12;
+ const R=fuelRows(),t=new Date(),y1=ymd(new Date(t.getFullYear()-1,t.getMonth(),t.getDate())),monthly=-R.filter(r=>r.occurred_on>=y1).reduce((a,r)=>a+r.amount,0)/12;
  $('gasAt').textContent=`오피넷 · ${new Date(GAS.at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})} 기준`;
  el.innerHTML=codes.map(cd=>{const nm=GAS.products[cd],gg=(GAS.gyeonggi||{})[cd],na=(GAS.national||{})[cd],ref=(gg||na||{}).price;
   const best=GAS.places.flatMap(p=>(p[cd]||[]).map(o=>({...o,where:p.k==='home'?'집 근처':'회사 근처'}))).sort((x,y)=>x.price-y.price);

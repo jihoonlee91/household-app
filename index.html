@@ -187,7 +187,7 @@ html.view-phone body{background:color-mix(in srgb,var(--bg) 70%,#000)}
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="viewBtn2" class="viewBtn"></button><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="pushHint" class="phint" hidden></div><div id="news"></div><div id="upnext"></div><div id="tiles"></div></main>
 <div id="ptr" aria-hidden="true">↻</div><div id="swHint" aria-live="polite"></div><nav id="sub" aria-label="탭"></nav><iframe id="app" class="appf" title="앱"></iframe>
-<script src="./install.js?v=v95"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
+<script src="./install.js?v=v96"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>/* jsdelivr를 못 받으면(차단·장애) unpkg의 같은 버전 원본으로 한 번 더 (실패할 때만 실행) */
 if(!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.js" integrity="sha384-sLWJsCmP+Z4Qn+HgF7Hi64Djta4fZMu0fcgi3uUL3GFV/ubx2G86LPOuMf7+ZIyX" crossorigin="anonymous"><\/script>');</script>
@@ -237,8 +237,13 @@ window.hhReqs=[];
 const isRead=(url,init)=>{ const m=String((init&&init.method)||(typeof Request!=="undefined"&&url instanceof Request&&url.method)||"GET").toUpperCase(); return m==="GET"||m==="HEAD"||/\/functions\/v1\//.test(String(url&&url.url||url)); };
 const whenVisible=()=>document.hidden?new Promise(r=>{ const f=()=>{ if(!document.hidden){ document.removeEventListener("visibilitychange",f); r(); } }; document.addEventListener("visibilitychange",f); setTimeout(r,30000); }):Promise.resolve();
 async function rawFetchRetry(input,init){ try{ return await rawFetch(input,init); }catch(e){ if(e&&e.name==="AbortError"||!isRead(input,init)||(init&&init.body&&typeof init.body!=="string")) throw e; await whenVisible(); await new Promise(r=>setTimeout(r,700)); return await rawFetch(input,init); } }
+/* 휴대폰이 잠자다 깨면 로그인 토큰이 만료된 채 요청이 한꺼번에 나가 401 → 세션을 새로 받고 그 요청만 한 번 다시 보냄(앱 iframe도 이 클라이언트를 씀) · 강제 갱신은 401일 때만(탭 여러 개가 동시에 갱신하면 리프레시 토큰이 충돌) */
+let refreshP=null; const refreshToken=()=>refreshP||(refreshP=(async()=>{ try{ const old=accessToken(); let {data}=await sb.auth.getSession(); if(data&&data.session&&data.session.access_token===old) ({data}=await sb.auth.refreshSession()); return data&&data.session&&data.session.access_token||null; }catch(_){ return null; }finally{ setTimeout(()=>{ refreshP=null; },3000); } })());
+async function fetch401(input,init){ const r=await rawFetchRetry(input,init); if(r.status!==401||typeof input!=="string"||!/\/(rest|functions)\/v1\//.test(input)||(init&&init.body&&typeof init.body!=="string")) return r;
+  const h=new Headers(init&&init.headers), a=h.get("Authorization")||""; if(!a||a==="Bearer "+SB_KEY) return r;
+  const tok=await refreshToken(); if(!tok||"Bearer "+tok===a) return r; h.set("Authorization","Bearer "+tok); return await rawFetchRetry(input,Object.assign({},init,{headers:h})); }
 async function hhFetch(input,init){ const url=String(input&&input.url||input), t0=performance.now(), name=reqName(url), quiet=/app_logs/.test(url);
-  try{ const r=await rawFetchRetry(input,init), ms=Math.round(performance.now()-t0);
+  try{ const r=await fetch401(input,init), ms=Math.round(performance.now()-t0);
     if(!quiet){ window.hhReqs.push({name,status:r.status,ms,at:Date.now()}); if(window.hhReqs.length>100) window.hhReqs.shift();
       if(!r.ok&&r.status!==406){ let body=""; try{ body=(await r.clone().text()).slice(0,300); }catch(_){} hhLog(r.status>=500?"error":"warn",`요청 실패 ${r.status} ${name}`,{source:"shell",status:r.status,ms,method:(init&&init.method)||"GET",body},curApp); }
       else if(ms>2500) hhLog("perf",`느린 요청 ${name}`,{source:"shell",ms},curApp); }
@@ -282,7 +287,7 @@ function rtFlush(){ rtSweep(); for(const r of RT) if(r.pend&&rtShown(r)){ const 
       if(!r){ r={ch,f:fw[0],w:fw[1],pend:null}; RT.push(r); }
       return on0(type,filter,p=>{ if(!rtLive(r)){ rtSweep(); return; } if(rtShown(r)) return cb(p); (r.pend||(r.pend=new Map())).set(cb,p); }); };
     return ch; }; }
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden) rtFlush(); });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ if(!refreshP) sb.auth.getSession().catch(()=>{}); rtFlush(); } });
 /* 앱(iframe) 쪽에서 쓰는 다리: 입력값을 부부 공용 DB(app_state)에 저장 */
 window.__hh={sb,inputs:null,open:app=>{ $("pick").value=app; openApp(app); },saveInputs(d){ const app=curApp; if(!app) return; clearTimeout(timer); timer=setTimeout(async()=>{ const {error}=await sb.from("app_state").upsert({app,key:"inputs",data:d,updated_at:new Date().toISOString()}); if(error) console.warn(error); },700); }};
 const setTheme=t=>{ theme=t; $("theme").value=t; try{localStorage.setItem("hh-theme",t);}catch(_){} applyTheme(); syncSeg(); };
