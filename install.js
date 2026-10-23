@@ -9,9 +9,9 @@
   const buttons=()=>['installGate','installBar'].map(id=>document.getElementById(id)).filter(Boolean);
   function refresh(){const installed=standalone();buttons().forEach(b=>{b.hidden=installed;b.style.display=installed?'none':'';});}
   function addShareButtons(){
-    if(!document.getElementById('hh-share-shell-style')){const s=document.createElement('style');s.id='hh-share-shell-style';s.textContent='@media(min-width:1100px){#bar #shareBar{width:100%;border-color:var(--accent);color:var(--accent);font-weight:700}html.side-mini #shareBar{display:none!important}}';document.head.appendChild(s);}
+    if(!document.getElementById('hh-share-shell-style')){const s=document.createElement('style');s.id='hh-share-shell-style';s.textContent='@media(min-width:1100px){#bar #shareBar{width:100%;border-color:var(--accent);color:var(--accent);font-weight:700}}';document.head.appendChild(s);}
     const bar=document.getElementById('bar'),out=document.getElementById('out');
-    if(bar&&out&&!document.getElementById('shareBar')){const b=document.createElement('button');b.id='shareBar';b.type='button';b.textContent='공유 이미지';b.setAttribute('data-no-share','');bar.insertBefore(b,out);b.onclick=()=>window.hhOpenShare&&window.hhOpenShare();}
+    if(bar&&out&&!document.getElementById('shareBar')){const b=document.createElement('button');b.id='shareBar';b.type='button';b.textContent='공유 이미지';b.setAttribute('data-no-share','');out.parentNode.insertBefore(b,out);b.onclick=()=>window.hhOpenShare&&window.hhOpenShare();}
     const sopt=document.querySelector('#allSheet .sopt'),out2=document.getElementById('out2');
     if(sopt&&out2&&!document.getElementById('share2')){const b=document.createElement('button');b.id='share2';b.type='button';b.textContent='공유 이미지';b.setAttribute('data-no-share','');sopt.insertBefore(b,out2);b.onclick=()=>{document.getElementById('allSheet')?.classList.remove('open');window.hhOpenShare&&window.hhOpenShare();};}
   }

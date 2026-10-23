@@ -61,23 +61,25 @@ html.busy::after{content:"";position:fixed;z-index:9999;top:env(safe-area-inset-
 
 /* ===== 메뉴: PC는 왼쪽 세로 메뉴(접기 가능), 휴대폰은 아래 탭 바 + '전체' 시트 ===== */
 :root{--sw:228px}html.side-mini{--sw:64px}
-#btm,#allSheet{display:none}#sideTog{display:none}
+#btm,#allSheet{display:none}#sideTog,#barFind,#moreBtn{display:none}
 @media (min-width:1100px){
- .authed #bar{display:flex!important;flex-direction:column;align-items:stretch;top:0;bottom:0;left:0;right:auto;width:var(--sw);height:auto;border-right:1px solid var(--line);border-bottom:0;padding:calc(12px + env(safe-area-inset-top,0px)) 10px 12px;gap:8px;overflow-y:auto;box-sizing:border-box}
- #bar b#who{flex:0 0 auto!important;display:block!important;font-size:15px;padding:2px 6px}
- #sideTog{display:block;align-self:flex-end;border:0;background:none;color:var(--muted);padding:2px 6px;font-size:16px}
+ .authed #bar{display:flex!important;flex-direction:column;align-items:stretch;top:0;bottom:0;left:0;right:auto;width:var(--sw);height:auto;border-right:1px solid var(--line);border-bottom:0;padding:calc(12px + env(safe-area-inset-top,0px)) 10px 12px;gap:8px;overflow:visible;box-sizing:border-box}
+ #barHead{display:flex;align-items:center;gap:2px;flex:0 0 auto}#bar b#who{flex:1 1 auto!important;display:block!important;font-size:15px;padding:2px 6px}
+ #sideTog,#barFind{display:grid;place-items:center;border:0;background:none;color:var(--muted);padding:2px 6px;font-size:16px}#barFind .si{width:17px;height:17px}
+ #barFoot{position:relative;flex:0 0 auto}#moreBtn{width:100%;display:flex;align-items:center;gap:8px;border:0;background:none;color:var(--muted);padding:7px 10px;font-size:13px;border-radius:9px}#moreBtn:hover,#moreBtn[aria-expanded=true]{background:var(--bg);color:var(--ink)}#moreBtn .si{width:18px;height:18px}
+ #barMore{position:absolute;left:0;bottom:calc(100% + 6px);width:calc(var(--sw) - 20px);min-width:196px;display:flex;flex-direction:column;gap:6px;padding:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:5}#barMore[hidden]{display:none}
  #tabsbar{flex-direction:column!important;flex:1!important;overflow:visible!important;gap:1px!important}
  #tabsbar button{text-align:left;padding:7px 10px!important;font-size:13.5px!important;border-radius:9px!important;border-bottom:0!important;border-left:3px solid transparent!important;display:flex;gap:8px;align-items:center}
  #tabsbar button[data-app]:not([data-app="home"]){border-left-color:color-mix(in srgb,var(--gc) 30%,transparent)!important}
  #tabsbar button[aria-current="page"]{border-left-color:var(--gc,var(--accent))!important}
- #tabsbar .tg{display:block;text-align:left;margin:12px 0 4px!important;border-left:0!important;background:none!important;padding:0 10px!important;font-size:11.5px!important;letter-spacing:.08em}
+ #tabsbar .tg{display:flex;align-self:stretch;align-items:center;justify-content:space-between;text-align:left;margin:12px 0 4px!important;border-left:0!important;background:none!important;padding:0 10px!important;font-size:11.5px!important;letter-spacing:.08em;cursor:pointer;user-select:none;border-radius:6px}#tabsbar .tg:hover{color:var(--ink);filter:brightness(.9)}#tabsbar .tg::after{content:"";width:6px;height:6px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg) translate(-2px,-2px);opacity:.55;transition:transform .15s}#tabsbar .tg.col::after{transform:rotate(-45deg) translate(-1px,-1px)}#tabsbar button.gcol{display:none!important}
  #tabsbar .ti{display:inline!important;width:1.3em;text-align:center}
- #themeSeg{justify-content:space-between}#bar #installBar,#bar #out,#bar #viewBtn{width:100%}
+ #themeSeg{justify-content:space-between}#barMore #installBar,#barMore #out,#barMore #viewBtn,#barMore #shareBar{width:100%}
  .authed #home{margin-left:var(--sw);padding-top:calc(24px + env(safe-area-inset-top,0px))}
  .appf{left:var(--sw)!important;top:0!important;width:calc(100% - var(--sw))!important;height:100%!important}
  #status{top:12px;left:calc(50% + var(--sw)/2)}
- html.side-mini #tabsbar .ln,html.side-mini #tabsbar .tg,html.side-mini #bar #who,html.side-mini #themeSeg,html.side-mini #installBar,html.side-mini #viewBtn,html.side-mini #out{display:none!important}
- html.side-mini #tabsbar button{justify-content:center;padding:8px 0!important}html.side-mini #sideTog{align-self:center}
+ html.side-mini #tabsbar .ln,html.side-mini #tabsbar .tg,html.side-mini #bar #who,html.side-mini #moreBtn .ln{display:none!important}html.side-mini #tabsbar button.gcol{display:flex!important}html.side-mini #barHead{flex-direction:column}html.side-mini #moreBtn{justify-content:center;padding:8px 0}html.side-mini #barMore{left:calc(100% + 8px);bottom:0;width:208px}
+ html.side-mini #tabsbar button{justify-content:center;padding:8px 0!important}
 }
 @media (max-width:1099px){
  .authed #bar{display:none!important}
@@ -180,14 +182,14 @@ html.view-phone body{background:color-mix(in srgb,var(--bg) 70%,#000)}
 <div id="gate"><div class="card"><h1>상지홈</h1><p>가족 전용입니다.<br>GitHub 계정으로 로그인하세요.</p>
 <button class="gh" id="login"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub로 로그인</button>
 <button class="install" id="installGate" type="button">앱 설치</button><div id="msg"></div></div></div>
-<div id="bar"><button type="button" id="sideTog" title="메뉴 접기·펴기">⇤</button><b id="who"></b><select id="pick" aria-label="앱 고르기"></select><nav id="tabsbar" aria-label="앱"></nav><select id="theme" aria-label="화면 테마"><option value="">시스템</option><option value="light">라이트</option><option value="dark">다크</option></select><span id="themeSeg" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button id="viewBtn" class="viewBtn" type="button"></button><button id="installBar" type="button">앱 설치</button><button id="out" type="button">로그아웃</button></div>
+<div id="bar"><div id="barHead"><b id="who"></b><button type="button" id="barFind" title="찾기 (Ctrl+K)" aria-label="찾기"><svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button><button type="button" id="sideTog" title="메뉴 접기·펴기">⇤</button></div><select id="pick" aria-label="앱 고르기"></select><nav id="tabsbar" aria-label="앱"></nav><select id="theme" aria-label="화면 테마"><option value="">시스템</option><option value="light">라이트</option><option value="dark">다크</option></select><div id="barFoot"><button type="button" id="moreBtn" aria-haspopup="true" aria-expanded="false" title="화면·설치·로그아웃"><svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg><span class="ln">화면·계정</span></button><div id="barMore" hidden><span id="themeSeg" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button id="viewBtn" class="viewBtn" type="button"></button><button id="installBar" type="button">앱 설치</button><button id="out" type="button">로그아웃</button></div></div></div>
 <div id="status" role="status" aria-live="polite"></div>
 <nav id="btm" aria-label="자주 쓰는 앱"></nav>
 <div id="allSheet" aria-hidden="true"><div class="sheet"><div class="sh"><b>전체 앱</b><button type="button" id="allClose" aria-label="닫기">닫기</button></div><div id="allList"></div>
   <div class="sopt"><span id="themeSeg2" role="group" aria-label="화면 테마"><button type="button" data-t="">시스템</button><button type="button" data-t="light">라이트</button><button type="button" data-t="dark">다크</button></span><button type="button" id="viewBtn2" class="viewBtn"></button><button type="button" id="install2">앱 설치</button><button type="button" id="out2">로그아웃</button></div></div></div>
 <main id="home"><h2 id="hello">상지홈</h2><p class="sub" id="hsub"></p><div id="qs"><input id="qsIn" type="search" autocomplete="off" placeholder="찾기 — 지출, 보험, 잔액…" aria-label="메뉴 찾기"><div id="qsList" role="listbox"></div></div><div id="must"></div><div id="pushHint" class="phint" hidden></div><div id="news"></div><div id="upnext"></div><div id="tiles"></div></main>
 <div id="ptr" aria-hidden="true">↻</div><div id="swHint" aria-live="polite"></div><nav id="sub" aria-label="탭"></nav><iframe id="app" class="appf" title="앱"></iframe>
-<script src="./install.js?v=v101"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
+<script src="./install.js?v=v102"></script><!-- 셸 버전은 여기 한 곳(sw.js CACHE 번호와 같게, check-runtime이 검사 · 오류 로그 ver에도 남음): install.js·mobile-ui.js·car.html 등이 이 값을 따라감 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-AkNSQdptcXlJ0/NBZc4qGk86cDVXcCevwoWgEKIpHOEfbvlXGLlIkimQtONt8KNf" crossorigin="anonymous"></script>
 <script>/* jsdelivr를 못 받으면(차단·장애) unpkg의 같은 버전 원본으로 한 번 더 (실패할 때만 실행) */
 if(!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.js" integrity="sha384-sLWJsCmP+Z4Qn+HgF7Hi64Djta4fZMu0fcgi3uUL3GFV/ubx2G86LPOuMf7+ZIyX" crossorigin="anonymous"><\/script>');</script>
@@ -302,14 +304,31 @@ function syncSeg(){ document.querySelectorAll("#themeSeg button,#themeSeg2 butto
 $("theme").value=theme; applyTheme(); syncSeg(); $("theme").onchange=e=>setTheme(e.target.value);
 $("themeSeg").onclick=e=>{ const b=e.target.closest("button[data-t]"); if(b) setTheme(b.dataset.t); };
 /* PC 앱 버튼: 드롭다운(#pick)과 같은 값을 쓰고, 현재 앱을 표시 */
-function syncTabs(){ const v=$("pick").value; document.querySelectorAll("#tabsbar button,#btm button[data-app],#allList button").forEach(b=>b.setAttribute("aria-current",b.dataset.app===v?"page":"false")); }
+function syncTabs(){ const v=$("pick").value; document.querySelectorAll("#tabsbar button,#btm button[data-app],#allList button").forEach(b=>b.setAttribute("aria-current",b.dataset.app===v?"page":"false")); paintGroups(); }
+/* PC 왼쪽 메뉴를 화면 높이 안에 맞춤(따로 스크롤 없이): 묶음 이름을 누르면 접고 펴기(기억함) · 짧은 화면에선 지금 보는 묶음만 남기고 아래 묶음부터 자동으로 접음 */
+const GSAVE=()=>{ try{ return JSON.parse(localStorage.getItem("hh-gcol")||"{}")||{}; }catch(_){ return {}; } };
+function paintGroups(){ const tb=$("tabsbar"); if(!tb||!tb.querySelector(".tg")) return;
+  const cg=(entryOf($("pick").value)||{}).g, sv=GSAVE(), col=new Set();
+  const paint=()=>{ tb.querySelectorAll(".tg").forEach(t=>{ const c=col.has(t.dataset.g); t.classList.toggle("col",c); t.setAttribute("aria-expanded",String(!c)); }); tb.querySelectorAll("button[data-g]").forEach(b=>b.classList.toggle("gcol",col.has(b.dataset.g))); };
+  const gs=[...tb.querySelectorAll(".tg")].map(t=>t.dataset.g); gs.forEach(g=>{ if(g!==cg&&sv[g]===true) col.add(g); }); paint();
+  if(innerWidth<1100||document.documentElement.classList.contains("side-mini")) return;
+  for(const g of gs.slice().reverse()){ if(tb.scrollHeight<=tb.clientHeight+1) break; if(g===cg||sv[g]===false||col.has(g)) continue; col.add(g); paint(); } }
+$("tabsbar").addEventListener("click",e=>{ const t=e.target.closest(".tg"); if(!t) return; const sv=GSAVE(), g=t.dataset.g; sv[g]=!t.classList.contains("col"); try{ localStorage.setItem("hh-gcol",JSON.stringify(sv)); }catch(_){} paintGroups(); });
+$("tabsbar").addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("tg")){ e.preventDefault(); e.target.click(); } });
+{ let rt; const again=()=>{ clearTimeout(rt); rt=setTimeout(paintGroups,60); }; addEventListener("resize",again); if(window.ResizeObserver) new ResizeObserver(again).observe($("tabsbar")); }
+/* 아래쪽 '화면·계정' 메뉴: 테마·화면 모드·앱 설치·공유 이미지·로그아웃 */
+{ const mb=$("moreBtn"), pop=$("barMore"), shut=()=>{ pop.hidden=true; mb.setAttribute("aria-expanded","false"); };
+  mb.onclick=e=>{ e.stopPropagation(); const open=pop.hidden; pop.hidden=!open; mb.setAttribute("aria-expanded",String(open)); };
+  document.addEventListener("click",e=>{ if(!pop.hidden&&!e.target.closest("#barFoot")) shut(); else if(!pop.hidden&&e.target.closest("#barMore button:not(#installBar)")&&!e.target.closest("#themeSeg")) shut(); });
+  addEventListener("keydown",e=>{ if(e.key==="Escape"&&!pop.hidden){ shut(); mb.focus(); } });
+  $("barFind").onclick=()=>{ if(window.hhOpenCommand) window.hhOpenCommand(); else focusSearch(); }; }
 const goApp=k=>{ $("pick").value=k; if(k==="home") openHome(); else openApp(k); syncTabs(); };
 const closeAll=()=>{ $("allSheet").classList.remove("open"); $("allSheet").setAttribute("aria-hidden","true"); };
 $("btm").onclick=e=>{ if(e.target.closest("#allOpen")){ $("allSheet").classList.add("open"); $("allSheet").setAttribute("aria-hidden","false"); syncSeg(); $("install2").hidden=$("installBar").hidden; return; } const b=e.target.closest("button[data-app]"); if(b) goApp(b.dataset.app); };
 $("allSheet").onclick=e=>{ if(e.target===$("allSheet")||e.target.closest("#allClose")){ closeAll(); return; } const b=e.target.closest("button[data-app]"); if(b){ closeAll(); goApp(b.dataset.app); return; }
   const t=e.target.closest("#themeSeg2 button[data-t]"); if(t){ setTheme(t.dataset.t); return; } if(e.target.closest("#out2")) $("out").click(); if(e.target.closest("#install2")) $("installBar").click(); };
 try{ if(localStorage.getItem("hh-side")==="mini") document.documentElement.classList.add("side-mini"); }catch(_){}
-$("sideTog").onclick=()=>{ const m=document.documentElement.classList.toggle("side-mini"); $("sideTog").textContent=m?"⇥":"⇤"; try{ localStorage.setItem("hh-side",m?"mini":""); }catch(_){} };
+$("sideTog").onclick=()=>{ const m=document.documentElement.classList.toggle("side-mini"); $("sideTog").textContent=m?"⇥":"⇤"; try{ localStorage.setItem("hh-side",m?"mini":""); }catch(_){} paintGroups(); };
 $("tabsbar").onclick=e=>{ const b=e.target.closest("button[data-app]"); if(!b) return; $("pick").value=b.dataset.app; if(b.dataset.app==="home") openHome(); else openApp(b.dataset.app); syncTabs(); };
 
 $("sub").addEventListener("scroll",subFade,{passive:true});
@@ -748,8 +767,8 @@ async function bootSession(){
   $("pick").innerHTML=`<option value="home">홈</option>`+MENU.map(e=>`<option value="${e.k}">${esc(nameOf(e.k))}</option>`).join("");
   { /* PC 왼쪽 메뉴: 묶음마다 색 이름표 + 아이콘 */
     let h=`<button type="button" data-app="home" title="홈"><i class="ti">${svgI("home")}</i><span class="ln">홈</span></button>`, cur=null;
-    MENU.forEach(e=>{ if(e.g!==cur){ h+=`<span class="tg" style="--gc:${e.c}">${e.g}</span>`; cur=e.g; } h+=`<button type="button" data-app="${e.k}" style="--gc:${e.c}" title="${esc(nameOf(e.k))}"><i class="ti">${e.ic}</i><span class="ln">${esc(nameOf(e.k))}</span></button>`; });
-    $("tabsbar").innerHTML=h;
+    MENU.forEach(e=>{ if(e.g!==cur){ h+=`<span class="tg" role="button" tabindex="0" aria-expanded="true" data-g="${e.g}" style="--gc:${e.c}" title="묶음 접기·펴기">${e.g}</span>`; cur=e.g; } h+=`<button type="button" data-app="${e.k}" data-g="${e.g}" style="--gc:${e.c}" title="${esc(nameOf(e.k))}"><i class="ti">${e.ic}</i><span class="ln">${esc(nameOf(e.k))}</span></button>`; });
+    $("tabsbar").innerHTML=h; setTimeout(paintGroups);
     /* 휴대폰 아래 탭(빠른 실행): 홈·자산·가계부·집·셔틀 + 전체 / 전체 시트: 묶음별 모든 메뉴 */
     $("btm").innerHTML=[["home",svgI("home"),"홈"],...["assets","ledger","housing","commute"].filter(k=>hasApp(k)&&entryOf(k)).map(k=>[k,entryOf(k).ic,nameOf(k)])].map(([k,i,l])=>`<button type="button" data-app="${k}"><i>${i}</i>${l}</button>`).join("")+`<button type="button" id="allOpen"><i>${svgI("menu")}</i>전체</button>`;
     $("allList").innerHTML=NAV.map(([g,c])=>{ const L=MENU.filter(e=>e.g===g); return L.length?`<div class="ag" style="color:${c}">${g}</div><div class="al">${L.map(e=>`<button type="button" data-app="${e.k}"><i>${e.ic}</i>${esc(nameOf(e.k))}</button>`).join("")}</div>`:""; }).join(""); }

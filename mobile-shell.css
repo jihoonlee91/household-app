@@ -13,8 +13,11 @@ html,body{min-width:0;max-width:100%;overscroll-behavior-y:none}#gate{min-height
 @media(max-width:1099px){#btm button{font-size:12px}#btm button i{font-size:20px}#allList .al button{font-size:12.5px}#home .sub{font-size:13px}}
 /* 윈도우 크롬: 얇은 스크롤바, 짧은 화면(125~150% 배율)에서도 메뉴 끝·테마·로그아웃이 보이게 */
 @media(hover:hover) and (pointer:fine){html,#bar,#tabsbar,#allSheet .sheet{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--muted) 35%,transparent) transparent}}
-@media(min-width:1100px){.authed #bar{overflow:hidden!important}#tabsbar{overflow-y:auto!important;overflow-x:hidden!important;min-height:0;margin-inline:-4px;padding-inline:4px;overscroll-behavior:contain}#sideTog{min-width:32px;min-height:32px;border-radius:8px}#sideTog:hover{background:var(--bg)}#themeSeg button{min-height:28px}#bar #installBar,#bar #out{min-height:34px}}
+@media(min-width:1100px){.authed #bar{overflow:visible!important}#tabsbar{overflow-y:auto!important;overflow-x:hidden!important;min-height:0;margin-inline:-4px;padding-inline:4px;overscroll-behavior:contain}#sideTog{min-width:32px;min-height:32px;border-radius:8px}#sideTog:hover{background:var(--bg)}#themeSeg button{min-height:28px}#bar #installBar,#bar #out{min-height:34px}}
 @media(min-width:1100px) and (max-height:860px){#tabsbar button{padding:5px 10px!important;font-size:13px!important}#tabsbar .tg{margin:8px 0 2px!important}.authed #bar{gap:6px;padding-block:10px}}
+/* 짧은 화면: 메뉴 줄 간격을 줄여 한 화면 안에(그래도 넘치면 아래 묶음부터 자동 접힘) */
+@media(min-width:1100px) and (max-height:720px){#tabsbar button{padding:3px 10px!important;font-size:12.5px!important}#tabsbar .tg{margin:6px 0 1px!important;font-size:11px!important}.authed #bar{gap:4px;padding-block:8px}#moreBtn{padding:4px 10px}}
+@media(min-width:1100px) and (max-height:600px){#tabsbar button{padding:2px 10px!important}#tabsbar .tg{margin:3px 0 0!important}}
 @media(min-width:1100px) and (max-width:1439px){:root{--sw:208px}}
 /* 다크 모드: 홈 묶음 이름(돈·가족·생활) 색을 밝혀 명암비 확보 */
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .grp,:root:not([data-theme="light"]) #allList .ag{filter:brightness(1.7) saturate(.9)}}:root[data-theme="dark"] .grp,:root[data-theme="dark"] #allList .ag{filter:brightness(1.7) saturate(.9)}
